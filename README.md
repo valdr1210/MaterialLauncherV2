@@ -43,9 +43,10 @@ Most existing Minecraft launchers are either stuck in 2014, cluttered with ads, 
 ## ✨ Features
 
 - 🎮 **Any version & loader**: Pure Vanilla, Fabric, Forge, NeoForge, and Quilt ready to install on the fly.
-- 🔑 **Authentication**:
-  - Official **Microsoft** accounts (OAuth 2.0 with Xbox Live & Minecraft Services)
-  - *(Note: Flathub build strictly requires an official Microsoft account in compliance with Flathub distribution policy)*
+- 🔑 **Flexible authentication**:
+  - Official **Microsoft** accounts (OAuth 2.0)
+  - **Ely.by** (with custom skins & capes support)
+  - **Offline mode** (for LAN play or playing without internet)
 - 🧩 **Built-in mod browser**: Search and install mods directly from **Modrinth** and **CurseForge** without leaving the app.
 - 📦 **Cross-platform packaging**:
   - **Windows**: Portable `.exe` (zero-install), Setup `.exe`, `.msi`, and `.zip`.
