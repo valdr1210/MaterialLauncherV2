@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   close: () => ipcRenderer.send('window-close'),
   openExternal: (url) => ipcRenderer.send('open-external', url),
   onWindowStateChange: (callback) => ipcRenderer.on('window-state-changed', (event, state) => callback(state)),
+  isFlatpak: !!process.env.FLATPAK_ID,
 
   // Minecraft Launcher Core APIs
   getVersions: () => ipcRenderer.invoke('mc-get-versions'),

@@ -1219,6 +1219,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalElyLoginBtn = document.getElementById('modalElyLoginBtn');
   const modalBtnAddOfflineChoice = document.getElementById('modalBtnAddOfflineChoice');
 
+  // Flathub compliance: hide third-party / offline auth if running in Flatpak
+  if (window.electronAPI?.isFlatpak) {
+    if (btnAccAddElyBy) btnAccAddElyBy.style.display = 'none';
+    if (btnAccAddOffline) btnAccAddOffline.style.display = 'none';
+    if (modalElyLoginBtn) modalElyLoginBtn.style.display = 'none';
+    if (modalBtnAddOfflineChoice) modalBtnAddOfflineChoice.style.display = 'none';
+  }
+
   // Console Modal
   const consoleModal = document.getElementById('consoleModal');
   const btnCloseConsoleModal = document.getElementById('btnCloseConsoleModal');

@@ -182,6 +182,9 @@ function createWindow() {
   });
 
   ipcMain.handle('ely-login-start', async (event, creds) => {
+    if (process.env.FLATPAK_ID) {
+      return { success: false, error: 'Ely.by authentication is disabled in Flathub builds for compliance.' };
+    }
     return await authManager.loginWithElyBy(creds?.username, creds?.password);
   });
 

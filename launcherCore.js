@@ -1356,6 +1356,10 @@ async function launchMinecraft(opts, callbacks = {}) {
   const activeAcc = opts.account || cfg.accounts.find(a => a.active) || cfg.accounts[0] || { name: 'Player', type: 'offline' };
   let authData = null;
 
+  if (process.env.FLATPAK_ID && activeAcc.type !== 'mojang') {
+    throw new Error('In compliance with Flathub distribution policy, only official Microsoft accounts are permitted.');
+  }
+
   if (activeAcc.type === 'mojang' && activeAcc.refresh_token) {
     try {
       const authManager = require('./authManager');
