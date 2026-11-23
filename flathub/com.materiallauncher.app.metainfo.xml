@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.materiallauncher.app</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Material Launcher</name>
+  <summary>A modern Minecraft launcher built with Material Design 3</summary>
+  <description>
+    <p>Material Launcher is a clean, modern, and aesthetic launcher for Minecraft featuring Google Material Design 3 guidelines, multiple mod loaders support (Fabric, Forge, NeoForge, Quilt), and integrated mod search.</p>
+  </description>
+  <launchable type="desktop-id">com.materiallauncher.app.desktop</launchable>
+  <url type="homepage">https://github.com/valdr1210/MaterialLauncherV2</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://i.imgur.com/gNiSOCZ.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="1.0.0" date="2026-11-23" />
+  </releases>
+  <content_rating type="oars-1.1" />
+</component>

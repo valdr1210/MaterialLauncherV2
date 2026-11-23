@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' https://launchercontent.mojang.com https://api.modrinth.com https://auth.ely.by;">
+  <title>Material Launcher</title>
+  <link rel="icon" type="image/png" href="./assets/icon.png">
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Custom Frameless Titlebar -->
+    <header class="titlebar">
+      <div class="titlebar-left">
+        <div class="titlebar-app-icon" id="titlebarAppIcon" title="Material Launcher"></div>
+        <span class="titlebar-title" data-i18n="app_title">Material Launcher</span>
+      </div>
+      <div class="titlebar-controls">
+        <button class="window-btn" id="btnMinimize" data-i18n-title="window_minimize" title="Свернуть">
+          <svg width="12" height="1" viewBox="0 0 12 1" fill="currentColor">
+            <rect width="12" height="1"/>
+          </svg>
+        </button>
+        <button class="window-btn" id="btnMaximize" data-i18n-title="window_maximize" title="Развернуть">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="0.6" y="0.6" width="8.8" height="8.8"/>
+          </svg>
+        </button>
+        <button class="window-btn close-btn" id="btnClose" data-i18n-title="window_close" title="Закрыть">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor">
+            <path d="M1 0L0 1L4 5L0 9L1 10L5 6L9 10L10 9L6 5L10 1L9 0L5 4L1 0Z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- App Body (Sidebar + Content) -->
+    <div class="app-body">
+      <!-- Left Sidebar (M3 Navigation Drawer) -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <!-- User Profile Item -->
+          <div class="profile-card" id="profileCard" title="Нажмите, чтобы настроить аккаунт Mojang / Microsoft" data-i18n-title="tooltip_profile_card" role="button" tabindex="0">
+            <div class="profile-avatar-wrapper">
+              <div class="avatar-border-bracket"></div>
+              <div class="profile-avatar" id="userAvatarBox"></div>
+            </div>
+            <div class="profile-info">
+              <span class="profile-username" id="profileUsername">Player</span>
+              <span class="profile-account-type" id="profileAccountType" data-i18n="sidebar_account_offline">Offline Account</span>
+            </div>
+          </div>
+
+          <!-- Navigation Pills -->
+          <nav class="nav-list" role="navigation" aria-label="Main Navigation">
+            <button class="nav-item active" data-tab="home" role="tab" aria-selected="true" aria-controls="tab-home">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+              </span>
+              <span class="nav-label" data-i18n="nav_home">Home</span>
+            </button>
+            <button class="nav-item" data-tab="mods" role="tab" aria-selected="false" aria-controls="tab-mods">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg>
+              </span>
+              <span class="nav-label" data-i18n="nav_mods">Mods</span>
+            </button>
+            <button class="nav-item" data-tab="settings" role="tab" aria-selected="false" aria-controls="tab-settings">
+              <span class="nav-icon">
+                <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+              </span>
+              <span class="nav-label" data-i18n="nav_settings">Settings</span>
+            </button>
+          </nav>
+        </div>
+
+        <div class="sidebar-bottom">
+          <!-- Version Selector Widget -->
+          <div class="version-selector-widget" id="versionSelectorWidget" title="Выбрать версию Minecraft" data-i18n-title="tooltip_version_selector" role="button" tabindex="0">
+            <span class="version-label" data-i18n="label_latest_release">Latest Release</span>
+            <span class="version-current" id="currentVersionText">
+              26.1.2 
+              <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+            </span>
+          </div>
+
+          <!-- Play Button in Sidebar (shown only when on other tabs: Mods, Settings) -->
+          <button class="play-button sidebar-play-button play-btn-trigger" id="sidebarPlayButton" title="Запустить Minecraft" data-i18n-title="tooltip_play_btn" style="display: none;">
+            <svg class="play-icon play-icon-idle" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            <span data-i18n="btn_play">Play</span>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="content-area">
+        <!-- 1. TAB: HOME (Exact match from the screenshot) -->
+        <section class="tab-pane active" id="tab-home" role="tabpanel" aria-labelledby="tab-home">
+          <!-- Hero Banner (Dynamic Mojang Featured Story) -->
+          <div class="hero-banner" id="heroBanner" title="Открыть новость на minecraft.net" data-i18n-title="tooltip_hero_banner" role="banner" tabindex="0">
+            <img class="hero-banner-img" id="heroBannerImg" alt="Featured Story" style="display: none;" />
+            <div class="hero-content">
+              <div class="hero-badge" id="heroBadge">
+                <svg viewBox="0 0 24 24"><path d="M12 2L9.5 9.5 2 12l7.5 2.5L12 22l2.5-7.5L22 12l-7.5-2.5z"/></svg>
+                <span id="heroBadgeText">New Update</span>
+              </div>
+              <h1 class="hero-title" id="heroTitle">Built by Players</h1>
+              <p class="hero-subtitle" id="heroSubtitle">
+                Join millions of players in the most popular sandbox game of all time. Create, explore, survive.
+              </p>
+            </div>
+
+            <!-- Pagination Dots -->
+            <div class="hero-pagination" id="heroPagination" role="tablist" aria-label="Featured Stories">
+              <button class="pag-dot active" data-index="0" role="tab" aria-selected="true" aria-label="Story 1"></button>
+              <button class="pag-dot" data-index="1" role="tab" aria-selected="false" aria-label="Story 2"></button>
+              <button class="pag-dot" data-index="2" role="tab" aria-selected="false" aria-label="Story 3"></button>
+            </div>
+          </div>
+
+          <!-- Latest News Section -->
+          <div class="news-section">
+            <div class="news-header">
+              <h2 class="news-heading" data-i18n="latest_news">Latest News</h2>
+              <button class="news-view-all" id="newsViewAll" data-i18n="view_all">View All</button>
+            </div>
+
+            <div class="news-grid" id="newsGrid">
+              <!-- Card 1: Green Update Card -->
+              <article class="news-card news-card-green">
+                <div class="news-thumbnail">
+                  <span class="news-tag">UPDATE</span>
+                </div>
+                <div class="news-info">
+                  <span class="news-date">Dec 10, 2024</span>
+                  <h3 class="news-title">Minecraft 1.21.4 — The Garden Awakens</h3>
+                </div>
+              </article>
+
+              <!-- Card 2: Blue Snapshot Card -->
+              <article class="news-card news-card-blue">
+                <div class="news-thumbnail">
+                  <span class="news-tag">SNAPSHOT</span>
+                </div>
+                <div class="news-info">
+                  <span class="news-date">Dec 5, 2024</span>
+                  <h3 class="news-title">Snapshot 25w03a Available</h3>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <!-- Bottom Launch Bar on Home Tab -->
+          <footer class="launch-bar" id="homeLaunchBar">
+            <button class="play-button main-play-button play-btn-trigger" id="mainPlayButton" title="Запустить Minecraft" data-i18n-title="tooltip_play_btn">
+              <svg class="play-icon play-icon-idle" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <span data-i18n="btn_play">Play</span>
+            </button>
+            <div class="launch-info">
+              <span class="launch-version-title" id="launchVersionTitle"></span>
+            </div>
+
+            <!-- Material 3 Sinusoid Wavy Progress Bar -->
+            <div class="m3-wavy-progress-container" id="launchWavyProgress" title="Прогресс загрузки" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <div class="m3-wavy-track-wrapper">
+                <!-- Active Traveling Wave Indicator -->
+                <div class="m3-wavy-fill-layer" id="launchWavyFill">
+                  <svg class="m3-wavy-svg m3-wavy-active-svg" width="2200" height="24">
+                    <path class="m3-wave-path m3-wave-active" d="M -80 12 Q -70 5, -60 12 T -40 12 T -20 12 T 0 12 T 20 12 T 40 12 T 60 12 T 80 12 T 100 12 T 120 12 T 140 12 T 160 12 T 180 12 T 200 12 T 220 12 T 240 12 T 260 12 T 280 12 T 300 12 T 320 12 T 340 12 T 360 12 T 380 12 T 400 12 T 420 12 T 440 12 T 460 12 T 480 12 T 500 12 T 520 12 T 540 12 T 560 12 T 580 12 T 600 12 T 620 12 T 640 12 T 660 12 T 680 12 T 700 12 T 720 12 T 740 12 T 760 12 T 780 12 T 800 12 T 820 12 T 840 12 T 860 12 T 880 12 T 900 12 T 920 12 T 940 12 T 960 12 T 980 12 T 1000 12 T 1020 12 T 1040 12 T 1060 12 T 1080 12 T 1100 12 T 1120 12 T 1140 12 T 1160 12 T 1180 12 T 1200 12 T 1220 12 T 1240 12 T 1260 12 T 1280 12 T 1300 12 T 1320 12 T 1340 12 T 1360 12 T 1380 12 T 1400 12 T 1420 12 T 1440 12 T 1460 12 T 1480 12 T 1500 12 T 1520 12 T 1540 12 T 1560 12 T 1580 12 T 1600 12 T 1620 12 T 1640 12 T 1660 12 T 1680 12 T 1700 12 T 1720 12 T 1740 12 T 1760 12 T 1780 12 T 1800 12 T 1820 12 T 1840 12 T 1860 12 T 1880 12 T 1900 12 T 1920 12 T 1940 12 T 1960 12 T 1980 12 T 2000 12 T 2020 12 T 2040 12 T 2060 12 T 2080 12 T 2100 12 T 2120 12 T 2140 12 T 2160 12 T 2180 12 T 2200 12" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </footer>
+        </section>
+
+        <!-- 2. TAB: MODS -->
+        <section class="tab-pane" id="tab-mods">
+          <div class="mods-pane-content">
+            <!-- Row of version cards and create card (side by side) -->
+            <div class="mods-cards-row" id="modsCardsRow">
+              <!-- Installed versions appear on the left, of the same card size -->
+              <div id="installedVersionsContainer" class="installed-versions-container"></div>
+
+              <!-- Create New Version Card (same size, 360px) -->
+              <div class="mod-card create-version-card" id="cardCreateVersion">
+                <div>
+                  <div class="mod-card-header">
+                    <div class="mod-icon-box">
+                      <svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg>
+                    </div>
+                    <div class="mod-info">
+                      <span class="mod-title" data-i18n="mods_btn_create_new_version">Создать новую версию</span>
+                      <span class="mod-author" data-i18n="mods_card_subtitle">Minecraft & Моды</span>
+                    </div>
+                  </div>
+                  <p class="mod-description" data-i18n="mods_minimal_desc">Создайте отдельную сборку Minecraft с нужной версией, загрузчиком и модами в 3 простых шага.</p>
+                </div>
+                <div class="mod-card-footer">
+                  <button class="m3-action-btn-primary btn-card-create-version" id="btnOpenCreateVersionModal">
+                    <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    <span data-i18n="mods_btn_create_new_version">Создать новую версию</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. TAB: SETTINGS -->
+        <section class="tab-pane" id="tab-settings">
+          <div class="settings-view">
+            <!-- Settings Sub-Navigation Tabs (PrismLauncher Style) -->
+            <div class="settings-nav-tabs">
+              <button class="settings-nav-tab active" data-subtab="minecraft">
+                <svg viewBox="0 0 24 24"><path d="M4 4h16v16H4V4zm2 4h12V6H6v2zm0 4h12v-2H6v2zm0 4h12v-2H6v2z"/></svg>
+                <span data-i18n="settings_tab_minecraft">Minecraft</span>
+              </button>
+              <button class="settings-nav-tab" data-subtab="java">
+                <svg class="java-tab-icon" viewBox="0 0 128 128">
+                  <path fill="currentColor" d="M47.617 98.12s-4.767 2.774 3.397 3.71c9.892 1.13 14.947.968 25.845-1.092 0 0 2.871 1.795 6.873 3.351-24.439 10.47-55.308-.607-36.115-5.969zm-2.988-13.665s-5.348 3.959 2.823 4.805c10.567 1.091 18.91 1.18 33.354-1.6 0 0 1.993 2.025 5.132 3.131-29.542 8.64-62.446.68-41.309-6.336z"/>
+                  <path fill="currentColor" d="M69.802 61.271c6.025 6.935-1.58 13.17-1.58 13.17s15.289-7.891 8.269-17.777c-6.559-9.215-11.587-13.792 15.635-29.58 0 .001-42.731 10.67-22.324 34.187z"/>
+                  <path fill="currentColor" d="M102.123 108.229s3.529 2.91-3.888 5.159c-14.102 4.272-58.706 5.56-71.094.171-4.451-1.938 3.899-4.625 6.526-5.192 2.739-.593 4.303-.485 4.303-.485-4.953-3.487-32.013 6.85-13.743 9.815 49.821 8.076 90.817-3.637 77.896-9.468zM49.912 70.294s-22.686 5.389-8.033 7.348c6.188.828 18.518.638 30.011-.326 9.39-.789 18.813-2.474 18.813-2.474s-3.308 1.419-5.704 3.053c-23.042 6.061-67.544 3.238-54.731-2.958 10.832-5.239 19.644-4.643 19.644-4.643zm40.697 22.747c23.421-12.167 12.591-23.86 5.032-22.285-1.848.385-2.677.72-2.677.72s.688-1.079 2-1.543c14.953-5.255 26.451 15.503-4.823 23.725 0-.002.359-.327.468-.617z"/>
+                  <path fill="currentColor" d="M76.491 1.587S89.459 14.563 64.188 34.51c-20.266 16.006-4.621 25.13-.007 35.559-11.831-10.673-20.509-20.07-14.688-28.815C58.041 28.42 81.722 22.195 76.491 1.587z"/>
+                </svg>
+                <span data-i18n="settings_tab_java">Java</span>
+              </button>
+              <button class="settings-nav-tab" data-subtab="accounts">
+                <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span data-i18n="settings_tab_accounts">Учётные записи</span>
+              </button>
+              <button class="settings-nav-tab" data-subtab="appearance">
+                <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.5c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 18.66 10.57 19 12 19c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                <span data-i18n="settings_tab_appearance">Внешний вид</span>
+              </button>
+              <button class="settings-nav-tab" data-subtab="language">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                <span data-i18n="settings_tab_language">Язык</span>
+              </button>
+            </div>
+
+            <!-- Subpane 1: Minecraft (Screenshot 1) -->
+            <div class="settings-subpane active" id="subpane-minecraft">
+              <div class="prism-section-box">
+                <div class="prism-box-title" data-i18n="mc_game_window">Окно игры</div>
+                <div class="prism-box-content">
+                  <label class="prism-checkbox-label">
+                    <input type="checkbox" id="mcFullscreenCheck">
+                    <span data-i18n="mc_fullscreen">Запускать Minecraft в полноэкранном режиме</span>
+                  </label>
+                  <div class="prism-dimension-row">
+                    <span data-i18n="mc_window_size">Размер окна:</span>
+                    <input type="number" class="m3-input prism-num-input" id="mcWinWidthInput" value="854" min="320" max="7680">
+                    <span class="prism-dim-x">×</span>
+                    <input type="number" class="m3-input prism-num-input" id="mcWinHeightInput" value="480" min="240" max="4320">
+                    <span data-i18n="mc_pixels">пиксели</span>
+                  </div>
+                  <label class="prism-checkbox-label">
+                    <input type="checkbox" id="mcHideLauncherCheck">
+                    <span data-i18n="mc_hide_launcher">Когда открывается окно игры, спрятать лаунчер</span>
+                  </label>
+                  <label class="prism-checkbox-label">
+                    <input type="checkbox" id="mcCloseLauncherCheck">
+                    <span data-i18n="mc_close_launcher">Завершать работу лаунчера при закрытии окна игры</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="prism-section-box">
+                <div class="prism-box-title" data-i18n="mc_console_window">Окно консоли</div>
+                <div class="prism-box-content">
+                  <label class="prism-checkbox-label">
+                    <input type="checkbox" id="mcShowConsoleLaunchCheck">
+                    <span data-i18n="mc_console_on_launch">Отображать окно консоли при запуске игры</span>
+                  </label>
+                  <label class="prism-checkbox-label">
+                    <input type="checkbox" id="mcShowConsoleErrorCheck" checked>
+                    <span data-i18n="mc_console_on_error">Отображать окно консоли при возникновении сбоя игры</span>
+                  </label>
+                  <label class="prism-checkbox-label">
+                    <input type="checkbox" id="mcHideConsoleExitCheck">
+                    <span data-i18n="mc_console_on_exit">Скрывать окно консоли при завершении игры</span>
+                  </label>
+                  <div class="prism-actions-margin">
+                    <button class="m3-action-btn-secondary" id="btnOpenConsoleNow">
+                      <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; fill: currentColor;"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zm-9-3h6v-2h-6v2zm-4.71-1.29L9.59 12 6.29 8.29 7.71 6.88l4.7 4.71-4.7 4.71-1.42-1.41z"/></svg>
+                      <span data-i18n="mc_open_console">Открыть окно консоли</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subpane 2: Java (Screenshots 2 & 3) -->
+            <div class="settings-subpane" id="subpane-java">
+              <div class="java-subnav-tabs">
+                <button class="java-subnav-btn active" data-javasub="general" data-i18n="java_tab_general">Основные</button>
+                <button class="java-subnav-btn" data-javasub="installations" data-i18n="java_tab_installations">Установки</button>
+              </div>
+
+              <!-- Java Tab: General (Screenshot 2) -->
+              <div class="java-subpane-view active" id="javasub-general">
+                <div class="prism-section-box">
+                  <div class="prism-box-title" data-i18n="java_installation">Установка Java</div>
+                  <div class="prism-box-content">
+                    <div class="prism-row-vertical">
+                      <span class="prism-field-label" data-i18n="java_executable">Исполняемый файл Java</span>
+                      <div class="prism-input-with-actions">
+                        <input type="text" class="m3-input flex-1" id="javaPathInput" data-i18n-placeholder="java_auto_detect_placeholder" placeholder="Автоматическое определение (рекомендуется)" readonly>
+                      </div>
+                      <div class="prism-btn-row">
+                        <button class="m3-action-btn-secondary" id="btnFindJava" data-i18n="btn_find">Найти</button>
+                        <button class="m3-action-btn-secondary" id="btnBrowseJava" data-i18n="btn_browse">Обзор</button>
+                      </div>
+                    </div>
+                    <label class="prism-checkbox-label">
+                      <input type="checkbox" id="javaSkipCheck">
+                      <span data-i18n="java_skip_compat">Пропустить проверку совместимости Java</span>
+                    </label>
+                    <label class="prism-checkbox-label">
+                      <input type="checkbox" id="javaSkipPromptCheck">
+                      <span data-i18n="java_skip_prompt">Пропустить запрос на установку Java при запуске</span>
+                    </label>
+                    <label class="prism-checkbox-label">
+                      <input type="checkbox" id="javaAutoDetectCheck" checked>
+                      <span data-i18n="java_autodetect">Автоопределение версии Java</span>
+                    </label>
+                    <label class="prism-checkbox-label">
+                      <input type="checkbox" id="javaAutoDownloadCheck" checked>
+                      <span data-i18n="java_autodownload">Автозагрузка Mojang Java</span>
+                    </label>
+                    <div class="prism-test-settings-row">
+                      <button class="m3-action-btn-secondary" id="btnTestJavaSettings" data-i18n="btn_test_settings">Проверить настройки</button>
+                      <span id="javaTestStatus" class="java-test-status"></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="prism-section-box">
+                  <div class="prism-box-title" data-i18n="java_memory">Память</div>
+                  <div class="prism-box-content">
+                    <div class="prism-memory-row">
+                      <span class="prism-mem-label" data-i18n="java_min_memory">Минимальное использование памяти:</span>
+                      <input type="number" class="m3-input prism-num-input" id="javaMinRamInput" value="512" min="128" step="128">
+                      <span class="prism-mem-unit">MiB</span>
+                      <span class="prism-mem-flag">(-Xms)</span>
+                    </div>
+                    <div class="prism-memory-row">
+                      <span class="prism-mem-label" data-i18n="java_max_memory">Максимальное использование памяти:</span>
+                      <input type="number" class="m3-input prism-num-input" id="javaMaxRamInput" value="4096" min="512" step="256">
+                      <span class="prism-mem-unit">MiB</span>
+                      <span class="prism-mem-flag">(-Xmx)</span>
+                    </div>
+                    <div class="prism-memory-row">
+                      <span class="prism-mem-label" data-i18n="java_permgen">Размер PermGen:</span>
+                      <input type="number" class="m3-input prism-num-input" id="javaPermGenInput" value="128" min="64" step="32">
+                      <span class="prism-mem-unit">MiB</span>
+                      <span class="prism-mem-flag">(-XX:PermSize)</span>
+                    </div>
+                    <label class="prism-checkbox-label">
+                      <input type="checkbox" id="javaWarnMemoryCheck" checked>
+                      <span data-i18n="java_warn_memory">Предупреждать при нехватке памяти</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="prism-section-box">
+                  <div class="prism-box-title" data-i18n="java_arguments">Аргументы Java</div>
+                  <div class="prism-box-content">
+                    <textarea class="m3-input prism-textarea" id="javaArgsInput" rows="2" placeholder="-XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Java Tab: Установки (Screenshot 3) -->
+              <div class="java-subpane-view" id="javasub-installations">
+                <div class="prism-table-toolbar">
+                  <button class="m3-action-btn-secondary" id="btnSelectJavaActive" data-i18n="java_btn_select">Выбрать для запуска</button>
+                  <button class="m3-action-btn-secondary" id="btnRefreshJava" data-i18n="java_btn_refresh">Обновить</button>
+                </div>
+                <div class="prism-table-wrapper">
+                  <table class="prism-table" id="javaTable">
+                    <thead>
+                      <tr>
+                        <th style="width: 110px;" data-i18n="java_col_version">Версия</th>
+                        <th style="width: 120px;" data-i18n="java_col_arch">Архитектура</th>
+                        <th data-i18n="java_col_path">Путь</th>
+                      </tr>
+                    </thead>
+                    <tbody id="javaTableBody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subpane 3: Учётные записи (Screenshot 4) -->
+            <div class="settings-subpane" id="subpane-accounts">
+              <div class="accounts-prism-layout">
+                <div class="accounts-table-container">
+                  <table class="prism-table" id="accountsTable">
+                    <thead>
+                      <tr>
+                        <th style="width: 44px;"></th>
+                        <th data-i18n="acc_col_username">Имя пользователя</th>
+                        <th style="width: 130px;" data-i18n="acc_col_type">Тип</th>
+                        <th style="width: 100px;" data-i18n="acc_col_status">Статус</th>
+                      </tr>
+                    </thead>
+                    <tbody id="accountsTableBody">
+                      <!-- Populated dynamically -->
+                    </tbody>
+                  </table>
+                </div>
+                <div class="accounts-actions-column">
+                  <button class="m3-filled-btn acc-action-btn" id="btnAccAddMicrosoft">
+                    <svg viewBox="0 0 24 24" class="ms-icon-small">
+                      <path fill="#f25022" d="M1 1h10v10H1z"/>
+                      <path fill="#00a4ef" d="M1 13h10v10H1z"/>
+                      <path fill="#7fba00" d="M13 1h10v10H13z"/>
+                      <path fill="#ffb900" d="M13 13h10v10H13z"/>
+                    </svg>
+                    <span data-i18n="acc_btn_add_ms">Войти через Microsoft</span>
+                  </button>
+                  <button class="m3-filled-btn acc-action-btn acc-btn-ely" id="btnAccAddElyBy">
+                    <img src="./assets/elyby.png" class="ely-icon-small" alt="Ely.by">
+                    <span data-i18n="acc_btn_add_ely">Войти через Ely.by</span>
+                  </button>
+                  <button class="m3-action-btn-secondary acc-action-btn" id="btnAccAddOffline" data-i18n="acc_btn_add_offline">Добавить автономную</button>
+                  <button class="m3-action-btn-secondary acc-action-btn" id="btnAccDelete" data-i18n="acc_btn_delete">Удалить</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subpane 4: Внешний вид (Appearance & Accent Color) -->
+            <div class="settings-subpane" id="subpane-appearance">
+              <div class="settings-group">
+                <div class="settings-group-title">
+                  <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.5c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 18.66 10.57 19 12 19c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                  <span data-i18n="app_appearance_title">Акцентный цвет и тема</span>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <span class="settings-item-label" data-i18n="app_accent_label">Цвет акцента</span>
+                    <span class="settings-item-desc" data-i18n="app_accent_desc">Стилизует кнопки, значки, рамки и фоновые оттенки</span>
+                  </div>
+                  <div class="settings-control">
+                    <div class="color-swatches" id="colorSwatches">
+                      <button class="color-swatch active" data-color="lavender" title="lavender" style="--swatch-color: #EADDFF;"></button>
+                      <button class="color-swatch" data-color="emerald" title="Emerald Green" style="--swatch-color: #9fe870;"></button>
+                      <button class="color-swatch" data-color="blue" title="Sky Blue" style="--swatch-color: #60cdff;"></button>
+                      <button class="color-swatch" data-color="amber" title="Amber Orange" style="--swatch-color: #ffb77c;"></button>
+                      <button class="color-swatch" data-color="rose" title="Ruby Rose" style="--swatch-color: #ffb0cd;"></button>
+                      <label class="color-swatch-custom" title="Выбрать свой цвет" data-i18n-title="tooltip_custom_color">
+                        <input type="color" id="customColorPicker" value="#EADDFF" />
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <span class="settings-item-label" data-i18n="app_theme_label">Тема интерфейса</span>
+                    <span class="settings-item-desc" data-i18n="app_theme_desc">Переключение между тёмной и светлой темой</span>
+                  </div>
+                  <div class="settings-control">
+                    <button class="theme-toggle-btn in-settings" id="themeToggleBtn">
+                      <svg viewBox="0 0 24 24" id="themeToggleIcon">
+                        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+                      </svg>
+                      <span id="themeLabel">Light mode</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subpane 5: Язык (Language) -->
+            <div class="settings-subpane" id="subpane-language">
+              <div class="prism-section-box">
+                <div class="prism-box-title" data-i18n="lang_title">Выбор языка</div>
+                <div class="prism-box-content">
+                  <span class="prism-field-label" data-i18n="lang_desc">Выберите язык для интерфейса лаунчера:</span>
+                  <div class="languages-grid" id="languagesGrid">
+                    <!-- Populated dynamically: ru, en, zh, de, fr, es, pt_br -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Real Version Selector Modal -->
+    <div class="modal-overlay" id="versionModal" role="dialog" aria-modal="true" aria-labelledby="versionModalTitle">
+      <div class="modal-content version-modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="versionModalTitle" data-i18n="modal_version_title">Select Minecraft Version</h3>
+          <button class="window-btn modal-close-btn" id="closeVersionModalBtn" aria-label="Close">✕</button>
+        </div>
+        
+        <div class="version-filter-bar">
+          <div class="search-input-box version-search-box">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="versionSearchInput" placeholder="Поиск версии..." data-i18n-placeholder="modal_version_search">
+          </div>
+          <div class="version-type-chips">
+            <button class="version-type-chip active" data-type="release" data-i18n="modal_version_releases">Releases</button>
+            <button class="version-type-chip" data-type="snapshot" data-i18n="modal_version_snapshots">Snapshots</button>
+            <button class="version-type-chip" data-type="custom" data-i18n="modal_version_custom">Кастомные</button>
+            <button class="version-type-chip" data-type="all" data-i18n="modal_version_all">All</button>
+          </div>
+        </div>
+
+        <div class="version-list" id="versionListContainer">
+          <div class="version-loading-placeholder">
+            <div class="m3-spinner"></div>
+            <span data-i18n="modal_version_loading">Loading real versions from Mojang...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mojang / Microsoft / Ely.by Account Modal -->
+    <div class="modal-overlay" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authModalTitle">
+      <div class="modal-content auth-modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="authModalTitle" data-i18n="settings_tab_accounts">Учётные записи</h3>
+          <button class="window-btn modal-close-btn" id="closeAuthModalBtn" aria-label="Close">✕</button>
+        </div>
+
+        <div class="auth-modal-body">
+          <!-- Account Switcher List (Выбор аккаунта) -->
+          <div class="modal-section-title" data-i18n="modal_select_account">Выберите аккаунт:</div>
+          <div class="modal-accounts-list" id="modalAccountsList"></div>
+
+          <!-- Add Account / Registration toggle (Регистрация/вход по отдельной кнопке) -->
+          <div class="modal-add-account-toggle">
+            <button class="m3-action-btn-secondary modal-btn-add-account" id="btnToggleAddAccountInModal">
+              <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: currentColor;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span data-i18n="modal_btn_add_account">Добавить аккаунт</span>
+            </button>
+          </div>
+
+          <!-- Add Account Options (Hidden by default, opened by separate button) -->
+          <div class="modal-add-options" id="modalAddOptions" style="display: none;">
+            <div class="modal-add-options-header">
+              <span class="auth-section-title" data-i18n="modal_choose_login_method">Способ входа:</span>
+            </div>
+            
+            <div class="modal-add-buttons-row">
+              <!-- Microsoft -->
+              <button class="ms-login-button flex-1" id="msLoginBtn" title="Войти через Microsoft" data-i18n-title="tooltip_login_ms">
+                <svg viewBox="0 0 24 24" class="ms-icon">
+                  <path fill="#f25022" d="M1 1h10v10H1z"/>
+                  <path fill="#00a4ef" d="M1 13h10v10H1z"/>
+                  <path fill="#7fba00" d="M13 1h10v10H13z"/>
+                  <path fill="#ffb900" d="M13 13h10v10H13z"/>
+                </svg>
+                <span>Microsoft</span>
+              </button>
+
+              <!-- Ely.by -->
+              <button class="ely-login-button flex-1" id="modalElyLoginBtn" title="Войти через Ely.by" data-i18n-title="tooltip_login_ely">
+                <img src="./assets/elyby.png" class="ely-icon-small" alt="Ely.by">
+                <span>Ely.by</span>
+              </button>
+
+              <!-- Offline -->
+              <button class="m3-action-btn-secondary flex-1 modal-offline-btn" id="modalBtnAddOfflineChoice" title="Добавить автономный аккаунт" data-i18n-title="tooltip_add_offline">
+                <svg viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: currentColor;"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                <span data-i18n="acc_type_offline">Автономная</span>
+              </button>
+            </div>
+            <div class="auth-status-msg" id="msAuthStatus" style="display: none;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Console Log Modal (Screenshot 1: Окно консоли) -->
+    <div class="modal-overlay" id="consoleModal" role="dialog" aria-modal="true" aria-labelledby="consoleModalTitle">
+      <div class="modal-content console-modal-content">
+        <div class="modal-header">
+          <div class="console-modal-header-left">
+            <svg viewBox="0 0 24 24" class="console-header-icon"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V6h16v12zm-9-3h6v-2h-6v2zm-4.71-1.29L9.59 12 6.29 8.29 7.71 6.88l4.7 4.71-4.7 4.71-1.42-1.41z"/></svg>
+            <h3 class="modal-title" id="consoleModalTitle" data-i18n="console_title">Консоль Minecraft</h3>
+          </div>
+          <div class="console-modal-actions">
+            <button class="m3-action-btn-secondary console-action-btn" id="btnCopyConsole" data-i18n="console_btn_copy">Копировать</button>
+            <button class="m3-action-btn-secondary console-action-btn" id="btnClearConsole" data-i18n="console_btn_clear">Очистить</button>
+            <button class="window-btn modal-close-btn" id="btnCloseConsoleModal" aria-label="Close">✕</button>
+          </div>
+        </div>
+        <div class="console-modal-body">
+          <pre class="console-output" id="consoleOutputText" data-i18n="console_ready">Готов к запуску Minecraft...</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Add Offline Account (Screenshot 4) -->
+    <div class="modal-overlay" id="addOfflineModal" role="dialog" aria-modal="true" aria-labelledby="addOfflineModalTitle">
+      <div class="modal-content add-offline-modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="addOfflineModalTitle" data-i18n="modal_add_offline_title">Добавить автономную учётную запись</h3>
+          <button class="window-btn modal-close-btn" id="btnCloseAddOfflineModal" aria-label="Close">✕</button>
+        </div>
+        <div class="add-offline-body">
+          <label class="prism-field-label" data-i18n="modal_nickname_label">Имя пользователя (Никнейм):</label>
+          <input type="text" class="m3-input offline-name-input" id="newOfflineNicknameInput" data-i18n-placeholder="modal_nickname_placeholder" placeholder="Введите никнейм..." minlength="3" maxlength="16">
+          <div class="add-offline-actions">
+            <button class="m3-action-btn-secondary" id="btnCancelAddOffline" data-i18n="btn_cancel">Отмена</button>
+            <button class="m3-filled-btn" id="btnConfirmAddOffline" data-i18n="modal_btn_add">Добавить</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Ely.by Login -->
+    <div class="modal-overlay" id="elyModal" role="dialog" aria-modal="true" aria-labelledby="elyModalTitle">
+      <div class="modal-content ely-modal-content">
+        <div class="modal-header">
+          <div class="ely-modal-header-left">
+            <img src="./assets/elyby.png" class="ely-icon-small ely-header-icon" alt="Ely.by">
+            <h3 class="modal-title" id="elyModalTitle" data-i18n="ely_modal_title">Вход в учётную запись Ely.by</h3>
+          </div>
+          <button class="window-btn modal-close-btn" id="btnCloseElyModal" aria-label="Close">✕</button>
+        </div>
+        <div class="ely-modal-body">
+          <label class="prism-field-label" data-i18n="ely_input_user">Логин или Email:</label>
+          <input type="text" class="m3-input ely-input" id="elyLoginUserInput" placeholder="user@example.com">
+          
+          <label class="prism-field-label" data-i18n="ely_input_pass">Пароль:</label>
+          <input type="password" class="m3-input ely-input" id="elyLoginPasswordInput" placeholder="••••••••">
+          
+          <div class="ely-status-msg" id="elyStatusMsg" style="display: none;"></div>
+          
+          <div class="ely-register-hint">
+            <a href="#" id="linkElyRegister" class="ely-register-link" data-i18n="ely_no_account">Нет аккаунта? Зарегистрироваться на Ely.by ↗</a>
+          </div>
+
+          <div class="ely-modal-actions">
+            <button class="m3-action-btn-secondary" id="btnCancelElyLogin" data-i18n="btn_cancel">Отмена</button>
+            <button class="m3-filled-btn" id="btnConfirmElyLogin">
+              <span data-i18n="ely_btn_login">Войти</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. MODAL: CREATE VERSION / INSTANCE (3-STEP WIZARD) -->
+    <div class="modal-overlay" id="createVersionModal" role="dialog" aria-modal="true" aria-labelledby="createVersionModalTitle">
+      <div class="modal-content create-version-wizard-modal">
+        <div class="modal-header">
+          <div class="create-version-header-left">
+            <h3 class="modal-title" id="createVersionModalTitle" data-i18n="create_version_modal_title">+ Создать версию</h3>
+          </div>
+          <button class="window-btn modal-close-btn" id="btnCloseCreateVersionModal">✕</button>
+        </div>
+
+        <!-- Assembly Name Top Row -->
+        <div class="wizard-name-top-bar">
+          <label class="wizard-name-top-label" for="cvInstanceNameInput" data-i18n="cv_label_name">Название сборки</label>
+          <div class="wizard-name-top-input-wrap">
+            <input type="text" class="wizard-name-top-input" id="cvInstanceNameInput" placeholder="Введите название сборки..." data-i18n-placeholder="placeholder_instance_name" maxlength="40" autocomplete="off">
+            <svg class="wizard-name-edit-icon" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          </div>
+        </div>
+
+        <div class="wizard-steps-container">
+          <!-- ШАГ 1: ЗАГРУЗЧИК МОДОВ -->
+          <div class="wizard-step-box active" id="wizardStep1" data-step="1">
+            <div class="wizard-step-header" id="wizardStep1Header">
+              <div class="wizard-step-header-left">
+                <span class="wizard-step-badge">1</span>
+                <span class="wizard-step-title" data-i18n="wizard_step_1_title">Шаг 1: Загрузчик модов</span>
+              </div>
+              <div class="wizard-step-header-right">
+                <span class="wizard-step-selected-value" id="wizardStep1Value">Fabric</span>
+                <svg class="wizard-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+              </div>
+            </div>
+            <div class="wizard-step-content" id="wizardStep1Content">
+              <div class="cv-loader-cards" id="cvLoaderCards">
+                <div class="cv-loader-card active" data-loader="fabric">
+                  <div class="cv-loader-icon-box fabric">
+                    <img src="./assets/loader_fabric.svg" alt="Fabric" class="cv-loader-img">
+                  </div>
+                  <div class="cv-loader-meta">
+                    <span class="cv-loader-name">Fabric</span>
+                    <span class="cv-loader-desc" data-i18n="cv_loader_fabric_desc">Быстрый, легковесный, тысячи модов</span>
+                  </div>
+                  <div class="cv-loader-check">✓</div>
+                </div>
+
+                <div class="cv-loader-card" data-loader="forge">
+                  <div class="cv-loader-icon-box forge">
+                    <img src="./assets/loader_forge.png" alt="Forge" class="cv-loader-img">
+                  </div>
+                  <div class="cv-loader-meta">
+                    <span class="cv-loader-name">Forge</span>
+                    <span class="cv-loader-desc" data-i18n="cv_loader_forge_desc">Классический загрузчик для крупных модов</span>
+                  </div>
+                  <div class="cv-loader-check">✓</div>
+                </div>
+
+                <div class="cv-loader-card" data-loader="neoforge">
+                  <div class="cv-loader-icon-box neoforge">
+                    <img src="./assets/loader_neoforge.svg" alt="NeoForge" class="cv-loader-img">
+                  </div>
+                  <div class="cv-loader-meta">
+                    <span class="cv-loader-name">NeoForge</span>
+                    <span class="cv-loader-desc" data-i18n="cv_loader_neoforge_desc">Современный форк Forge для новых версий</span>
+                  </div>
+                  <div class="cv-loader-check">✓</div>
+                </div>
+
+                <div class="cv-loader-card" data-loader="quilt">
+                  <div class="cv-loader-icon-box quilt">
+                    <img src="./assets/loader_quilt.svg" alt="Quilt" class="cv-loader-img">
+                  </div>
+                  <div class="cv-loader-meta">
+                    <span class="cv-loader-name">Quilt</span>
+                    <span class="cv-loader-desc" data-i18n="cv_loader_quilt_desc">Модульный загрузчик, совместим с Fabric</span>
+                  </div>
+                  <div class="cv-loader-check">✓</div>
+                </div>
+
+                <div class="cv-loader-card" data-loader="vanilla">
+                  <div class="cv-loader-icon-box vanilla">
+                    <img src="./assets/loader_vanilla.svg" alt="Vanilla" class="cv-loader-img">
+                  </div>
+                  <div class="cv-loader-meta">
+                    <span class="cv-loader-name">Vanilla</span>
+                    <span class="cv-loader-desc" data-i18n="cv_loader_vanilla_desc">Чистая игра без загрузчика модов</span>
+                  </div>
+                  <div class="cv-loader-check">✓</div>
+                </div>
+              </div>
+
+              <!-- Provider selector row -->
+              <div class="wizard-provider-row">
+                <span class="wizard-provider-label" data-i18n="cv_label_provider">Сервис для загрузки модов:</span>
+                <div class="wizard-provider-chips" id="cvProviderCards">
+                  <button class="wizard-provider-chip active" data-provider="modrinth" type="button">
+                    <img src="./assets/provider_modrinth.svg" alt="Modrinth" class="provider-chip-icon">
+                    <span>Modrinth</span>
+                  </button>
+                  <button class="wizard-provider-chip" data-provider="curseforge" type="button">
+                    <img src="./assets/provider_curseforge.svg" alt="CurseForge" class="provider-chip-icon">
+                    <span>CurseForge</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ШАГ 2: ВЫБРАТЬ ВЕРСИЮ -->
+          <div class="wizard-step-box" id="wizardStep2" data-step="2">
+            <div class="wizard-step-header" id="wizardStep2Header">
+              <div class="wizard-step-header-left">
+                <span class="wizard-step-badge">2</span>
+                <span class="wizard-step-title" data-i18n="wizard_step_2_title">Шаг 2: Выбрать версию</span>
+              </div>
+              <div class="wizard-step-header-right">
+                <span class="wizard-step-selected-value" id="wizardStep2Value">1.21.1</span>
+                <svg class="wizard-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+              </div>
+            </div>
+            <div class="wizard-step-content" id="wizardStep2Content">
+              <div class="wizard-version-search-row">
+                <div class="search-input-box wizard-version-search-box">
+                  <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                  <input type="text" id="wizardVersionSearchInput" placeholder="Поиск версии (напр. 1.21.1, 1.20, 1.16)..." data-i18n-placeholder="wizard_version_search_placeholder">
+                </div>
+                <label class="cv-checkbox-label" id="cvShowSnapshotsLabel">
+                  <input type="checkbox" id="cvShowSnapshotsCheckbox">
+                  <span id="cvShowSnapshotsText" data-i18n="cv_show_snapshots">Снапшоты</span>
+                </label>
+              </div>
+              <div class="wizard-versions-grid" id="wizardVersionsGrid">
+                <!-- Dynamically populated or static fallbacks -->
+              </div>
+              <button class="wizard-show-all-versions-btn" id="btnToggleAllWizardVersions" type="button">
+                <span id="txtToggleAllWizardVersions" data-i18n="cv_show_all_versions">Показать все версии</span>
+                <svg viewBox="0 0 24 24" class="toggle-versions-chevron"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- ШАГ 3: ВЫБРАТЬ МОДЫ -->
+          <div class="wizard-step-box" id="wizardStep3" data-step="3">
+            <div class="wizard-step-header" id="wizardStep3Header">
+              <div class="wizard-step-header-left">
+                <span class="wizard-step-badge">3</span>
+                <span class="wizard-step-title" data-i18n="wizard_step_3_title">Шаг 3: Выбрать моды</span>
+              </div>
+              <div class="wizard-step-header-right">
+                <span class="wizard-step-selected-value" id="wizardStep3Value">0 выбрано</span>
+                <svg class="wizard-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+              </div>
+            </div>
+            <div class="wizard-step-content" id="wizardStep3Content">
+              <div class="wizard-mod-search-row">
+                <div class="search-input-box wizard-mod-search-box">
+                  <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>
+                  <input type="text" id="wizardModSearchInput" placeholder="Поиск модов (Sodium, Iris, JEI, AppleSkin...)" data-i18n-placeholder="wizard_mod_search_placeholder">
+                </div>
+              </div>
+              <div class="filter-chips wizard-categories-chips" id="wizardCategoriesChips">
+                <button class="filter-chip active" data-category="all" data-i18n="mods_cat_all">Все</button>
+                <button class="filter-chip" data-category="optimization" data-i18n="mods_cat_opt">Оптимизация</button>
+                <button class="filter-chip" data-category="technology" data-i18n="mods_cat_tech">Технологии</button>
+                <button class="filter-chip" data-category="adventure" data-i18n="mods_cat_adv">Приключения</button>
+                <button class="filter-chip" data-category="magic" data-i18n="mods_cat_magic">Магия</button>
+                <button class="filter-chip" data-category="decoration" data-i18n="mods_cat_decor">Декор</button>
+                <button class="filter-chip" data-category="utility" data-i18n="mods_cat_util">Интерфейс</button>
+                <button class="filter-chip" data-category="storage" data-i18n="mods_cat_storage">Хранилище</button>
+              </div>
+              <div class="wizard-mods-list" id="wizardModsList">
+                <!-- Dynamically populated mod list with checkboxes/toggles -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Banner: Ready-made .mrpack assembly file (Full width, placed at the very bottom above footer) -->
+        <button class="mrpack-import-banner fullwidth" id="btnImportMrpackInModal" type="button">
+          <div class="mrpack-banner-left">
+            <div class="mrpack-banner-icon">
+              <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+            </div>
+            <div class="mrpack-banner-text" data-i18n="mrpack_banner_text">Есть готовый файл сборки <b>.mrpack</b>?</div>
+          </div>
+          <div class="mrpack-banner-btn-label">
+            <span data-i18n="mrpack_btn_import">Импортировать .mrpack</span>
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-7.85-1.42 1.42L16.86 11H5v2z"/></svg>
+          </div>
+        </button>
+
+        <!-- Wizard Footer: Action buttons -->
+        <div class="wizard-footer">
+          <div class="wizard-footer-actions">
+            <button class="btn-wizard-cancel" id="btnCancelCreateVersion" data-i18n="btn_cancel">Отмена</button>
+            <button class="btn-wizard-submit" id="btnSubmitCreateVersion">
+              <span class="btn-wizard-submit-plus">+</span>
+              <span data-i18n="cv_btn_create">Создать версию</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. CONTEXT MENU FOR INSTALLED VERSIONS -->
+  <div class="m3-context-menu" id="versionContextMenu" style="display: none;">
+    <div class="m3-context-item" id="ctxMenuAddMods">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      <span data-i18n="ctx_add_mods">Добавить моды</span>
+    </div>
+    <div class="m3-context-item" id="ctxMenuOpenFolder">
+      <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+      <span data-i18n="ctx_open_folder">Открыть папку</span>
+    </div>
+    <div class="m3-context-divider"></div>
+    <div class="m3-context-item danger" id="ctxMenuDeleteVersion">
+      <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      <span data-i18n="ctx_delete_version">Удалить версию</span>
+    </div>
+  </div>
+
+  <!-- 8b. CONTEXT MENU FOR ACCOUNTS -->
+  <div class="m3-context-menu" id="accountContextMenu" style="display: none;">
+    <div class="m3-context-item" id="ctxMenuAddAccount">
+      <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      <span data-i18n="modal_btn_add_account">Добавить аккаунт</span>
+    </div>
+    <div class="m3-context-divider" id="ctxMenuAccountDivider"></div>
+    <div class="m3-context-item danger" id="ctxMenuDeleteAccount">
+      <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+      <span data-i18n="acc_btn_delete">Удалить</span>
+    </div>
+  </div>
+
+  <!-- 8.5 MANAGE INSTANCE MODS MODAL (OPENED FROM CARD "КОНФИГУРАЦИЯ" BUTTON) -->
+  <div class="modal-overlay" id="manageInstanceModsModal" role="dialog" aria-modal="true" aria-labelledby="manageInstanceModsTitle">
+    <div class="modal-content create-version-wizard-modal manage-mods-modal">
+      <div class="modal-header">
+        <div class="create-version-header-left">
+          <svg viewBox="0 0 24 24" class="create-version-header-icon"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          <div>
+            <h3 class="modal-title" id="manageInstanceModsTitle" data-i18n="manage_mods_modal_title">Конфигурация сборки</h3>
+            <span class="manage-mods-subtitle" id="manageInstanceModsSubtitle">Forge 1.20.1</span>
+          </div>
+        </div>
+        <button class="window-btn modal-close-btn" id="btnCloseManageModsModal">✕</button>
+      </div>
+
+      <!-- Assembly Name Configuration Section -->
+      <div class="manage-instance-rename-bar">
+        <label class="manage-rename-label" for="manageInstanceNameInput" data-i18n="lbl_instance_name">Название сборки</label>
+        <div class="manage-rename-input-wrap">
+          <input type="text" id="manageInstanceNameInput" class="manage-rename-input" placeholder="Введите название сборки..." data-i18n-placeholder="placeholder_instance_name" maxlength="60" autocomplete="off" />
+          <button class="btn-save-instance-name" id="btnSaveInstanceName" title="Сохранить название" data-i18n-title="btn_save_name">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            <span data-i18n="btn_save">Сохранить</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation tabs inside modal: Installed vs Catalog -->
+      <div class="manage-modal-nav-tabs">
+        <button class="manage-modal-nav-tab active" id="tabBtnInstalledMods" data-subpane="installed">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/></svg>
+          <span id="tabInstalledModsLabel" data-i18n="mods_instance_title">Установленные моды</span>
+          <span class="instance-mods-count-badge" id="tabInstalledModsBadge">0</span>
+        </button>
+        <button class="manage-modal-nav-tab" id="tabBtnAddCatalogMods" data-subpane="catalog">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          <span data-i18n="btn_add_mods_full">Добавить моды</span>
+        </button>
+      </div>
+
+      <!-- Subpane 1: Installed Mods List (Image 2) -->
+      <div class="manage-modal-subpane active" id="subpaneInstalledMods">
+        <div class="manage-installed-top-bar">
+          <span class="manage-installed-heading" id="manageInstalledHeading" data-i18n="manage_installed_heading">Установленные моды</span>
+          <div class="instance-mods-actions">
+            <button class="btn-version-folder" id="btnManageDownloadAll" title="Скачать все моды в папку сборки" data-i18n-title="tooltip_download_all_mods">
+              <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM17 13l-5 5-5-5h3V9h4v4h3z"/></svg>
+              <span data-i18n="btn_download_all">Скачать всё</span>
+            </button>
+            <button class="btn-add-mods-primary" id="btnSwitchToAddMods">
+              <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+              <span data-i18n="btn_add_mods_full">Добавить моды</span>
+            </button>
+            <button class="btn-version-folder" id="btnManageOpenFolder">
+              <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
+              <span data-i18n="version_card_folder">Папка</span>
+            </button>
+          </div>
+        </div>
+        <div class="manage-installed-mods-scroll" id="manageInstalledModsContainer">
+          <!-- Dynamically populated installed mod cards -->
+        </div>
+      </div>
+
+      <!-- Subpane 2: Add Mods Catalog -->
+      <div class="manage-modal-subpane" id="subpaneCatalogMods" style="display: none;">
+        <div class="wizard-mod-search-row">
+          <div class="search-input-box wizard-mod-search-box">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" id="manageModSearchInput" placeholder="Поиск модов для добавления (Sodium, Iris, JEI, AppleSkin...)" data-i18n-placeholder="manage_mods_search_placeholder">
+          </div>
+        </div>
+        <div class="filter-chips wizard-categories-chips" id="manageCategoriesChips">
+          <button class="filter-chip active" data-category="all" data-i18n="mods_cat_all">Все</button>
+          <button class="filter-chip" data-category="optimization" data-i18n="mods_cat_opt">Оптимизация</button>
+          <button class="filter-chip" data-category="technology" data-i18n="mods_cat_tech">Технологии</button>
+          <button class="filter-chip" data-category="adventure" data-i18n="mods_cat_adv">Приключения</button>
+          <button class="filter-chip" data-category="magic" data-i18n="mods_cat_magic">Магия</button>
+          <button class="filter-chip" data-category="decoration" data-i18n="mods_cat_decor">Декор</button>
+          <button class="filter-chip" data-category="utility" data-i18n="mods_cat_util">Интерфейс</button>
+          <button class="filter-chip" data-category="storage" data-i18n="mods_cat_storage">Хранилище</button>
+        </div>
+        <div class="wizard-mods-list" id="manageModsList" style="max-height: 380px;">
+          <!-- Dynamically populated mod list with checkboxes/toggles -->
+        </div>
+      </div>
+
+      <div class="wizard-footer" style="justify-content: space-between;">
+        <span class="manage-mods-footer-summary" id="manageModsFooterSummary">0 выбрано</span>
+        <div class="wizard-footer-actions">
+          <button class="m3-action-btn-primary" id="btnSaveManageMods" data-i18n="btn_done">Готово</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. M3 CONFIRMATION DIALOG -->
+  <div class="modal-overlay" id="confirmDialogModal" role="dialog" aria-modal="true" aria-labelledby="confirmDialogTitle" style="z-index: 1200;">
+    <div class="modal-content m3-dialog-content">
+      <div class="m3-dialog-header">
+        <div class="m3-dialog-icon" id="confirmDialogIcon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        </div>
+        <h3 class="m3-dialog-title" id="confirmDialogTitle" data-i18n="dialog_confirm_default_title">Подтверждение</h3>
+      </div>
+      <div class="m3-dialog-body" id="confirmDialogMessage" data-i18n="dialog_confirm_default_msg">
+        Вы действительно хотите выполнить это действие?
+      </div>
+      <div class="m3-dialog-actions">
+        <button class="m3-action-btn-secondary" id="confirmDialogCancelBtn" data-i18n="btn_cancel">Отмена</button>
+        <button class="m3-filled-btn" id="confirmDialogConfirmBtn" data-i18n="dialog_confirm">Подтвердить</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9.5 M3 CRASH REPORT MODAL -->
+  <div class="modal-overlay" id="crashReportModal" role="dialog" aria-modal="true" aria-labelledby="crashReportTitle" style="z-index: 1250;">
+    <div class="modal-content m3-dialog-content crash-modal-content" style="max-width: 620px;">
+      <div class="m3-dialog-header" style="align-items: flex-start;">
+        <div class="m3-dialog-icon error" style="background: rgba(255, 107, 107, 0.15); color: #ff6b6b;">
+          <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: currentColor;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        </div>
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h3 class="m3-dialog-title" id="crashReportTitle" style="margin: 0; font-size: 18px;" data-i18n="crash_modal_title">Сбой игры Minecraft</h3>
+            <span class="minimal-instance-badge" id="crashReportExitCodeBadge" style="background: rgba(255, 107, 107, 0.2); color: #ff6b6b; font-size: 11px;">Код: 1</span>
+          </div>
+          <div id="crashReportTypeSub" style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 2px;" data-i18n="crash_auto_diag">Автоматическая диагностика</div>
+        </div>
+        <button class="window-btn modal-close-btn" id="btnCloseCrashModal" aria-label="Close">✕</button>
+      </div>
+
+      <div class="m3-dialog-body" style="margin-top: 14px;">
+        <div class="crash-diag-box" style="background: var(--md-sys-color-surface-container); border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px; padding: 14px 16px;">
+          <div id="crashDiagTitle" style="font-size: 14px; font-weight: 700; color: var(--md-sys-color-on-surface); margin-bottom: 6px;" data-i18n="crash_analysis_title">Анализ ошибки</div>
+          <p id="crashDiagDesc" style="font-size: 13px; color: var(--md-sys-color-on-surface-variant); line-height: 1.5; margin: 0;"></p>
+        </div>
+
+        <div style="margin-top: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 12px; font-weight: 600; color: var(--md-sys-color-on-surface-variant);" data-i18n="crash_log_snippet_title">Фрагмент лога ошибки:</span>
+            <span id="crashMclogsResultLink" style="font-size: 12px;"></span>
+          </div>
+          <pre id="crashLogSnippet" style="background: #121014; color: #e6e0e9; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 11px; max-height: 140px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; margin: 0; border: 1px solid rgba(255,255,255,0.08);"></pre>
+        </div>
+      </div>
+
+      <div class="m3-dialog-actions" style="margin-top: 16px; justify-content: space-between;">
+        <div style="display: flex; gap: 8px;">
+          <button class="m3-action-btn-secondary" id="btnCrashOpenConsole" style="font-size: 12px; height: 34px;">
+            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8h16v10zm-2-1h-6v-2h6v2zM7.5 17l-1.41-1.41L8.67 13l-2.59-2.59L7.5 9l4 4-4 4z"/></svg>
+            <span data-i18n="crash_btn_open_console">Вся консоль</span>
+          </button>
+          <button class="m3-action-btn-secondary" id="btnCrashCopyLog" style="font-size: 12px; height: 34px;">
+            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1 2 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            <span data-i18n="crash_btn_copy_log">Копировать лог</span>
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="m3-action-btn-secondary" id="btnCrashShareMclogs" style="font-size: 12px; height: 34px; background: rgba(142, 192, 124, 0.15); color: #8ec07c; border-color: rgba(142, 192, 124, 0.3);">
+            <svg viewBox="0 0 24 24" style="width: 14px; height: 14px; fill: currentColor;"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg>
+            <span data-i18n="crash_btn_share_mclogs">Поделиться (mclo.gs)</span>
+          </button>
+          <button class="m3-filled-btn" id="btnDismissCrashModal" style="font-size: 12px; height: 34px;" data-i18n="crash_btn_close">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. M3 SNACKBAR NOTIFICATION CONTAINER -->
+  <div class="m3-snackbar-container" id="m3SnackbarContainer" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="./js/i18n.js"></script>
+  <script src="./js/skins.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

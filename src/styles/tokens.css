@@ -1,0 +1,142 @@
+/* Google Material Design 3 Design Tokens (M3 / Material You) */
+:root {
+  /* Font Family */
+  --md-sys-typescale-font: 'Google Sans', 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Shapes & Radii */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-xs: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-xl: 20px;
+  --md-sys-shape-corner-2xl: 24px;
+  --md-sys-shape-corner-full: 9999px;
+
+  /* Transitions */
+  --md-sys-motion-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+  --md-sys-motion-duration-long: 400ms;
+
+  /* Dynamic Components */
+  --wave-percent: 0%;
+  --md-sys-color-primary-rgb: 234, 221, 255;
+}
+
+/* Dark Theme (Default - Material 3 Baseline) */
+[data-theme="dark"] {
+  --md-sys-color-surface: #1D1B20;
+  --md-sys-color-surface-dim: #16141A;
+  --md-sys-color-surface-bright: #302C3A;
+  --md-sys-color-surface-container-lowest: #141217;
+  --md-sys-color-surface-container-low: #25222D;
+  --md-sys-color-surface-container: #2D2937;
+  --md-sys-color-surface-container-high: #353040;
+  --md-sys-color-surface-container-highest: #3E384C;
+
+  --md-sys-color-on-surface: #E6E1E5;
+  --md-sys-color-surface-variant: #49454F;
+  --md-sys-color-on-surface-variant: #CAC4D0;
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-variant: #49454F;
+
+  /* Primary (M3 Pastel Lilac #EADDFF) */
+  --md-sys-color-primary: #EADDFF;
+  --md-sys-color-on-primary: #1D1B20;
+  --md-sys-color-primary-container: #4F378B;
+  --md-sys-color-on-primary-container: #EADDFF;
+
+  /* Secondary (Active Nav Pill) */
+  --md-sys-color-secondary-container: rgba(234, 221, 255, 0.16);
+  --md-sys-color-on-secondary-container: #EADDFF;
+
+  /* Tertiary */
+  --md-sys-color-tertiary: #EFB8C8;
+  --md-sys-color-on-tertiary: #492532;
+
+  /* Badges & Accents */
+  --md-sys-color-badge-new-bg: #fca5a5;
+  --md-sys-color-badge-new-text: #451010;
+  --md-sys-color-badge-update-bg: #381E72;
+  --md-sys-color-badge-update-text: #EADDFF;
+
+  /* Semantic Feedback Colors */
+  --md-sys-color-success: #4ade80;
+  --md-sys-color-error: #f87171;
+  --md-sys-color-on-error: #601410;
+  --md-sys-color-warning: #fbbf24;
+
+  /* News Card Colors */
+  --md-sys-color-news-green: #33a350;
+  --md-sys-color-news-blue: #276fd3;
+
+  /* App Themed Logo Tokens */
+  --ml-icon-bg: #1D1B20;
+  --ml-icon-border: #79747E;
+  --ml-icon-letters: #EADDFF;
+  --md-sys-color-accent-text-icon: #EADDFF;
+
+  /* Shadows */
+  --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.5);
+  --md-sys-elevation-2: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --md-sys-elevation-fab: none;
+}
+
+/* Light Theme (Default Lavender M3) */
+[data-theme="light"] {
+  --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-surface-dim: #DED8E1;
+  --md-sys-color-surface-bright: #FEF7FF;
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-low: #F7F2FA;
+  --md-sys-color-surface-container: #F3EDF7;
+  --md-sys-color-surface-container-high: #ECE6F0;
+  --md-sys-color-surface-container-highest: #E6E0E9;
+
+  --md-sys-color-on-surface: #1D1B20;
+  --md-sys-color-surface-variant: #E7E0EC;
+  --md-sys-color-on-surface-variant: #49454F;
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-variant: #CAC4D0;
+
+  /* Primary (M3 Lavender #6750A4) */
+  --md-sys-color-primary: #6750A4;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+
+  /* Secondary */
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+
+  /* Tertiary */
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-on-tertiary: #ffffff;
+
+  /* Badges & Accents */
+  --md-sys-color-badge-new-bg: #fca5a5;
+  --md-sys-color-badge-new-text: #451010;
+  --md-sys-color-badge-update-bg: #E8DEF8;
+  --md-sys-color-badge-update-text: #6750A4;
+
+  /* Semantic Feedback Colors */
+  --md-sys-color-success: #16a34a;
+  --md-sys-color-error: #dc2626;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-warning: #d97706;
+
+  /* News Card Colors */
+  --md-sys-color-news-green: #2ea04f;
+  --md-sys-color-news-blue: #1d6fd6;
+
+  /* App Themed Logo Tokens */
+  --ml-icon-bg: #FEF7FF;
+  --ml-icon-border: #79747E;
+  --ml-icon-letters: #6750A4;
+  --md-sys-color-accent-text-icon: #6750A4;
+
+  --md-sys-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --md-sys-elevation-2: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --md-sys-elevation-fab: none;
+}
