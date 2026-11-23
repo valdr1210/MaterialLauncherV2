@@ -1,15 +1,15 @@
 <div align="center">
 
   <p>
-    <a href="README.md"><strong>🇷🇺 Русский</strong></a> &nbsp;|&nbsp; 
-    <a href="README_EN.md">🇬🇧 English</a>
+    <a href="README.md"><strong>🇬🇧 English</strong></a> &nbsp;|&nbsp; 
+    <a href="README_RU.md">🇷🇺 Русский</a>
   </p>
 
   <a href="https://imgur.com/a/hpicWJo">
     <img src="https://i.imgur.com/CGpougK.png" alt="Material Launcher" width="620">
   </a>
 
-  <p><strong>Быстрый, чистый и приятный Minecraft лаунчер на Material Design 3 (Material You).</strong></p>
+  <p><strong>A clean, fast, and modern Minecraft launcher built on Material Design 3 (Material You).</strong></p>
 
   <p>
     <img src="https://img.shields.io/badge/Node.js-v20+-68a063?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
@@ -30,72 +30,72 @@
 
 ---
 
-## 🎨 Зачем ещё один лаунчер?
+## 🎨 Why another launcher?
 
-Большинство существующих лаунчеров застряли где-то в 2014 году: либо перегружены баннерами и лишними кнопками, либо выглядят как софт времён Windows XP. 
+Most existing Minecraft launchers are either stuck in 2014, cluttered with ads, or look like Windows XP utilities.
 
-**Material Launcher** сделан с упором на визуальный комфорт и простоту:
-- **Ничего лишнего** — интерфейс по гайдлайнам **Google Material Design 3**: мягкие акцентные цвета, приятные скругления, адаптивная тёмная тема и плавная реакция на любые действия.
-- **Всё под рукой** — запуск в один клик, удобный список сборок и быстрый доступ к модам без блуждания по бесконечным меню.
-
----
-
-## ✨ Фичи
-
-- 🎮 **Любые версии и загрузчики**: чистая ванилла, Fabric, Forge, NeoForge, Quilt. Ставятся и настраиваются на лету.
-- 🔑 **Авторизация**:
-  - Официальный **Microsoft**
-  - **Ely.by** (со скинами и плащами)
-  - **Офлайн-режим** (для игры по локалке или без интернета)
-- 🧩 **Браузер модов внутри лаунчера**: ищите и ставьте моды прямо с **Modrinth** и **CurseForge** — браузер открывать не придётся.
-- 📦 **Пакеты под любую систему**:
-  - **Windows**: портативный `.exe` (без установки), инсталлятор `.exe`, `.msi` и `.zip`.
-  - **Linux**: `.AppImage`, `.deb`, `.rpm`, `.flatpak`, `.tar.gz` и `.zip`.
-- 📰 **Лента новостей**: свежие статьи, обновления и анонсы снэпшотов прямо на главном экране.
+**Material Launcher** is built for people who appreciate clean design:
+- **No visual clutter** — interface following **Google Material Design 3** guidelines: soft accent colors, rounded corners, an adaptive dark theme, and fluid animations.
+- **Everything within reach** — single-click launch, easy instance management, and direct mod installs without getting lost in nested menus.
 
 ---
 
-## 📦 Форматы загрузки
+## ✨ Features
 
-Все сборки генерируются автоматически через CI/CD:
+- 🎮 **Any version & loader**: Pure Vanilla, Fabric, Forge, NeoForge, and Quilt ready to install on the fly.
+- 🔑 **Flexible authentication**:
+  - Official **Microsoft** accounts
+  - **Ely.by** (with skins & capes support)
+  - **Offline mode** (for LAN play or playing without internet)
+- 🧩 **Built-in mod browser**: Search and install mods directly from **Modrinth** and **CurseForge** without leaving the app.
+- 📦 **Cross-platform packaging**:
+  - **Windows**: Portable `.exe` (zero-install), Setup `.exe`, `.msi`, and `.zip`.
+  - **Linux**: `.AppImage`, `.deb`, `.rpm`, `.flatpak`, `.tar.gz`, and `.zip`.
+- 📰 **News feed**: Latest news, snapshot announcements, and game updates straight on your home screen.
 
-| Платформа | Доступные форматы | Описание |
+---
+
+## 📦 Downloads
+
+All builds are compiled natively through CI/CD:
+
+| Platform | Formats | Details |
 | :--- | :--- | :--- |
-| **Windows** | `Portable .exe` | Запустил и играешь, не оставляет мусора в системе |
-| | `Setup .exe` | Стандартный установщик с ярлыками и мастером |
-| | `.msi` | Пакет Windows Installer |
-| | `.zip` | Портативный архив с распакованной программой |
-| **Linux** | `.AppImage` | Универсальный бинарник для любого дистрибутива |
-| | `.deb` | Пакет для Ubuntu, Debian, Linux Mint, Pop!_OS |
-| | `.rpm` | Пакет для Fedora, openSUSE, RHEL |
-| | `.flatpak` | Песочница с изоляцией прав и рантаймом Flathub |
-| | `.tar.gz` / `.zip` | Архивы с готовым бинарником |
+| **Windows** | `Portable .exe` | Standalone executable, leaves no junk behind |
+| | `Setup .exe` | Traditional NSIS installer with shortcuts |
+| | `.msi` | Windows Installer package |
+| | `.zip` | Portable archive |
+| **Linux** | `.AppImage` | Universal bundle for any distro |
+| | `.deb` | Ubuntu, Debian, Linux Mint, Pop!_OS |
+| | `.rpm` | Fedora, openSUSE, RHEL |
+| | `.flatpak` | Sandboxed Flathub package |
+| | `.tar.gz` / `.zip` | Generic portable archives |
 
 ---
 
-## 🛠 Запуск и разработка
+## 🛠 Building & Running from Source
 
-Если хотите собрать лаунчер самостоятельно:
+If you want to tweak the code or build it yourself:
 
 ```bash
-# Клонируем проект
+# Clone the repository
 git clone https://github.com/valdr1210/MaterialLauncherV2.git
 cd MaterialLauncherV2
 
-# Ставим зависимости
+# Install dependencies
 npm install
 
-# Запуск в режиме разработки
+# Start in development mode
 npm start
 ```
 
-### Команды сборки:
+### Build Commands:
 
 ```bash
-# Сборка под Windows (Portable EXE, Setup EXE, MSI, ZIP)
+# Build for Windows (Portable EXE, Setup EXE, MSI, ZIP)
 npm run build:win
 
-# Сборка под Linux (AppImage, DEB, RPM, Flatpak, TAR.GZ, ZIP)
+# Build for Linux (AppImage, DEB, RPM, Flatpak, TAR.GZ, ZIP)
 npm run build:linux
 ```
 
@@ -105,5 +105,5 @@ npm run build:linux
   <a href="https://imgur.com/a/mnwiRM5">
     <img src="https://i.imgur.com/mbWxY5a.png" width="44" height="44" alt="ML Icon">
   </a><br>
-  <sub>Material Launcher • Распространяется под лицензией MIT</sub>
+  <sub>Material Launcher • Released under the MIT License</sub>
 </div>
