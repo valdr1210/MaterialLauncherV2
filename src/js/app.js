@@ -1176,7 +1176,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const mcCustomPathInput = document.getElementById('mcCustomPathInput');
   const btnBrowseMcPath = document.getElementById('btnBrowseMcPath');
   const btnOpenMcPath = document.getElementById('btnOpenMcPath');
-  const btnResetMcPath = document.getElementById('btnResetMcPath');
   const migrateMcPathModal = document.getElementById('migrateMcPathModal');
   const migrateOldPathText = document.getElementById('migrateOldPathText');
   const migrateNewPathText = document.getElementById('migrateNewPathText');
@@ -1665,10 +1664,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.electronAPI?.openMinecraftFolder) {
       window.electronAPI.openMinecraftFolder();
     }
-  });
-
-  btnResetMcPath?.addEventListener('click', () => {
-    handleMinecraftPathChange('');
   });
 
   btnMigrateMove?.addEventListener('click', async () => {
