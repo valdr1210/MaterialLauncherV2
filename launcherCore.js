@@ -61,6 +61,103 @@ function getMinecraftDir(cfg) {
   return resolved;
 }
 
+function inspectMinecraftDir(dir) {
+  if (!dir) return { exists: false, hasFiles: false, count: 0 };
+  const resolved = path.resolve(dir);
+  if (!fs.existsSync(resolved)) {
+    return { exists: false, hasFiles: false, count: 0, resolved };
+  }
+  try {
+    const list = fs.readdirSync(resolved);
+    return {
+      exists: true,
+      hasFiles: list.length > 0,
+      count: list.length,
+      resolved
+    };
+  } catch (e) {
+    return { exists: false, hasFiles: false, count: 0, resolved };
+  }
+}
+
+async function migrateMinecraftDir(oldDir, newDir, action) {
+  if (!oldDir || !newDir) {
+    throw new Error('Пути директорий не указаны');
+  }
+  const resolvedOld = path.resolve(oldDir);
+  const resolvedNew = path.resolve(newDir);
+
+  if (resolvedOld.toLowerCase() === resolvedNew.toLowerCase()) {
+    return { success: true, action: 'none', message: 'Директории совпадают' };
+  }
+
+  if (action === 'keep') {
+    if (!fs.existsSync(resolvedNew)) {
+      fs.mkdirSync(resolvedNew, { recursive: true });
+    }
+    return { success: true, action: 'keep' };
+  }
+
+  if (action === 'delete') {
+    if (fs.existsSync(resolvedOld)) {
+      try {
+        if (shellModule && shellModule.trashItem) {
+          await shellModule.trashItem(resolvedOld);
+        } else {
+          fs.rmSync(resolvedOld, { recursive: true, force: true });
+        }
+      } catch (e) {
+        try {
+          fs.rmSync(resolvedOld, { recursive: true, force: true });
+        } catch (err) {}
+      }
+    }
+    if (!fs.existsSync(resolvedNew)) {
+      fs.mkdirSync(resolvedNew, { recursive: true });
+    }
+    return { success: true, action: 'delete' };
+  }
+
+  if (action === 'move') {
+    if (!fs.existsSync(resolvedNew)) {
+      fs.mkdirSync(resolvedNew, { recursive: true });
+    }
+
+    if (fs.existsSync(resolvedOld)) {
+      if (resolvedNew.startsWith(resolvedOld + path.sep)) {
+        throw new Error('Новая папка не может находиться внутри старой папки');
+      }
+
+      const entries = fs.readdirSync(resolvedOld);
+      for (const entry of entries) {
+        const srcPath = path.join(resolvedOld, entry);
+        const dstPath = path.join(resolvedNew, entry);
+        try {
+          fs.cpSync(srcPath, dstPath, { recursive: true, force: true });
+        } catch (copyErr) {
+          console.warn(`[Migrate] Warning copying ${srcPath} to ${dstPath}:`, copyErr.message);
+        }
+      }
+
+      // After copying, clean up the old directory safely
+      try {
+        if (shellModule && shellModule.trashItem) {
+          await shellModule.trashItem(resolvedOld);
+        } else {
+          fs.rmSync(resolvedOld, { recursive: true, force: true });
+        }
+      } catch (e) {
+        try {
+          fs.rmSync(resolvedOld, { recursive: true, force: true });
+        } catch (err) {}
+      }
+    }
+    return { success: true, action: 'move' };
+  }
+
+  throw new Error(`Неизвестное действие: ${action}`);
+}
+
 // Ensure directories exist
 if (!fs.existsSync(LAUNCHER_DATA_DIR)) {
   fs.mkdirSync(LAUNCHER_DATA_DIR, { recursive: true });
@@ -1656,6 +1753,8 @@ module.exports = {
   getMinecraftDir,
   getDefaultMinecraftDir,
   DEFAULT_MINECRAFT_DIR,
+  inspectMinecraftDir,
+  migrateMinecraftDir,
   LAUNCHER_DATA_DIR,
   PRISM_DIR,
   setCryptoHelpers,

@@ -339,5 +339,19 @@
   "mc_btn_open_folder": "Open Folder",
   "mc_btn_reset_default": "Reset to Default",
   "toast_mc_path_updated": "Minecraft directory updated",
-  "toast_mc_path_reset": "Minecraft directory reset to default"
+  "toast_mc_path_reset": "Minecraft directory reset to default",
+  "modal_migrate_title": "Change Minecraft Folder",
+  "modal_migrate_desc": "You selected a new Minecraft directory. What would you like to do with the existing game files from the previous folder?",
+  "modal_migrate_from": "From:",
+  "modal_migrate_to": "To:",
+  "modal_migrate_in_progress": "Moving files to new path... Please wait.",
+  "modal_migrate_move_title": "Move all files to the new path",
+  "modal_migrate_move_sub": "Copy versions, mods, and saves, then clean up the old folder",
+  "modal_migrate_keep_title": "Leave old files where they are",
+  "modal_migrate_keep_sub": "Switch path without modifying files in the previous directory",
+  "modal_migrate_delete_title": "Delete old game files",
+  "modal_migrate_delete_sub": "Clean up the previous folder to free up space on drive C:",
+  "modal_migrate_delete_confirm": "Are you sure you want to clean up the old Minecraft folder ({path})? This will free up space on drive C:, and old files will be moved to the Recycle Bin.",
+  "toast_mc_files_moved": "Game files successfully moved to the new path",
+  "toast_mc_old_files_deleted": "Old game files deleted. Directory switched."
 }

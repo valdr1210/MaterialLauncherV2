@@ -339,5 +339,19 @@
   "mc_btn_open_folder": "Открыть папку",
   "mc_btn_reset_default": "По умолчанию",
   "toast_mc_path_updated": "Директория Minecraft обновлена",
-  "toast_mc_path_reset": "Путь к Minecraft сброшен по умолчанию"
+  "toast_mc_path_reset": "Путь к Minecraft сброшен по умолчанию",
+  "modal_migrate_title": "Смена папки Minecraft",
+  "modal_migrate_desc": "Вы выбрали новую директорию для Minecraft. Что сделать с существующими игровыми файлами из предыдущей папки?",
+  "modal_migrate_from": "Откуда:",
+  "modal_migrate_to": "Куда:",
+  "modal_migrate_in_progress": "Перенос файлов на новый путь... Пожалуйста, подождите.",
+  "modal_migrate_move_title": "Перенести все файлы на новый путь",
+  "modal_migrate_move_sub": "Скопировать версии, моды и сохранения, затем очистить старую папку",
+  "modal_migrate_keep_title": "Оставить старые файлы на месте",
+  "modal_migrate_keep_sub": "Переключить путь, но не трогать файлы в прежней директории",
+  "modal_migrate_delete_title": "Удалить старые файлы игры",
+  "modal_migrate_delete_sub": "Очистить прежнюю папку для освобождения места на диске C",
+  "modal_migrate_delete_confirm": "Вы действительно хотите очистить старую папку Minecraft ({path})? Это действие освободит место на диске C, старые файлы будут перемещены в корзину.",
+  "toast_mc_files_moved": "Файлы игры успешно перенесены на новый путь",
+  "toast_mc_old_files_deleted": "Старые файлы игры удалены. Директория переключена."
 }

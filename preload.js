@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openMinecraftFolder: () => ipcRenderer.invoke('mc-open-folder'),
   selectMinecraftFolderDialog: () => ipcRenderer.invoke('mc-select-minecraft-folder'),
   getDefaultMinecraftFolder: () => ipcRenderer.invoke('mc-get-default-folder'),
+  inspectMinecraftFolder: (folderPath) => ipcRenderer.invoke('mc-inspect-folder', folderPath),
+  migrateMinecraftFolder: (params) => ipcRenderer.invoke('mc-migrate-folder', params),
   openModsFolder: (instanceId) => ipcRenderer.invoke('mc-open-mods-folder', instanceId),
   openInstanceFolder: (instanceId) => ipcRenderer.invoke('mc-open-instance-folder', instanceId),
   downloadSingleMod: (instanceId, mod) => ipcRenderer.invoke('mc-download-single-mod', { instanceId, mod }),

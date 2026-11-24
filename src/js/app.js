@@ -1177,6 +1177,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnBrowseMcPath = document.getElementById('btnBrowseMcPath');
   const btnOpenMcPath = document.getElementById('btnOpenMcPath');
   const btnResetMcPath = document.getElementById('btnResetMcPath');
+  const migrateMcPathModal = document.getElementById('migrateMcPathModal');
+  const migrateOldPathText = document.getElementById('migrateOldPathText');
+  const migrateNewPathText = document.getElementById('migrateNewPathText');
+  const migrateProgressSection = document.getElementById('migrateProgressSection');
+  const migrateProgressText = document.getElementById('migrateProgressText');
+  const migrateChoicesContainer = document.getElementById('migrateChoicesContainer');
+  const btnMigrateMove = document.getElementById('btnMigrateMove');
+  const btnMigrateKeep = document.getElementById('btnMigrateKeep');
+  const btnMigrateDelete = document.getElementById('btnMigrateDelete');
+  const btnMigrateCancel = document.getElementById('btnMigrateCancel');
 
   const javaPathInput = document.getElementById('javaPathInput');
   const btnFindJava = document.getElementById('btnFindJava');
@@ -1578,20 +1588,75 @@ document.addEventListener('DOMContentLoaded', () => {
     saveConfig();
   });
 
+  let pendingMigration = null;
+
+  async function handleMinecraftPathChange(newRawPath) {
+    const trimmedNew = (newRawPath || '').trim();
+    const defaultFolder = window.electronAPI?.getDefaultMinecraftFolder 
+      ? await window.electronAPI.getDefaultMinecraftFolder() 
+      : '';
+    const currentActivePath = appConfig.minecraftPath ? appConfig.minecraftPath.trim() : defaultFolder;
+    const targetResolved = trimmedNew || defaultFolder;
+
+    // If identical, revert input visually if needed and do nothing
+    if (currentActivePath.toLowerCase() === targetResolved.toLowerCase()) {
+      if (mcCustomPathInput) mcCustomPathInput.value = appConfig.minecraftPath || '';
+      return;
+    }
+
+    // Inspect previous folder to see if it contains game data
+    let inspection = { exists: false, hasFiles: false };
+    if (window.electronAPI?.inspectMinecraftFolder && currentActivePath) {
+      try {
+        inspection = await window.electronAPI.inspectMinecraftFolder(currentActivePath);
+      } catch (e) {
+        console.warn('Inspect folder error:', e);
+      }
+    }
+
+    if (!inspection.exists || !inspection.hasFiles) {
+      // Empty or non-existent previous folder: simply switch path without prompting
+      appConfig.minecraftPath = trimmedNew;
+      if (mcCustomPathInput) mcCustomPathInput.value = trimmedNew;
+      await saveConfig();
+      showSnackbar(window.I18N?.t?.('toast_mc_path_updated', 'Директория Minecraft обновлена') || 'Директория Minecraft обновлена', 'success');
+      if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
+      return;
+    }
+
+    // Previous folder has files! Show migration modal dialog
+    pendingMigration = {
+      oldPath: currentActivePath,
+      newPath: targetResolved,
+      targetConfigValue: trimmedNew
+    };
+
+    if (migrateOldPathText) migrateOldPathText.textContent = currentActivePath;
+    if (migrateNewPathText) migrateNewPathText.textContent = targetResolved;
+    if (migrateProgressSection) migrateProgressSection.style.display = 'none';
+    if (migrateChoicesContainer) migrateChoicesContainer.style.display = 'flex';
+    if (btnMigrateCancel) btnMigrateCancel.style.display = 'inline-flex';
+
+    if (migrateMcPathModal) migrateMcPathModal.classList.add('open');
+  }
+
+  function closeMigrateModal(revert = false) {
+    if (migrateMcPathModal) migrateMcPathModal.classList.remove('open');
+    if (revert && mcCustomPathInput) {
+      mcCustomPathInput.value = appConfig.minecraftPath || '';
+    }
+    pendingMigration = null;
+  }
+
   mcCustomPathInput?.addEventListener('change', (e) => {
-    appConfig.minecraftPath = e.target.value.trim();
-    saveConfig();
+    handleMinecraftPathChange(e.target.value);
   });
 
   btnBrowseMcPath?.addEventListener('click', async () => {
     if (window.electronAPI?.selectMinecraftFolderDialog) {
       const selected = await window.electronAPI.selectMinecraftFolderDialog();
       if (selected) {
-        if (mcCustomPathInput) mcCustomPathInput.value = selected;
-        appConfig.minecraftPath = selected;
-        await saveConfig();
-        showSnackbar(window.I18N?.t?.('toast_mc_path_updated', 'Директория Minecraft обновлена') || 'Директория Minecraft обновлена', 'success');
-        if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
+        handleMinecraftPathChange(selected);
       }
     }
   });
@@ -1602,12 +1667,96 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  btnResetMcPath?.addEventListener('click', async () => {
-    if (mcCustomPathInput) mcCustomPathInput.value = '';
-    appConfig.minecraftPath = '';
-    await saveConfig();
-    showSnackbar(window.I18N?.t?.('toast_mc_path_reset', 'Путь Minecraft сброшен по умолчанию') || 'Путь Minecraft сброшен по умолчанию', 'info');
-    if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
+  btnResetMcPath?.addEventListener('click', () => {
+    handleMinecraftPathChange('');
+  });
+
+  btnMigrateMove?.addEventListener('click', async () => {
+    if (!pendingMigration) return;
+    const { oldPath, newPath, targetConfigValue } = pendingMigration;
+
+    if (migrateChoicesContainer) migrateChoicesContainer.style.display = 'none';
+    if (btnMigrateCancel) btnMigrateCancel.style.display = 'none';
+    if (migrateProgressSection) migrateProgressSection.style.display = 'block';
+
+    try {
+      if (window.electronAPI?.migrateMinecraftFolder) {
+        await window.electronAPI.migrateMinecraftFolder({ oldPath, newPath, action: 'move' });
+      }
+      appConfig.minecraftPath = targetConfigValue;
+      if (mcCustomPathInput) mcCustomPathInput.value = targetConfigValue;
+      await saveConfig();
+      closeMigrateModal(false);
+      showSnackbar(window.I18N?.t?.('toast_mc_files_moved', 'Файлы игры успешно перенесены на новый путь') || 'Файлы игры успешно перенесены на новый путь', 'success');
+      if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
+    } catch (err) {
+      if (migrateProgressSection) migrateProgressSection.style.display = 'none';
+      if (migrateChoicesContainer) migrateChoicesContainer.style.display = 'flex';
+      if (btnMigrateCancel) btnMigrateCancel.style.display = 'inline-flex';
+      showSnackbar((window.I18N?.t?.('toast_error_generic', 'Ошибка: {error}') || 'Ошибка: {error}').replace('{error}', err.message), 'error');
+    }
+  });
+
+  btnMigrateKeep?.addEventListener('click', async () => {
+    if (!pendingMigration) return;
+    const { oldPath, newPath, targetConfigValue } = pendingMigration;
+
+    try {
+      if (window.electronAPI?.migrateMinecraftFolder) {
+        await window.electronAPI.migrateMinecraftFolder({ oldPath, newPath, action: 'keep' });
+      }
+      appConfig.minecraftPath = targetConfigValue;
+      if (mcCustomPathInput) mcCustomPathInput.value = targetConfigValue;
+      await saveConfig();
+      closeMigrateModal(false);
+      showSnackbar(window.I18N?.t?.('toast_mc_path_updated', 'Директория Minecraft обновлена') || 'Директория Minecraft обновлена', 'success');
+      if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
+    } catch (err) {
+      showSnackbar((window.I18N?.t?.('toast_error_generic', 'Ошибка: {error}') || 'Ошибка: {error}').replace('{error}', err.message), 'error');
+    }
+  });
+
+  btnMigrateDelete?.addEventListener('click', async () => {
+    if (!pendingMigration) return;
+    const { oldPath, newPath, targetConfigValue } = pendingMigration;
+
+    const confirmed = await showConfirmDialog({
+      title: window.I18N?.t?.('modal_migrate_delete_title', 'Удалить старые файлы игры') || 'Удалить старые файлы игры',
+      message: (window.I18N?.t?.('modal_migrate_delete_confirm', 'Вы действительно хотите очистить старую папку Minecraft ({path})? Это действие освободит место на диске C, старые файлы будут перемещены в корзину.') || 'Вы действительно хотите очистить старую папку Minecraft ({path})? Это действие освободит место на диске C, старые файлы будут перемещены в корзину.').replace('{path}', oldPath),
+      confirmText: window.I18N?.t?.('btn_delete', 'Удалить') || 'Удалить',
+      cancelText: window.I18N?.t?.('btn_cancel', 'Отмена') || 'Отмена',
+      iconType: 'danger'
+    });
+
+    if (!confirmed) return;
+
+    if (migrateChoicesContainer) migrateChoicesContainer.style.display = 'none';
+    if (btnMigrateCancel) btnMigrateCancel.style.display = 'none';
+    if (migrateProgressSection) migrateProgressSection.style.display = 'block';
+
+    try {
+      if (window.electronAPI?.migrateMinecraftFolder) {
+        await window.electronAPI.migrateMinecraftFolder({ oldPath, newPath, action: 'delete' });
+      }
+      appConfig.minecraftPath = targetConfigValue;
+      if (mcCustomPathInput) mcCustomPathInput.value = targetConfigValue;
+      await saveConfig();
+      closeMigrateModal(false);
+      showSnackbar(window.I18N?.t?.('toast_mc_old_files_deleted', 'Старые файлы игры удалены. Директория переключена.') || 'Старые файлы игры удалены. Директория переключена.', 'info');
+      if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
+    } catch (err) {
+      if (migrateProgressSection) migrateProgressSection.style.display = 'none';
+      if (migrateChoicesContainer) migrateChoicesContainer.style.display = 'flex';
+      if (btnMigrateCancel) btnMigrateCancel.style.display = 'inline-flex';
+      showSnackbar((window.I18N?.t?.('toast_error_generic', 'Ошибка: {error}') || 'Ошибка: {error}').replace('{error}', err.message), 'error');
+    }
+  });
+
+  btnMigrateCancel?.addEventListener('click', () => closeMigrateModal(true));
+  migrateMcPathModal?.addEventListener('click', (e) => {
+    if (e.target === migrateMcPathModal && (!migrateProgressSection || migrateProgressSection.style.display === 'none')) {
+      closeMigrateModal(true);
+    }
   });
 
   javaSkipCheck?.addEventListener('change', (e) => {

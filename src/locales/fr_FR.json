@@ -339,5 +339,19 @@
   "mc_btn_open_folder": "Ouvrir le dossier",
   "mc_btn_reset_default": "Par défaut",
   "toast_mc_path_updated": "Répertoire de Minecraft mis à jour",
-  "toast_mc_path_reset": "Répertoire de Minecraft réinitialisé par défaut"
+  "toast_mc_path_reset": "Répertoire de Minecraft réinitialisé par défaut",
+  "modal_migrate_title": "Changer le dossier Minecraft",
+  "modal_migrate_desc": "Vous avez sélectionné un nouveau répertoire Minecraft. Que souhaitez-vous faire des fichiers de jeu du dossier précédent ?",
+  "modal_migrate_from": "De :",
+  "modal_migrate_to": "Vers :",
+  "modal_migrate_in_progress": "Déplacement des fichiers vers le nouvel emplacement... Veuillez patienter.",
+  "modal_migrate_move_title": "Déplacer tous les fichiers vers le nouvel emplacement",
+  "modal_migrate_move_sub": "Copier les versions, mods et sauvegardes, puis nettoyer l'ancien dossier",
+  "modal_migrate_keep_title": "Laisser les anciens fichiers en place",
+  "modal_migrate_keep_sub": "Changer de dossier sans modifier les fichiers de l'ancien répertoire",
+  "modal_migrate_delete_title": "Supprimer les anciens fichiers du jeu",
+  "modal_migrate_delete_sub": "Nettoyer l'ancien dossier pour libérer de l'espace sur le disque C:",
+  "modal_migrate_delete_confirm": "Voulez-vous vraiment nettoyer l'ancien dossier Minecraft ({path}) ? Cela libérera de l'espace sur C: et déplacera les anciens fichiers dans la corbeille.",
+  "toast_mc_files_moved": "Fichiers du jeu déplacés avec succès vers le nouvel emplacement",
+  "toast_mc_old_files_deleted": "Anciens fichiers supprimés. Répertoire changé."
 }

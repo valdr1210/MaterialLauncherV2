@@ -246,6 +246,14 @@ function createWindow() {
     return launcherCore.getDefaultMinecraftDir();
   });
 
+  ipcMain.handle('mc-inspect-folder', (event, folderPath) => {
+    return launcherCore.inspectMinecraftDir(folderPath);
+  });
+
+  ipcMain.handle('mc-migrate-folder', async (event, { oldPath, newPath, action }) => {
+    return await launcherCore.migrateMinecraftDir(oldPath, newPath, action);
+  });
+
   ipcMain.handle('mc-open-mods-folder', (event, instanceId) => {
     const cfg = launcherCore.loadConfig();
     const instId = instanceId || cfg.selectedInstanceId;

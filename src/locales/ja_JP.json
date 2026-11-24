@@ -339,5 +339,19 @@
   "mc_btn_open_folder": "フォルダーを開く",
   "mc_btn_reset_default": "既定に戻す",
   "toast_mc_path_updated": "Minecraftディレクトリが更新されました",
-  "toast_mc_path_reset": "Minecraftディレクトリが既定にリセットされました"
+  "toast_mc_path_reset": "Minecraftディレクトリが既定にリセットされました",
+  "modal_migrate_title": "Minecraftフォルダーの変更",
+  "modal_migrate_desc": "新しいMinecraftディレクトリが選択されました。以前のフォルダーにあるゲームデータをどうしますか？",
+  "modal_migrate_from": "移動元:",
+  "modal_migrate_to": "移動先:",
+  "modal_migrate_in_progress": "ファイルを新しいパスに移動中... しばらくお待ちください。",
+  "modal_migrate_move_title": "すべてのファイルを新しいパスに移動",
+  "modal_migrate_move_sub": "バージョン、MOD、セーブデータをコピーし、古いフォルダーをクリーンアップします",
+  "modal_migrate_keep_title": "古いファイルをそのまま残す",
+  "modal_migrate_keep_sub": "古いフォルダーのファイルを変更せずにパスのみ切り替えます",
+  "modal_migrate_delete_title": "古いゲームファイルを削除",
+  "modal_migrate_delete_sub": "Cドライブの空き容量を確保するために以前のフォルダーを削除します",
+  "modal_migrate_delete_confirm": "以前のMinecraftフォルダー ({path}) を削除してもよろしいですか？ Cドライブの空き容量が増加し、古いファイルはごみ箱に移動されます。",
+  "toast_mc_files_moved": "ゲームファイルが新しいパスに正常に移動されました",
+  "toast_mc_old_files_deleted": "古いゲームファイルを削除し、ディレクトリを切り替えました。"
 }

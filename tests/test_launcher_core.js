@@ -257,6 +257,65 @@ async function main() {
     } catch (e) {}
   });
 
+  // Test 15: inspectMinecraftDir
+  await runTest('inspectMinecraftDir() detects existence and file count', () => {
+    const nonExistent = path.join(os.tmpdir(), 'non_existent_mc_' + Date.now());
+    const res1 = launcherCore.inspectMinecraftDir(nonExistent);
+    assert.strictEqual(res1.exists, false, 'Non-existent must report exists=false');
+
+    const emptyDir = path.join(os.tmpdir(), 'empty_mc_test_' + Date.now());
+    fs.mkdirSync(emptyDir, { recursive: true });
+    const res2 = launcherCore.inspectMinecraftDir(emptyDir);
+    assert.strictEqual(res2.exists, true, 'Empty dir must exist');
+    assert.strictEqual(res2.hasFiles, false, 'Empty dir must have hasFiles=false');
+    assert.strictEqual(res2.count, 0, 'Empty dir count must be 0');
+
+    fs.writeFileSync(path.join(emptyDir, 'options.txt'), 'version:1', 'utf8');
+    const res3 = launcherCore.inspectMinecraftDir(emptyDir);
+    assert.strictEqual(res3.exists, true);
+    assert.strictEqual(res3.hasFiles, true);
+    assert.strictEqual(res3.count, 1);
+
+    try {
+      fs.rmSync(emptyDir, { recursive: true, force: true });
+    } catch (e) {}
+  });
+
+  // Test 16: migrateMinecraftDir move, keep and delete actions
+  await runTest('migrateMinecraftDir() handles move, keep, and delete modes', async () => {
+    const oldDir = path.join(os.tmpdir(), 'old_mc_' + Date.now());
+    const newDir = path.join(os.tmpdir(), 'new_mc_' + Date.now());
+
+    fs.mkdirSync(path.join(oldDir, 'mods'), { recursive: true });
+    fs.writeFileSync(path.join(oldDir, 'options.txt'), 'fov:70', 'utf8');
+    fs.writeFileSync(path.join(oldDir, 'mods', 'example.jar'), 'fake-jar-data', 'utf8');
+
+    // Test 'move'
+    const moveRes = await launcherCore.migrateMinecraftDir(oldDir, newDir, 'move');
+    assert(moveRes.success, 'Move must succeed');
+    assert(fs.existsSync(newDir), 'New directory must exist');
+    assert(fs.existsSync(path.join(newDir, 'options.txt')), 'options.txt must be copied');
+    assert(fs.existsSync(path.join(newDir, 'mods', 'example.jar')), 'mods/example.jar must be copied');
+    assert.strictEqual(fs.readFileSync(path.join(newDir, 'options.txt'), 'utf8'), 'fov:70');
+
+    // Test 'keep'
+    const keepNew = path.join(os.tmpdir(), 'keep_mc_' + Date.now());
+    const keepRes = await launcherCore.migrateMinecraftDir(newDir, keepNew, 'keep');
+    assert(keepRes.success, 'Keep must succeed');
+    assert(fs.existsSync(keepNew), 'keepNew must exist');
+    assert(fs.existsSync(newDir), 'newDir must still exist');
+
+    // Test 'delete'
+    const delRes = await launcherCore.migrateMinecraftDir(newDir, keepNew, 'delete');
+    assert(delRes.success, 'Delete must succeed');
+
+    try {
+      fs.rmSync(oldDir, { recursive: true, force: true });
+      fs.rmSync(newDir, { recursive: true, force: true });
+      fs.rmSync(keepNew, { recursive: true, force: true });
+    } catch (e) {}
+  });
+
   console.log('\n=== SUMMARY ===');
   const passed = testResults.filter(r => r.passed).length;
   const failed = testResults.filter(r => !r.passed).length;

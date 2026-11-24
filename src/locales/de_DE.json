@@ -339,5 +339,19 @@
   "mc_btn_open_folder": "Ordner öffnen",
   "mc_btn_reset_default": "Standard wiederherstellen",
   "toast_mc_path_updated": "Minecraft-Verzeichnis aktualisiert",
-  "toast_mc_path_reset": "Minecraft-Verzeichnis auf Standard zurückgesetzt"
+  "toast_mc_path_reset": "Minecraft-Verzeichnis auf Standard zurückgesetzt",
+  "modal_migrate_title": "Minecraft-Ordner ändern",
+  "modal_migrate_desc": "Sie haben ein neues Minecraft-Verzeichnis ausgewählt. Was möchten Sie mit den vorhandenen Spieldateien aus dem vorherigen Ordner tun?",
+  "modal_migrate_from": "Von:",
+  "modal_migrate_to": "Nach:",
+  "modal_migrate_in_progress": "Dateien werden an den neuen Speicherort verschoben... Bitte warten.",
+  "modal_migrate_move_title": "Alle Dateien auf neuen Pfad verschieben",
+  "modal_migrate_move_sub": "Versionen, Mods und Spielstände kopieren und den alten Ordner bereinigen",
+  "modal_migrate_keep_title": "Alte Dateien unverändert belassen",
+  "modal_migrate_keep_sub": "Pfad umschalten, ohne Dateien im bisherigen Ordner anzutasten",
+  "modal_migrate_delete_title": "Alte Spieldateien löschen",
+  "modal_migrate_delete_sub": "Bisherigen Ordner bereinigen, um Speicherplatz auf Laufwerk C: freizugeben",
+  "modal_migrate_delete_confirm": "Möchten Sie den alten Minecraft-Ordner ({path}) wirklich bereinigen? Dadurch wird Speicherplatz auf C: freigegeben und die alten Dateien in den Papierkorb verschoben.",
+  "toast_mc_files_moved": "Spieldateien erfolgreich auf den neuen Pfad verschoben",
+  "toast_mc_old_files_deleted": "Alte Spieldateien gelöscht. Verzeichnis umgestellt."
 }

@@ -339,5 +339,19 @@
   "mc_btn_open_folder": "Abrir carpeta",
   "mc_btn_reset_default": "Restablecer por defecto",
   "toast_mc_path_updated": "Directorio de Minecraft actualizado",
-  "toast_mc_path_reset": "Directorio de Minecraft restablecido por defecto"
+  "toast_mc_path_reset": "Directorio de Minecraft restablecido por defecto",
+  "modal_migrate_title": "Cambiar carpeta de Minecraft",
+  "modal_migrate_desc": "Has seleccionado un nuevo directorio para Minecraft. ¿Qué deseas hacer con los archivos del juego de la carpeta anterior?",
+  "modal_migrate_from": "Desde:",
+  "modal_migrate_to": "Hacia:",
+  "modal_migrate_in_progress": "Moviendo archivos a la nueva ruta... Por favor, espera.",
+  "modal_migrate_move_title": "Mover todos los archivos a la nueva ruta",
+  "modal_migrate_move_sub": "Copiar versiones, mods y mundos, y luego limpiar la carpeta antigua",
+  "modal_migrate_keep_title": "Dejar los archivos antiguos en su lugar",
+  "modal_migrate_keep_sub": "Cambiar la ruta sin modificar los archivos en el directorio anterior",
+  "modal_migrate_delete_title": "Eliminar archivos antiguos del juego",
+  "modal_migrate_delete_sub": "Limpiar la carpeta anterior para liberar espacio en el disco C:",
+  "modal_migrate_delete_confirm": "¿Seguro que deseas limpiar la antigua carpeta de Minecraft ({path})? Esto liberará espacio en el disco C: y los archivos se enviarán a la papelera.",
+  "toast_mc_files_moved": "Archivos del juego movidos con éxito a la nueva ruta",
+  "toast_mc_old_files_deleted": "Archivos antiguos eliminados. Directorio cambiado."
 }

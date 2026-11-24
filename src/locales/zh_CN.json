@@ -339,5 +339,19 @@
   "mc_btn_open_folder": "打开文件夹",
   "mc_btn_reset_default": "恢复默认",
   "toast_mc_path_updated": "Minecraft目录已更新",
-  "toast_mc_path_reset": "Minecraft目录已重置为默认值"
+  "toast_mc_path_reset": "Minecraft目录已重置为默认值",
+  "modal_migrate_title": "更改Minecraft文件夹",
+  "modal_migrate_desc": "您已选择新的Minecraft目录。要如何处理上一文件夹中的现有游戏文件？",
+  "modal_migrate_from": "来源：",
+  "modal_migrate_to": "目标：",
+  "modal_migrate_in_progress": "正在将文件移动到新路径... 请稍候。",
+  "modal_migrate_move_title": "将所有文件移动到新路径",
+  "modal_migrate_move_sub": "复制版本、模组和存档，然后清理旧文件夹",
+  "modal_migrate_keep_title": "保留原有文件不动",
+  "modal_migrate_keep_sub": "仅切换路径，不更改之前目录中的文件",
+  "modal_migrate_delete_title": "删除旧游戏文件",
+  "modal_migrate_delete_sub": "清理之前文件夹以释放C盘空间",
+  "modal_migrate_delete_confirm": "确定要清理旧Minecraft文件夹 ({path}) 吗？这将释放C盘空间，旧文件将移至回收站。",
+  "toast_mc_files_moved": "游戏文件已成功移动至新路径",
+  "toast_mc_old_files_deleted": "旧游戏文件已删除，目录已切换。"
 }

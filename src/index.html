@@ -1029,6 +1029,65 @@
     </div>
   </div>
 
+  <!-- 9.4 M3 MINECRAFT PATH MIGRATION MODAL -->
+  <div class="modal-overlay" id="migrateMcPathModal" role="dialog" aria-modal="true" aria-labelledby="migrateMcPathTitle" style="z-index: 1210;">
+    <div class="modal-content m3-dialog-content" style="max-width: 540px;">
+      <div class="m3-dialog-header">
+        <div class="m3-dialog-icon">
+          <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+        </div>
+        <h3 class="m3-dialog-title" id="migrateMcPathTitle" data-i18n="modal_migrate_title">Смена папки Minecraft</h3>
+      </div>
+      <div class="m3-dialog-body">
+        <p id="migrateMcPathDesc" style="margin-bottom: 12px; line-height: 1.5; font-size: 14px;" data-i18n="modal_migrate_desc">
+          Вы выбрали новую директорию для Minecraft. Что сделать с существующими игровыми файлами из предыдущей папки?
+        </p>
+
+        <div class="migrate-path-preview" style="background: rgba(255,255,255,0.05); padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+          <div><strong data-i18n="modal_migrate_from">Откуда:</strong> <span id="migrateOldPathText" style="word-break: break-all; opacity: 0.85;"></span></div>
+          <div><strong data-i18n="modal_migrate_to">Куда:</strong> <span id="migrateNewPathText" style="word-break: break-all; opacity: 0.85;"></span></div>
+        </div>
+
+        <div id="migrateProgressSection" style="display: none; margin-bottom: 16px; text-align: center;">
+          <div class="spinner" style="margin: 0 auto 10px auto; width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--md-sys-color-primary, #6750A4); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+          <div id="migrateProgressText" style="font-size: 13px;" data-i18n="modal_migrate_in_progress">Перенос файлов на новый путь... Пожалуйста, подождите.</div>
+        </div>
+
+        <div class="migrate-choices" id="migrateChoicesContainer" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Option 1: Move files -->
+          <button class="m3-filled-btn" id="btnMigrateMove" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 16px; text-align: left; height: auto;">
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; min-width: 20px; fill: currentColor;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+            <div>
+              <div style="font-weight: 600;" data-i18n="modal_migrate_move_title">Перенести все файлы на новый путь</div>
+              <div style="font-size: 12px; opacity: 0.8; font-weight: normal;" data-i18n="modal_migrate_move_sub">Скопировать версии, моды и сохранения, затем очистить старую папку</div>
+            </div>
+          </button>
+
+          <!-- Option 2: Keep files without moving -->
+          <button class="m3-action-btn-secondary" id="btnMigrateKeep" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 16px; text-align: left; height: auto;">
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; min-width: 20px; fill: currentColor;"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95C8.08 7.14 9.94 6 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11c1.56.1 2.78 1.41 2.78 2.96 0 1.65-1.35 3-3 3z"/></svg>
+            <div>
+              <div style="font-weight: 600;" data-i18n="modal_migrate_keep_title">Оставить старые файлы на месте</div>
+              <div style="font-size: 12px; opacity: 0.8; font-weight: normal;" data-i18n="modal_migrate_keep_sub">Переключить путь, но не трогать файлы в прежней директории</div>
+            </div>
+          </button>
+
+          <!-- Option 3: Delete old files -->
+          <button class="m3-action-btn-secondary" id="btnMigrateDelete" style="display: flex; align-items: center; justify-content: flex-start; gap: 12px; padding: 12px 16px; text-align: left; height: auto; color: #ff8a80;">
+            <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; min-width: 20px; fill: currentColor;"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            <div>
+              <div style="font-weight: 600;" data-i18n="modal_migrate_delete_title">Удалить старые файлы игры</div>
+              <div style="font-size: 12px; opacity: 0.8; font-weight: normal;" data-i18n="modal_migrate_delete_sub">Очистить прежнюю папку для освобождения места на диске C</div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="m3-dialog-actions" style="margin-top: 12px;">
+        <button class="m3-action-btn-secondary" id="btnMigrateCancel" data-i18n="btn_cancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 9.5 M3 CRASH REPORT MODAL -->
   <div class="modal-overlay" id="crashReportModal" role="dialog" aria-modal="true" aria-labelledby="crashReportTitle" style="z-index: 1250;">
     <div class="modal-content m3-dialog-content crash-modal-content" style="max-width: 620px;">
