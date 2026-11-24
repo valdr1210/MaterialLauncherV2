@@ -331,5 +331,13 @@
   "mod_desc_controlling": "Удобный поиск и фильтрация занятых и конфликтующих клавиш управления в настройках.",
   "toast_error_generic": "Ошибка: {error}",
   "ely_login_invalid": "Неверный логин или пароль на Ely.by",
-  "ely_connect_error": "Ошибка подключения к Ely.by"
+  "ely_connect_error": "Ошибка подключения к Ely.by",
+  "mc_directory_title": "Директория игры (Папка Minecraft)",
+  "mc_directory_hint": "Путь хранения версий, модов и ресурсов (.minecraft):",
+  "mc_directory_placeholder": "По умолчанию (AppData/Roaming/.minecraft)",
+  "mc_btn_browse": "Обзор...",
+  "mc_btn_open_folder": "Открыть папку",
+  "mc_btn_reset_default": "По умолчанию",
+  "toast_mc_path_updated": "Директория Minecraft обновлена",
+  "toast_mc_path_reset": "Путь к Minecraft сброшен по умолчанию"
 }

@@ -331,5 +331,13 @@
   "mod_desc_controlling": "キー割り当ての検索・フィルタリング機能。競合しているキーを瞬時に特定。",
   "toast_error_generic": "エラー: {error}",
   "ely_login_invalid": "Ely.byのログインIDまたはパスワードが無効です",
-  "ely_connect_error": "Ely.byへの接続に失敗しました"
+  "ely_connect_error": "Ely.byへの接続に失敗しました",
+  "mc_directory_title": "ゲームディレクトリ (Minecraftフォルダー)",
+  "mc_directory_hint": "バージョン、MOD、リソースの保存先 (.minecraft):",
+  "mc_directory_placeholder": "既定 (AppData/Roaming/.minecraft)",
+  "mc_btn_browse": "参照...",
+  "mc_btn_open_folder": "フォルダーを開く",
+  "mc_btn_reset_default": "既定に戻す",
+  "toast_mc_path_updated": "Minecraftディレクトリが更新されました",
+  "toast_mc_path_reset": "Minecraftディレクトリが既定にリセットされました"
 }

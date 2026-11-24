@@ -1173,6 +1173,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const mcShowConsoleErrorCheck = document.getElementById('mcShowConsoleErrorCheck');
   const mcHideConsoleExitCheck = document.getElementById('mcHideConsoleExitCheck');
   const btnOpenConsoleNow = document.getElementById('btnOpenConsoleNow');
+  const mcCustomPathInput = document.getElementById('mcCustomPathInput');
+  const btnBrowseMcPath = document.getElementById('btnBrowseMcPath');
+  const btnOpenMcPath = document.getElementById('btnOpenMcPath');
+  const btnResetMcPath = document.getElementById('btnResetMcPath');
 
   const javaPathInput = document.getElementById('javaPathInput');
   const btnFindJava = document.getElementById('btnFindJava');
@@ -1255,6 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let selectedAccountRowIndex = -1;
 
   function collectConfigFromUI() {
+    if (mcCustomPathInput) appConfig.minecraftPath = mcCustomPathInput.value.trim();
     if (mcFullscreenCheck) appConfig.fullscreen = mcFullscreenCheck.checked;
     if (mcWinWidthInput) appConfig.windowWidth = parseInt(mcWinWidthInput.value, 10) || 854;
     if (mcWinHeightInput) appConfig.windowHeight = parseInt(mcWinHeightInput.value, 10) || 480;
@@ -1491,6 +1496,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function applyConfigToUI() {
+    if (mcCustomPathInput) {
+      mcCustomPathInput.value = appConfig.minecraftPath || '';
+    }
     if (mcFullscreenCheck) mcFullscreenCheck.checked = !!appConfig.fullscreen;
     if (mcWinWidthInput) mcWinWidthInput.value = appConfig.windowWidth || 854;
     if (mcWinHeightInput) mcWinHeightInput.value = appConfig.windowHeight || 480;
@@ -1568,6 +1576,38 @@ document.addEventListener('DOMContentLoaded', () => {
   mcHideConsoleExitCheck?.addEventListener('change', (e) => {
     appConfig.autoCloseConsole = e.target.checked;
     saveConfig();
+  });
+
+  mcCustomPathInput?.addEventListener('change', (e) => {
+    appConfig.minecraftPath = e.target.value.trim();
+    saveConfig();
+  });
+
+  btnBrowseMcPath?.addEventListener('click', async () => {
+    if (window.electronAPI?.selectMinecraftFolderDialog) {
+      const selected = await window.electronAPI.selectMinecraftFolderDialog();
+      if (selected) {
+        if (mcCustomPathInput) mcCustomPathInput.value = selected;
+        appConfig.minecraftPath = selected;
+        await saveConfig();
+        showSnackbar(window.I18N?.t?.('toast_mc_path_updated', 'Директория Minecraft обновлена') || 'Директория Minecraft обновлена', 'success');
+        if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
+      }
+    }
+  });
+
+  btnOpenMcPath?.addEventListener('click', () => {
+    if (window.electronAPI?.openMinecraftFolder) {
+      window.electronAPI.openMinecraftFolder();
+    }
+  });
+
+  btnResetMcPath?.addEventListener('click', async () => {
+    if (mcCustomPathInput) mcCustomPathInput.value = '';
+    appConfig.minecraftPath = '';
+    await saveConfig();
+    showSnackbar(window.I18N?.t?.('toast_mc_path_reset', 'Путь Minecraft сброшен по умолчанию') || 'Путь Minecraft сброшен по умолчанию', 'info');
+    if (typeof renderInstancesGrid === 'function') renderInstancesGrid();
   });
 
   javaSkipCheck?.addEventListener('change', (e) => {

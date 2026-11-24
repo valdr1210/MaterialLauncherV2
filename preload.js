@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   loginElyBy: (creds) => ipcRenderer.invoke('ely-login-start', creds),
   launchMinecraft: (opts) => ipcRenderer.invoke('mc-launch', opts),
   openMinecraftFolder: () => ipcRenderer.invoke('mc-open-folder'),
+  selectMinecraftFolderDialog: () => ipcRenderer.invoke('mc-select-minecraft-folder'),
+  getDefaultMinecraftFolder: () => ipcRenderer.invoke('mc-get-default-folder'),
   openModsFolder: (instanceId) => ipcRenderer.invoke('mc-open-mods-folder', instanceId),
   openInstanceFolder: (instanceId) => ipcRenderer.invoke('mc-open-instance-folder', instanceId),
   downloadSingleMod: (instanceId, mod) => ipcRenderer.invoke('mc-download-single-mod', { instanceId, mod }),

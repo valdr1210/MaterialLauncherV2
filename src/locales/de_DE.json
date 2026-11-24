@@ -331,5 +331,13 @@
   "mod_desc_controlling": "Tastenbelegungen durchsuchen und filtern, Konflikte in den Einstellungen hervorheben.",
   "toast_error_generic": "Fehler: {error}",
   "ely_login_invalid": "Ungültiger Benutzername oder Passwort bei Ely.by",
-  "ely_connect_error": "Verbindung zu Ely.by fehlgeschlagen"
+  "ely_connect_error": "Verbindung zu Ely.by fehlgeschlagen",
+  "mc_directory_title": "Spielverzeichnis (Minecraft-Ordner)",
+  "mc_directory_hint": "Speicherort für Versionen, Mods und Ressourcen (.minecraft):",
+  "mc_directory_placeholder": "Standard (AppData/Roaming/.minecraft)",
+  "mc_btn_browse": "Durchsuchen...",
+  "mc_btn_open_folder": "Ordner öffnen",
+  "mc_btn_reset_default": "Standard wiederherstellen",
+  "toast_mc_path_updated": "Minecraft-Verzeichnis aktualisiert",
+  "toast_mc_path_reset": "Minecraft-Verzeichnis auf Standard zurückgesetzt"
 }

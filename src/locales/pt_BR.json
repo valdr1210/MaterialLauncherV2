@@ -331,5 +331,13 @@
   "mod_desc_controlling": "Pesquise e filtre teclas de atalho, destacando conflitos nas configurações.",
   "toast_error_generic": "Erro: {error}",
   "ely_login_invalid": "Usuário ou senha inválidos no Ely.by",
-  "ely_connect_error": "Falha ao conectar ao Ely.by"
+  "ely_connect_error": "Falha ao conectar ao Ely.by",
+  "mc_directory_title": "Diretório do jogo (Pasta do Minecraft)",
+  "mc_directory_hint": "Caminho de armazenamento para versões, mods e recursos (.minecraft):",
+  "mc_directory_placeholder": "Padrão (AppData/Roaming/.minecraft)",
+  "mc_btn_browse": "Procurar...",
+  "mc_btn_open_folder": "Abrir pasta",
+  "mc_btn_reset_default": "Restaurar padrão",
+  "toast_mc_path_updated": "Diretório do Minecraft atualizado",
+  "toast_mc_path_reset": "Diretório do Minecraft redefinido para o padrão"
 }

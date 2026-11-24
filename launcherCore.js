@@ -29,7 +29,7 @@ function getDefaultMinecraftDir() {
 
 const APPDATA_DIR = getDefaultDataDir();
 const LAUNCHER_DATA_DIR = path.join(APPDATA_DIR, '.materiallauncher');
-const MINECRAFT_DIR = getDefaultMinecraftDir();
+const DEFAULT_MINECRAFT_DIR = getDefaultMinecraftDir();
 const PRISM_DIR = process.platform === 'darwin'
   ? path.join(os.homedir(), 'Library', 'Application Support', 'PrismLauncher')
   : (process.platform === 'linux' ? path.join(os.homedir(), '.local', 'share', 'PrismLauncher') : path.join(APPDATA_DIR, 'PrismLauncher'));
@@ -38,13 +38,39 @@ const PRISM_ASSETS_DIR = path.join(PRISM_DIR, 'assets');
 const CONFIG_FILE = path.join(LAUNCHER_DATA_DIR, 'config.json');
 const MANIFEST_CACHE = path.join(LAUNCHER_DATA_DIR, 'version_manifest_v2.json');
 
+function getMinecraftDir(cfg) {
+  let target = '';
+  if (cfg && typeof cfg.minecraftPath === 'string' && cfg.minecraftPath.trim()) {
+    target = cfg.minecraftPath.trim();
+  } else {
+    try {
+      if (fs.existsSync(CONFIG_FILE)) {
+        const raw = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
+        if (raw && typeof raw.minecraftPath === 'string' && raw.minecraftPath.trim()) {
+          target = raw.minecraftPath.trim();
+        }
+      }
+    } catch (e) {}
+  }
+  const resolved = target ? path.resolve(target) : DEFAULT_MINECRAFT_DIR;
+  try {
+    if (!fs.existsSync(resolved)) {
+      fs.mkdirSync(resolved, { recursive: true });
+    }
+  } catch (e) {}
+  return resolved;
+}
+
 // Ensure directories exist
 if (!fs.existsSync(LAUNCHER_DATA_DIR)) {
   fs.mkdirSync(LAUNCHER_DATA_DIR, { recursive: true });
 }
-if (!fs.existsSync(MINECRAFT_DIR)) {
-  fs.mkdirSync(MINECRAFT_DIR, { recursive: true });
-}
+try {
+  const currentMcDir = getMinecraftDir();
+  if (!fs.existsSync(currentMcDir)) {
+    fs.mkdirSync(currentMcDir, { recursive: true });
+  }
+} catch (e) {}
 
 // Token encryption & Shell bridges
 let cryptoHelpers = {
@@ -268,7 +294,7 @@ function resolveJavaForVersion(targetVersion, isAuto = true, manualPath = '', lo
 
 // Helper to ensure authlib-injector is present for Ely.by accounts
 async function ensureAuthlibInjector() {
-  const targetPath = path.join(MINECRAFT_DIR, 'authlib-injector.jar');
+  const targetPath = path.join(getMinecraftDir(), 'authlib-injector.jar');
   if (fs.existsSync(targetPath) && fs.statSync(targetPath).size > 10000) {
     return targetPath;
   }
@@ -490,7 +516,7 @@ function validateInstanceId(instanceId) {
 
 function getInstanceDir(instanceId) {
   const cleanId = validateInstanceId(instanceId);
-  const instancesRoot = path.resolve(MINECRAFT_DIR, 'instances');
+  const instancesRoot = path.resolve(getMinecraftDir(), 'instances');
   const dir = path.resolve(instancesRoot, cleanId);
   if (!dir.startsWith(instancesRoot + path.sep)) {
     throw new Error('Обнаружена попытка Path Traversal в пути инстанса');
@@ -851,7 +877,7 @@ async function deleteModFile(instanceId, modId, fileName) {
 // Delete instance folder safely via OS Recycle Bin (shell.trashItem)
 async function deleteInstanceFolder(instanceId) {
   const cleanId = validateInstanceId(instanceId);
-  const instancesRoot = path.resolve(MINECRAFT_DIR, 'instances');
+  const instancesRoot = path.resolve(getMinecraftDir(), 'instances');
   const instDir = path.resolve(instancesRoot, cleanId);
   if (!instDir.startsWith(instancesRoot + path.sep)) {
     throw new Error('Обнаружена попытка Path Traversal');
@@ -886,7 +912,7 @@ function getInstanceJars(instanceId) {
 // Ensure ForgeWrapper is present in .minecraft/libraries
 async function ensureForgeWrapper() {
   const fwVersion = '1.6.0';
-  const fwDir = path.join(MINECRAFT_DIR, 'libraries', 'io', 'github', 'zekerzhayard', 'ForgeWrapper', fwVersion);
+  const fwDir = path.join(getMinecraftDir(), 'libraries', 'io', 'github', 'zekerzhayard', 'ForgeWrapper', fwVersion);
   const fwPath = path.join(fwDir, `ForgeWrapper-${fwVersion}.jar`);
   if (fs.existsSync(fwPath) && fs.statSync(fwPath).size > 10000) {
     return fwPath;
@@ -936,7 +962,7 @@ async function ensureForgeInstaller(gameVersion, preferredForgeVer) {
   }
 
   // 2. Check .minecraft libraries
-  const mcForgeBase = path.join(MINECRAFT_DIR, 'libraries', 'net', 'minecraftforge', 'forge');
+  const mcForgeBase = path.join(getMinecraftDir(), 'libraries', 'net', 'minecraftforge', 'forge');
   if (fs.existsSync(mcForgeBase)) {
     const versions = sortVersions(fs.readdirSync(mcForgeBase));
     for (const v of versions) {
@@ -1023,7 +1049,7 @@ async function ensureFabricProfile(gameVersion) {
     if (!Array.isArray(metaRes.data) || metaRes.data.length === 0) return null;
     const loaderVer = metaRes.data[0].loader.version;
     const profileId = `fabric-loader-${loaderVer}-${gameVersion}`;
-    const vDir = path.join(MINECRAFT_DIR, 'versions', profileId);
+    const vDir = path.join(getMinecraftDir(), 'versions', profileId);
     const vJsonPath = path.join(vDir, `${profileId}.json`);
 
     if (fs.existsSync(vJsonPath) && fs.statSync(vJsonPath).size > 500) {
@@ -1053,7 +1079,7 @@ async function ensureQuiltProfile(gameVersion) {
     if (!Array.isArray(metaRes.data) || metaRes.data.length === 0) return null;
     const loaderVer = metaRes.data[0].loader.version;
     const profileId = `quilt-loader-${loaderVer}-${gameVersion}`;
-    const vDir = path.join(MINECRAFT_DIR, 'versions', profileId);
+    const vDir = path.join(getMinecraftDir(), 'versions', profileId);
     const vJsonPath = path.join(vDir, `${profileId}.json`);
 
     if (fs.existsSync(vJsonPath) && fs.statSync(vJsonPath).size > 500) {
@@ -1518,11 +1544,12 @@ async function launchMinecraft(opts, callbacks = {}) {
   }
 
   // Asset optimization: reuse PrismLauncher assets if present so we don't redownload 10,000 files!
-  const assetRootToUse = fs.existsSync(PRISM_ASSETS_DIR) ? PRISM_ASSETS_DIR : path.join(MINECRAFT_DIR, 'assets');
+  const mcDir = getMinecraftDir(cfg);
+  const assetRootToUse = fs.existsSync(PRISM_ASSETS_DIR) ? PRISM_ASSETS_DIR : path.join(mcDir, 'assets');
 
   const launchOpts = {
     authorization: authData,
-    root: MINECRAFT_DIR,
+    root: mcDir,
     javaPath: selectedJava,
     version: {
       number: versionId,
@@ -1542,8 +1569,8 @@ async function launchMinecraft(opts, callbacks = {}) {
     customArgs: customJvmArgs,
     overrides: {
       detached: false,
-      gameDirectory: instanceDir || MINECRAFT_DIR,
-      cwd: instanceDir || MINECRAFT_DIR,
+      gameDirectory: instanceDir || mcDir,
+      cwd: instanceDir || mcDir,
       assetRoot: assetRootToUse,
       env: {
         ...process.env,
@@ -1625,7 +1652,10 @@ async function launchMinecraft(opts, callbacks = {}) {
 }
 
 module.exports = {
-  MINECRAFT_DIR,
+  get MINECRAFT_DIR() { return getMinecraftDir(); },
+  getMinecraftDir,
+  getDefaultMinecraftDir,
+  DEFAULT_MINECRAFT_DIR,
   LAUNCHER_DATA_DIR,
   PRISM_DIR,
   setCryptoHelpers,

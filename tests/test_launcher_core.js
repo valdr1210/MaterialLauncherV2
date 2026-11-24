@@ -240,6 +240,23 @@ async function main() {
     }
   });
 
+  // Test 14: getMinecraftDir custom path support
+  await runTest('getMinecraftDir() respects custom path and falls back to default', () => {
+    const defaultDir = launcherCore.getDefaultMinecraftDir();
+    assert(defaultDir, 'Default directory must exist');
+    assert.strictEqual(launcherCore.getMinecraftDir({}), defaultDir, 'Empty config must return default directory');
+    assert.strictEqual(launcherCore.getMinecraftDir({ minecraftPath: '' }), defaultDir, 'Empty string must return default directory');
+    assert.strictEqual(launcherCore.getMinecraftDir({ minecraftPath: '   ' }), defaultDir, 'Whitespace string must return default directory');
+
+    const tempCustom = path.join(os.tmpdir(), 'mat_mc_custom_test_' + Date.now());
+    const customResult = launcherCore.getMinecraftDir({ minecraftPath: tempCustom });
+    assert.strictEqual(customResult, path.resolve(tempCustom), 'Must resolve custom path');
+    assert(fs.existsSync(tempCustom), 'Must create directory if missing');
+    try {
+      fs.rmdirSync(tempCustom);
+    } catch (e) {}
+  });
+
   console.log('\n=== SUMMARY ===');
   const passed = testResults.filter(r => r.passed).length;
   const failed = testResults.filter(r => !r.passed).length;

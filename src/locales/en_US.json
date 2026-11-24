@@ -331,5 +331,13 @@
   "mod_desc_controlling": "Search and filter keybinds, highlighting free and conflicting controls in settings.",
   "toast_error_generic": "Error: {error}",
   "ely_login_invalid": "Invalid login or password on Ely.by",
-  "ely_connect_error": "Failed to connect to Ely.by"
+  "ely_connect_error": "Failed to connect to Ely.by",
+  "mc_directory_title": "Game Directory (Minecraft Folder)",
+  "mc_directory_hint": "Path for versions, mods, and resources (.minecraft):",
+  "mc_directory_placeholder": "Default (AppData/Roaming/.minecraft)",
+  "mc_btn_browse": "Browse...",
+  "mc_btn_open_folder": "Open Folder",
+  "mc_btn_reset_default": "Reset to Default",
+  "toast_mc_path_updated": "Minecraft directory updated",
+  "toast_mc_path_reset": "Minecraft directory reset to default"
 }

@@ -331,5 +331,13 @@
   "mod_desc_controlling": "Recherchez et filtrez les raccourcis clavier en mettant en évidence les conflits.",
   "toast_error_generic": "Erreur: {error}",
   "ely_login_invalid": "Identifiant ou mot de passe incorrect sur Ely.by",
-  "ely_connect_error": "Échec de connexion à Ely.by"
+  "ely_connect_error": "Échec de connexion à Ely.by",
+  "mc_directory_title": "Répertoire du jeu (Dossier Minecraft)",
+  "mc_directory_hint": "Emplacement des versions, mods et ressources (.minecraft) :",
+  "mc_directory_placeholder": "Par défaut (AppData/Roaming/.minecraft)",
+  "mc_btn_browse": "Parcourir...",
+  "mc_btn_open_folder": "Ouvrir le dossier",
+  "mc_btn_reset_default": "Par défaut",
+  "toast_mc_path_updated": "Répertoire de Minecraft mis à jour",
+  "toast_mc_path_reset": "Répertoire de Minecraft réinitialisé par défaut"
 }

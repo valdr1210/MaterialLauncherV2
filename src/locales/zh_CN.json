@@ -331,5 +331,13 @@
   "mod_desc_controlling": "按键控制：在控制设置中直接搜索、筛选按键，高亮提示冲突或未绑定热键。",
   "toast_error_generic": "错误: {error}",
   "ely_login_invalid": "Ely.by 账户名或密码错误",
-  "ely_connect_error": "无法连接至 Ely.by"
+  "ely_connect_error": "无法连接至 Ely.by",
+  "mc_directory_title": "游戏目录 (Minecraft文件夹)",
+  "mc_directory_hint": "版本、模组和资源存储路径 (.minecraft)：",
+  "mc_directory_placeholder": "默认 (AppData/Roaming/.minecraft)",
+  "mc_btn_browse": "浏览...",
+  "mc_btn_open_folder": "打开文件夹",
+  "mc_btn_reset_default": "恢复默认",
+  "toast_mc_path_updated": "Minecraft目录已更新",
+  "toast_mc_path_reset": "Minecraft目录已重置为默认值"
 }

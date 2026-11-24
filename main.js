@@ -225,8 +225,25 @@ function createWindow() {
   });
 
   ipcMain.handle('mc-open-folder', () => {
-    shell.openPath(launcherCore.MINECRAFT_DIR);
+    shell.openPath(launcherCore.getMinecraftDir());
     return true;
+  });
+
+  ipcMain.handle('mc-select-minecraft-folder', async () => {
+    const currentPath = launcherCore.getMinecraftDir();
+    const res = await dialog.showOpenDialog(win, {
+      title: 'Выберите папку для данных Minecraft',
+      defaultPath: currentPath,
+      properties: ['openDirectory', 'createDirectory']
+    });
+    if (!res.canceled && res.filePaths.length > 0) {
+      return res.filePaths[0];
+    }
+    return null;
+  });
+
+  ipcMain.handle('mc-get-default-folder', () => {
+    return launcherCore.getDefaultMinecraftDir();
   });
 
   ipcMain.handle('mc-open-mods-folder', (event, instanceId) => {
@@ -236,7 +253,7 @@ function createWindow() {
     if (instId) {
       targetPath = launcherCore.getInstanceModsDir(instId);
     } else {
-      targetPath = path.join(launcherCore.MINECRAFT_DIR, 'mods');
+      targetPath = path.join(launcherCore.getMinecraftDir(), 'mods');
       if (!fs.existsSync(targetPath)) {
         fs.mkdirSync(targetPath, { recursive: true });
       }
@@ -252,7 +269,7 @@ function createWindow() {
     if (instId) {
       targetPath = launcherCore.getInstanceDir(instId);
     } else {
-      targetPath = launcherCore.MINECRAFT_DIR;
+      targetPath = launcherCore.getMinecraftDir();
     }
     shell.openPath(targetPath);
     return true;
