@@ -40,8 +40,10 @@ const MANIFEST_CACHE = path.join(LAUNCHER_DATA_DIR, 'version_manifest_v2.json');
 
 function getMinecraftDir(cfg) {
   let target = '';
-  if (cfg && typeof cfg.minecraftPath === 'string' && cfg.minecraftPath.trim()) {
-    target = cfg.minecraftPath.trim();
+  if (cfg !== undefined) {
+    if (cfg && typeof cfg.minecraftPath === 'string' && cfg.minecraftPath.trim()) {
+      target = cfg.minecraftPath.trim();
+    }
   } else {
     try {
       if (fs.existsSync(CONFIG_FILE)) {
