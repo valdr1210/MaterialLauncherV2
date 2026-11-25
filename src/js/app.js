@@ -4682,7 +4682,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const safeTitle = escapeHtml(item.title || 'Minecraft News');
       const safeTag = escapeHtml(tag);
-      const safeDate = escapeHtml(formattedDate);
       const safeImg = (imgPath && /^https?:\/\//i.test(imgPath)) ? escapeHtml(imgPath) : '';
 
       card.innerHTML = `
@@ -4691,7 +4690,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="news-tag">${safeTag}</span>
         </div>
         <div class="news-info">
-          <span class="news-date">${safeDate}</span>
           <h3 class="news-title">${safeTitle}</h3>
         </div>
       `;
