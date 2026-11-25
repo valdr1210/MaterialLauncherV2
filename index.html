@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="lavender">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Material Launcher — fast, clean, and modern Minecraft launcher in Google Material Design 3 (Material You) for Windows and Linux.">
+  <title>Material Launcher — Minecraft Launcher in Material Design 3</title>
+  <link rel="icon" type="image/svg+xml" href="./logo_full.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <!-- Top Navigation App Bar (M3 Top App Bar) -->
+  <header class="top-app-bar" id="topBar">
+    <div class="container top-bar-inner">
+      <a href="#hero" class="brand" aria-label="Material Launcher — на главную">
+        <span class="brand-logo" aria-hidden="true">
+          <img src="./logo_full.svg" alt="Material Launcher">
+        </span>
+        <span class="brand-name">Material Launcher</span>
+        <span class="brand-version">v1.0.0</span>
+      </a>
+
+      <div class="top-actions">
+        <!-- Language Switcher (8 languages) -->
+        <div class="lang-select-wrap">
+          <select id="langSelect" class="lang-select" aria-label="Language">
+            <option value="en">EN</option>
+            <option value="ru">RU</option>
+            <option value="de">DE</option>
+            <option value="fr">FR</option>
+            <option value="es">ES</option>
+            <option value="pt">PT</option>
+            <option value="zh">ZH</option>
+            <option value="ja">JA</option>
+          </select>
+          <svg class="lang-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5z"/></svg>
+        </div>
+
+        <!-- Theme Toggle -->
+        <button class="icon-btn" id="themeToggle" type="button" data-i18n-title="theme_toggle_title" title="Switch theme" aria-label="Switch theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0-5a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1zm0 16a1 1 0 0 1 1 1v2a1 1 0 1 1-2 0v-2a1 1 0 0 1 1-1zm9-7a1 1 0 0 1 0 2h-2a1 1 0 1 1 0-2h2zM5 12a1 1 0 0 1-1 1H2a1 1 0 1 1 0-2h2a1 1 0 0 1 1 1zm13.36-5.36a1 1 0 0 1 0 1.41l-1.41 1.42a1 1 0 1 1-1.42-1.42l1.42-1.41a1 1 0 0 1 1.41 0zM8.47 16.95a1 1 0 0 1 0 1.41l-1.42 1.42a1 1 0 1 1-1.41-1.42l1.41-1.41a1 1 0 0 1 1.42 0zm9.89 1.41a1 1 0 0 1-1.41 0l-1.42-1.41a1 1 0 1 1 1.42-1.42l1.41 1.42a1 1 0 0 1 0 1.41zM8.47 7.05a1 1 0 0 1-1.42 0L5.64 5.64a1 1 0 1 1 1.41-1.42l1.42 1.41a1 1 0 0 1 0 1.42z"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12.1 22c-5.5 0-10-4.5-10-10 0-4.8 3.4-8.9 8.1-9.8.6-.1 1.1.4.9 1-.4 1.1-.6 2.2-.6 3.3 0 4.9 4 8.9 8.9 8.9 1.1 0 2.2-.2 3.3-.6.6-.2 1.1.3 1 .9-.9 4.7-5 8.3-9.6 8.3z"/></svg>
+        </button>
+
+        <a href="#downloads" class="btn btn-tonal btn-sm" data-i18n="btn_download_short">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <div class="m3-badge">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/></svg>
+            <span data-i18n="hero_badge">Material Design 3 • Version 1.0.0</span>
+          </div>
+
+          <h1 class="hero-title">
+            <span data-i18n="hero_title_1">Minecraft launcher</span><br>
+            <span data-i18n="hero_title_2">with </span><span class="text-primary" data-i18n="hero_title_accent">nothing extra</span>
+          </h1>
+
+          <div class="hero-cta-group">
+            <a href="#" id="primaryDownloadBtn" class="btn btn-filled btn-lg">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20h14v-2H5v2zm7-18v10.17l3.59-3.58L17 10l-5 5-5-5 1.41-1.41L11 12.17V2h1z"/></svg>
+              <span id="primaryDownloadText">Download for Windows (.exe)</span>
+            </a>
+            <a href="#downloads" id="linuxDownloadJump" class="btn btn-outlined btn-lg">
+              Linux
+            </a>
+          </div>
+        </div>
+
+        <!-- Interactive 3D Theme-Slice Preview (like preview.png) -->
+        <div class="hero-visual" id="preview">
+          <div class="theme-showcase" id="themeShowcase">
+            <!-- Floating Color Labels above each slice -->
+            <div class="theme-labels-row" aria-hidden="true">
+              <div class="theme-label" data-label="emerald" style="--label-x: 17%; --label-y: -8px;">
+                <span>Emerald Green</span>
+              </div>
+              <div class="theme-label" data-label="ocean" style="--label-x: 41%; --label-y: 6px;">
+                <span>Sky Blue</span>
+              </div>
+              <div class="theme-label" data-label="lavender" style="--label-x: 60%; --label-y: 18px;">
+                <span>Lavender</span>
+              </div>
+              <div class="theme-label" data-label="sunset" style="--label-x: 78%; --label-y: 30px;">
+                <span>Amber Orange</span>
+              </div>
+              <div class="theme-label" data-label="sakura" style="--label-x: 91%; --label-y: 40px;">
+                <span>Ruby Rose</span>
+              </div>
+            </div>
+
+            <!-- 3D Perspective Stack of 5 Diagonal Theme Slices -->
+            <div class="theme-stack" role="group" aria-label="Interactive Material Launcher themes">
+              <div class="theme-slice slice-emerald" data-slice="emerald" data-accent-target="emerald" title="Emerald Green">
+                <img src="./themes/emerald.png" alt="Material Launcher — Emerald Green">
+              </div>
+              <div class="theme-slice slice-ocean" data-slice="ocean" data-accent-target="ocean" title="Sky Blue">
+                <img src="./themes/ocean.png" alt="Material Launcher — Sky Blue">
+              </div>
+              <div class="theme-slice slice-lavender" data-slice="lavender" data-accent-target="lavender" title="Lavender">
+                <img src="./themes/lavender.png" alt="Material Launcher — Lavender">
+              </div>
+              <div class="theme-slice slice-sunset" data-slice="sunset" data-accent-target="sunset" title="Amber Orange">
+                <img src="./themes/sunset.png" alt="Material Launcher — Amber Orange">
+              </div>
+              <div class="theme-slice slice-sakura" data-slice="sakura" data-accent-target="rose" title="Ruby Rose">
+                <img src="./themes/sakura.png" alt="Material Launcher — Ruby Rose">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-eyebrow" data-i18n="features_eyebrow">Why Material Launcher</span>
+          <h2 class="section-title" data-i18n="features_title">Built for comfortable gaming</h2>
+          <p class="section-subtitle" data-i18n="features_subtitle">
+            No cluttered menus, banners, or outdated interfaces — just clean Material You and the tools you need at hand.
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9a1.5 1.5 0 0 0 1.5-1.5c0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-1a1.5 1.5 0 0 1 1.5-1.5H16a5 5 0 0 0 5-5c0-4.42-4.03-8-9-8zm-5.5 9a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3-4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm3 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/></svg>
+            </div>
+            <h3 data-i18n="feat_1_title">Google Material Design 3</h3>
+            <p data-i18n="feat_1_desc">Soft rounded corners, adaptive dark and light themes, accent color palette, and smooth animations on every interaction.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg>
+            </div>
+            <h3 data-i18n="feat_2_title">Built-in Mod Browser</h3>
+            <p data-i18n="feat_2_desc">Search and install mods from Modrinth and CurseForge right inside the launcher, and create separate modpacks for your versions.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            </div>
+            <h3 data-i18n="feat_3_title">Any Loaders &amp; Accounts</h3>
+            <p data-i18n="feat_3_desc">Vanilla, Fabric, Forge, NeoForge, and Quilt. Sign in via official Microsoft (OAuth 2.0), Ely.by with skins, or offline mode.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+            </div>
+            <h3 data-i18n="feat_4_title">Custom Game Folder &amp; Migration</h3>
+            <p data-i18n="feat_4_desc">Pick any drive to store versions and mods without cluttering drive C:, with smart file migration or cleanup.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></svg>
+            </div>
+            <h3 data-i18n="feat_5_title">Auto Java &amp; Crash Diagnostics</h3>
+            <p data-i18n="feat_5_desc">Automatically finds or downloads the right Java version and analyzes crash logs to explain what went wrong.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+            </div>
+            <h3 data-i18n="feat_6_title">8 Languages Out of the Box</h3>
+            <p data-i18n="feat_6_desc">Full localization in English, Russian, German, French, Spanish, Portuguese, Chinese, and Japanese.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Downloads Section -->
+    <section class="section section-alt" id="downloads">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" data-i18n="dl_title">Download Material Launcher</h2>
+          <p class="section-subtitle" data-i18n="dl_subtitle">
+            Choose your operating system and preferred package format. All builds are free with no registration required.
+          </p>
+        </div>
+
+        <!-- M3 Segmented Button / OS Switcher -->
+        <div class="os-switcher-wrap">
+          <div class="segmented-control" role="tablist" aria-label="Operating system">
+            <button class="seg-btn active" data-os="windows" role="tab" aria-selected="true" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5L10.5 4.4V11.5H3V5.5ZM11.5 4.2L21 2.8V11.5H11.5V4.2ZM3 12.5H10.5V19.6L3 18.5V12.5ZM11.5 12.5H21V21.2L11.5 19.8V12.5Z"/></svg>
+              <span>Windows (x64)</span>
+            </button>
+            <button class="seg-btn" data-os="linux" role="tab" aria-selected="false" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C9.5 2 8 3.9 8 6.3c0 1.1-.4 2.1-1.3 3.4-1.1 1.6-2.2 3.5-2.2 5.3 0 1 .7 1.6 1.4 1.3.4-.2.8-.7 1.2-1.4.2 1.3.7 2.5 1.4 3.4-.9.4-1.5 1-1.5 1.7 0 .9 1 1.5 2.4 1.5 1 0 1.7-.3 2.1-.8h1c.4.5 1.1.8 2.1.8 1.4 0 2.4-.6 2.4-1.5 0-.7-.6-1.3-1.5-1.7.7-.9 1.2-2.1 1.4-3.4.4.7.8 1.2 1.2 1.4.7.3 1.4-.3 1.4-1.3 0-1.8-1.1-3.7-2.2-5.3C16.4 8.4 16 7.4 16 6.3 16 3.9 14.5 2 12 2zm-1.6 4.2a.8.8 0 1 1 0 1.6.8.8 0 0 1 0-1.6zm3.2 0a.8.8 0 1 1 0 1.6.8.8 0 0 1 0-1.6zm-3.4 2.5L12 10.2l1.8-1.5c-.5-.3-1.1-.4-1.8-.4s-1.3.1-1.8.4zm1.8 2.6c-1.8 0-3.1 1.8-3.1 4.2 0 1.9 1.1 3.3 3.1 3.3s3.1-1.4 3.1-3.3c0-2.4-1.3-4.2-3.1-4.2z"/></svg>
+              <span>Linux (x64)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Windows Packages -->
+        <div class="downloads-grid active" data-os-pane="windows">
+          <a class="download-card recommended" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-Setup-1.0.0.exe">
+            <div class="dc-top">
+              <span class="dc-ext">.EXE</span>
+              <span class="dc-badge" data-i18n="badge_recommended">Recommended</span>
+            </div>
+            <h3 data-i18n="win_setup_title">Installer (Setup)</h3>
+            <p data-i18n="win_setup_desc">Classic setup wizard with folder selection, desktop shortcut, and Start Menu entry.</p>
+            <div class="dc-footer">
+              <span class="dc-size">100.3 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0-portable.exe">
+            <div class="dc-top">
+              <span class="dc-ext">.EXE</span>
+              <span class="dc-tag">Portable</span>
+            </div>
+            <h3 data-i18n="win_port_title">Portable Version</h3>
+            <p data-i18n="win_port_desc">Single executable file: launch and play from any drive or USB stick without installation.</p>
+            <div class="dc-footer">
+              <span class="dc-size">92.3 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0.msi">
+            <div class="dc-top">
+              <span class="dc-ext">.MSI</span>
+              <span class="dc-tag">Installer</span>
+            </div>
+            <h3 data-i18n="win_msi_title">Windows Installer</h3>
+            <p data-i18n="win_msi_desc">Standard MSI package for system-wide deployment and Windows management.</p>
+            <div class="dc-footer">
+              <span class="dc-size">106.4 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0.zip">
+            <div class="dc-top">
+              <span class="dc-ext">.ZIP</span>
+              <span class="dc-tag" data-i18n="tag_archive">Archive</span>
+            </div>
+            <h3 data-i18n="win_zip_title">Unpacked Archive</h3>
+            <p data-i18n="win_zip_desc">Ready-to-run program folder inside a ZIP archive — just extract anywhere.</p>
+            <div class="dc-footer">
+              <span class="dc-size">130.0 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+        </div>
+
+        <!-- Linux Packages -->
+        <div class="downloads-grid" data-os-pane="linux">
+          <a class="download-card recommended" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0.AppImage">
+            <div class="dc-top">
+              <span class="dc-ext">.AppImage</span>
+              <span class="dc-badge" data-i18n="badge_universal">Universal</span>
+            </div>
+            <h3 data-i18n="lin_appimage_title">AppImage</h3>
+            <p data-i18n="lin_appimage_desc">Runs on any Linux distro without installation. Make it executable and launch.</p>
+            <div class="dc-footer">
+              <span class="dc-size">114.5 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher_1.0.0_amd64.deb">
+            <div class="dc-top">
+              <span class="dc-ext">.DEB</span>
+              <span class="dc-tag">Debian / Ubuntu</span>
+            </div>
+            <h3 data-i18n="lin_deb_title">DEB Package</h3>
+            <p data-i18n="lin_deb_desc">For Ubuntu, Debian, Linux Mint, Pop!_OS, and derivatives. Install via apt.</p>
+            <div class="dc-footer">
+              <span class="dc-size">89.8 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0.x86_64.rpm">
+            <div class="dc-top">
+              <span class="dc-ext">.RPM</span>
+              <span class="dc-tag">Fedora / RHEL</span>
+            </div>
+            <h3 data-i18n="lin_rpm_title">RPM Package</h3>
+            <p data-i18n="lin_rpm_desc">For Fedora, openSUSE, Red Hat, and other RPM-based distributions.</p>
+            <div class="dc-footer">
+              <span class="dc-size">79.2 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0.x86_64.flatpak">
+            <div class="dc-top">
+              <span class="dc-ext">.FLATPAK</span>
+              <span class="dc-tag" data-i18n="tag_sandbox">Sandbox</span>
+            </div>
+            <h3 data-i18n="lin_flatpak_title">Flatpak Bundle</h3>
+            <p data-i18n="lin_flatpak_desc">Offline Flatpak bundle with permission sandboxing and desktop integration.</p>
+            <div class="dc-footer">
+              <span class="dc-size">81.0 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0-linux.tar.gz">
+            <div class="dc-top">
+              <span class="dc-ext">.TAR.GZ</span>
+              <span class="dc-tag" data-i18n="tag_archive">Archive</span>
+            </div>
+            <h3 data-i18n="lin_targz_title">Binary tar.gz</h3>
+            <p data-i18n="lin_targz_desc">Classic Linux archive with the ready-to-run executable.</p>
+            <div class="dc-footer">
+              <span class="dc-size">108.3 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+
+          <a class="download-card" href="https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.0.0/Material.Launcher-1.0.0-linux.zip">
+            <div class="dc-top">
+              <span class="dc-ext">.ZIP</span>
+              <span class="dc-tag" data-i18n="tag_archive">Archive</span>
+            </div>
+            <h3 data-i18n="lin_zip_title">Linux ZIP</h3>
+            <p data-i18n="lin_zip_desc">Portable archive for quick extraction on any Linux system.</p>
+            <div class="dc-footer">
+              <span class="dc-size">108.6 MB</span>
+              <span class="dc-action" data-i18n="dl_action">Download →</span>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-left">
+        <img src="./banner.png" alt="Material Launcher" class="footer-banner">
+        <span class="footer-copy" data-i18n="footer_copy">Open Source • MIT License • Not an official Mojang / Microsoft product</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/valdr1210/MaterialLauncherV2" target="_blank" rel="noopener noreferrer" class="btn btn-text btn-sm">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2A10 10 0 0 0 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/></svg>
+          GitHub
+        </a>
+        <a href="https://github.com/valdr1210/MaterialLauncherV2/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer" data-i18n="footer_releases">Releases</a>
+        <a href="https://github.com/valdr1210/MaterialLauncherV2/issues" target="_blank" rel="noopener noreferrer" data-i18n="footer_issues">Report an Issue</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- GeoIP Language Suggestion Banner -->
+  <div class="lang-suggest-banner" id="langSuggestBanner" role="status" aria-live="polite" hidden>
+    <span class="ls-text" id="langSuggestText"></span>
+    <div class="ls-actions">
+      <button type="button" class="btn btn-filled btn-sm" id="langSuggestAccept"></button>
+      <button type="button" class="btn btn-text btn-sm" id="langSuggestDismiss"></button>
+    </div>
+  </div>
+
+  <script src="./i18n.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
