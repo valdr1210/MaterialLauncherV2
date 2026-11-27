@@ -1907,7 +1907,7 @@ document.addEventListener('DOMContentLoaded', () => {
   async function runMicrosoftLogin(viaBrowser = false) {
     const loginFn = viaBrowser ? window.electronAPI?.loginMicrosoftBrowser : window.electronAPI?.loginMicrosoft;
     if (!loginFn) {
-      showSnackbar((window.I18N ? window.I18N.t('toast_ms_login_desktop_only', 'Microsoft Login доступен в десктопном приложении Electron.') : 'Microsoft Login доступен в десктопном приложении Electron.'), 'warning');
+      showSnackbar((window.I18N ? window.I18N.t('toast_ms_login_desktop_only', 'Microsoft Login доступен в десктопном приложении.') : 'Microsoft Login доступен в десктопном приложении.'), 'warning');
       return;
     }
     if (btnAccAddMicrosoft) btnAccAddMicrosoft.disabled = true;

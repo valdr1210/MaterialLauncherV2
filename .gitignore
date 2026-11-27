@@ -2,6 +2,8 @@
 node_modules/
 
 # Build outputs
+src-tauri/target/
+src-tauri/gen/
 dist/
 build/
 out/

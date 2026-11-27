@@ -1,0 +1,39 @@
+[package]
+name = "material-launcher"
+version = "1.2.0"
+description = "Material Launcher in Material Design 3 (Tauri / Rust)"
+authors = ["MaterialLauncher"]
+edition = "2021"
+
+[lib]
+name = "material_launcher_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.12", features = ["json", "stream", "rustls-tls"] }
+futures-util = "0.3"
+dirs = "5"
+zip = "2"
+sha1 = "0.10"
+md-5 = "0.10"
+hex = "0.4"
+base64 = "0.22"
+urlencoding = "2"
+regex = "1"
+walkdir = "2"
+open = "5"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.59", features = [
+  "Win32_Foundation",
+  "Win32_Security_Cryptography",
+  "Win32_System_Memory"
+] }

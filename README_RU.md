@@ -12,8 +12,8 @@
   <p><strong>Быстрый, чистый и приятный Minecraft лаунчер на Material Design 3 (Material You).</strong></p>
 
   <p>
-    <img src="https://img.shields.io/badge/Node.js-v20+-68a063?style=flat-square&logo=node.js&logoColor=white" alt="Node.js">
-    <img src="https://img.shields.io/badge/Electron-40+-47848F?style=flat-square&logo=electron&logoColor=white" alt="Electron">
+    <img src="https://img.shields.io/badge/Rust-2021-DE5833?style=flat-square&logo=rust&logoColor=white" alt="Rust">
+    <img src="https://img.shields.io/badge/Tauri-v2-24C8DB?style=flat-square&logo=tauri&logoColor=white" alt="Tauri v2">
     <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux-blue?style=flat-square" alt="Platform">
     <img src="https://img.shields.io/badge/License-MIT-orange?style=flat-square" alt="License">
   </p>
