@@ -4,6 +4,7 @@ node_modules/
 # Build outputs
 src-tauri/target/
 src-tauri/gen/
+release_v*/
 dist/
 build/
 out/

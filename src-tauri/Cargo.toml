@@ -1,6 +1,6 @@
 [package]
 name = "material-launcher"
-version = "1.2.0"
+version = "1.3.0"
 description = "Material Launcher in Material Design 3 (Tauri / Rust)"
 authors = ["MaterialLauncher"]
 edition = "2021"
