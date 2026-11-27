@@ -67,42 +67,37 @@ All builds are compiled natively through CI/CD:
 
 | Platform | Formats | Details |
 | :--- | :--- | :--- |
-| **Windows** | `Portable .exe` | Standalone executable, leaves no junk behind |
-| | `Setup .exe` | Traditional NSIS installer with shortcuts |
-| | `.msi` | Windows Installer package |
-| | `.zip` | Portable archive |
+| **Windows** | `Setup .exe` | NSIS installer with shortcuts (~5.5 MB) |
+| | `Portable .exe` | Standalone executable, leaves no junk behind (~18.7 MB) |
+| | `.msi` | Windows Installer package (~7.9 MB) |
 | **Linux** | `.AppImage` | Universal bundle for any distro |
-| | `.deb` | Ubuntu, Debian, Linux Mint, Pop!_OS |
-| | `.rpm` | Fedora, openSUSE, RHEL |
-| | `.flatpak` | Sandboxed Flathub package |
-| | `.tar.gz` / `.zip` | Generic portable archives |
+| | `.deb` | Ubuntu, Debian, Linux Mint, Pop!_OS (~8.1 MB) |
+| | `.rpm` | Fedora, openSUSE, RHEL (~8.1 MB) |
+| | `.tar.gz` | Portable binary archive (~7.9 MB) |
 
 ---
 
 ## 🛠 Building & Running from Source
 
-If you want to tweak the code or build it yourself:
+Requires **Rust** (stable) and **Tauri CLI v2** (`cargo install tauri-cli --version "^2"`):
 
 ```bash
 # Clone the repository
 git clone https://github.com/valdr1210/MaterialLauncherV2.git
 cd MaterialLauncherV2
 
-# Install dependencies
-npm install
-
 # Start in development mode
-npm start
+cargo tauri dev
 ```
 
 ### Build Commands:
 
 ```bash
-# Build for Windows (Portable EXE, Setup EXE, MSI, ZIP)
-npm run build:win
+# Build for Windows (Setup EXE, MSI, Portable EXE)
+cargo tauri build --bundles nsis,msi
 
-# Build for Linux (AppImage, DEB, RPM, Flatpak, TAR.GZ, ZIP)
-npm run build:linux
+# Build for Linux (AppImage, DEB, RPM)
+cargo tauri build --bundles deb,rpm,appimage
 ```
 
 ---

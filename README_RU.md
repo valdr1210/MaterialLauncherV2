@@ -67,42 +67,37 @@
 
 | Платформа | Доступные форматы | Описание |
 | :--- | :--- | :--- |
-| **Windows** | `Portable .exe` | Запустил и играешь, не оставляет мусора в системе |
-| | `Setup .exe` | Стандартный установщик с ярлыками и мастером |
-| | `.msi` | Пакет Windows Installer |
-| | `.zip` | Портативный архив с распакованной программой |
+| **Windows** | `Setup .exe` | Стандартный NSIS-установщик с ярлыками (~5.5 МБ) |
+| | `Portable .exe` | Запустил и играешь, не оставляет мусора в системе (~18.7 МБ) |
+| | `.msi` | Пакет Windows Installer (~7.9 МБ) |
 | **Linux** | `.AppImage` | Универсальный бинарник для любого дистрибутива |
-| | `.deb` | Пакет для Ubuntu, Debian, Linux Mint, Pop!_OS |
-| | `.rpm` | Пакет для Fedora, openSUSE, RHEL |
-| | `.flatpak` | Песочница с изоляцией прав и рантаймом Flathub |
-| | `.tar.gz` / `.zip` | Архивы с готовым бинарником |
+| | `.deb` | Пакет для Ubuntu, Debian, Linux Mint, Pop!_OS (~8.1 МБ) |
+| | `.rpm` | Пакет для Fedora, openSUSE, RHEL (~8.1 МБ) |
+| | `.tar.gz` | Архив с готовым бинарником (~7.9 МБ) |
 
 ---
 
 ## 🛠 Запуск и разработка
 
-Если хотите собрать лаунчер самостоятельно:
+Требуется **Rust** (stable) и **Tauri CLI v2** (`cargo install tauri-cli --version "^2"`):
 
 ```bash
 # Клонируем проект
 git clone https://github.com/valdr1210/MaterialLauncherV2.git
 cd MaterialLauncherV2
 
-# Ставим зависимости
-npm install
-
 # Запуск в режиме разработки
-npm start
+cargo tauri dev
 ```
 
 ### Команды сборки:
 
 ```bash
-# Сборка под Windows (Portable EXE, Setup EXE, MSI, ZIP)
-npm run build:win
+# Сборка под Windows (Setup EXE, MSI, Portable EXE)
+cargo tauri build --bundles nsis,msi
 
-# Сборка под Linux (AppImage, DEB, RPM, Flatpak, TAR.GZ, ZIP)
-npm run build:linux
+# Сборка под Linux (AppImage, DEB, RPM)
+cargo tauri build --bundles deb,rpm,appimage
 ```
 
 ---
