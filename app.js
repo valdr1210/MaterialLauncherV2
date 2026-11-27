@@ -1,13 +1,13 @@
 (() => {
-  const RELEASE_BASE = 'https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.1.0';
+  const RELEASE_BASE = 'https://github.com/valdr1210/MaterialLauncherV2/releases/download/v1.2.0';
 
   const PRIMARY_ASSETS = {
     windows: {
-      url: `${RELEASE_BASE}/Material.Launcher-Setup-1.1.0.exe`,
+      url: `${RELEASE_BASE}/Material.Launcher-Setup-1.2.0.exe`,
       key: 'btn_dl_win'
     },
     linux: {
-      url: `${RELEASE_BASE}/Material.Launcher-1.1.0.AppImage`,
+      url: `${RELEASE_BASE}/Material.Launcher-1.2.0.AppImage`,
       key: 'btn_dl_linux'
     }
   };
