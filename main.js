@@ -148,6 +148,9 @@ function createWindow() {
 
   ipcMain.handle('get-locale-data', (event, code) => {
     try {
+      if (typeof code !== 'string' || !/^[a-zA-Z0-9_-]+$/.test(code)) {
+        return null;
+      }
       const localePath = path.join(__dirname, 'src', 'locales', `${code}.json`);
       if (fs.existsSync(localePath)) {
         return JSON.parse(fs.readFileSync(localePath, 'utf8'));
@@ -181,6 +184,19 @@ function createWindow() {
     return await authManager.loginWithMicrosoft(win);
   });
 
+  ipcMain.handle('ms-login-browser-start', async () => {
+    return await authManager.loginWithMicrosoftBrowser({
+      onCode: (data) => {
+        if (!win.isDestroyed()) win.webContents.send('ms-login-code', data);
+      }
+    });
+  });
+
+  ipcMain.handle('ms-login-cancel', () => {
+    authManager.cancelMicrosoftLogin();
+    return { success: true };
+  });
+
   ipcMain.handle('ely-login-start', async (event, creds) => {
     if (process.env.FLATPAK_ID) {
       return { success: false, error: 'Ely.by authentication is disabled in Flathub builds for compliance.' };
@@ -189,12 +205,13 @@ function createWindow() {
   });
 
   ipcMain.handle('mc-launch', async (event, launchOpts) => {
+    const opts = launchOpts || {};
     try {
-      if (launchOpts.hideLauncherOnLaunch) {
+      if (opts.hideLauncherOnLaunch) {
         win.hide();
       }
 
-      return await launcherCore.launchMinecraft(launchOpts, {
+      return await launcherCore.launchMinecraft(opts, {
         onProgress: (prog) => {
           if (!win.isDestroyed()) win.webContents.send('mc-launch-progress', prog);
         },
@@ -205,7 +222,7 @@ function createWindow() {
           if (!win.isDestroyed()) win.webContents.send('mc-launch-log', log);
         },
         onClose: (code) => {
-          if (launchOpts.closeLauncherOnExit) {
+          if (opts.closeLauncherOnExit) {
             app.quit();
           } else {
             if (!win.isDestroyed()) {
@@ -217,7 +234,7 @@ function createWindow() {
       });
     } catch (err) {
       console.error('Launch failed:', err);
-      if (launchOpts.hideLauncherOnLaunch && !win.isDestroyed()) {
+      if (opts.hideLauncherOnLaunch && !win.isDestroyed()) {
         win.show();
       }
       return { success: false, error: err.message || 'Ошибка запуска' };
@@ -250,37 +267,55 @@ function createWindow() {
     return launcherCore.inspectMinecraftDir(folderPath);
   });
 
-  ipcMain.handle('mc-migrate-folder', async (event, { oldPath, newPath, action }) => {
-    return await launcherCore.migrateMinecraftDir(oldPath, newPath, action);
+  ipcMain.handle('mc-migrate-folder', async (event, { oldPath, newPath, action } = {}) => {
+    try {
+      return await launcherCore.migrateMinecraftDir(oldPath, newPath, action);
+    } catch (e) {
+      return { success: false, error: e.message || 'Ошибка миграции папки' };
+    }
   });
 
-  ipcMain.handle('mc-open-mods-folder', (event, instanceId) => {
-    const cfg = launcherCore.loadConfig();
-    const instId = instanceId || cfg.selectedInstanceId;
-    let targetPath;
-    if (instId) {
-      targetPath = launcherCore.getInstanceModsDir(instId);
-    } else {
-      targetPath = path.join(launcherCore.getMinecraftDir(), 'mods');
-      if (!fs.existsSync(targetPath)) {
-        fs.mkdirSync(targetPath, { recursive: true });
+  ipcMain.handle('mc-get-loader-versions', async (event, { loader, gameVersion } = {}) => {
+    return await launcherCore.getLoaderVersions(loader, gameVersion);
+  });
+
+  ipcMain.handle('mc-open-mods-folder', async (event, instanceId) => {
+    try {
+      const cfg = launcherCore.loadConfig();
+      const instId = instanceId || cfg.selectedInstanceId;
+      let targetPath;
+      if (instId) {
+        targetPath = launcherCore.getInstanceModsDir(instId);
+      } else {
+        targetPath = path.join(launcherCore.getMinecraftDir(), 'mods');
+        if (!fs.existsSync(targetPath)) {
+          fs.mkdirSync(targetPath, { recursive: true });
+        }
       }
+      const err = await shell.openPath(targetPath);
+      if (err) return { success: false, error: err };
+      return true;
+    } catch (e) {
+      return { success: false, error: e.message };
     }
-    shell.openPath(targetPath);
-    return true;
   });
 
-  ipcMain.handle('mc-open-instance-folder', (event, instanceId) => {
-    const cfg = launcherCore.loadConfig();
-    const instId = instanceId || cfg.selectedInstanceId;
-    let targetPath;
-    if (instId) {
-      targetPath = launcherCore.getInstanceDir(instId);
-    } else {
-      targetPath = launcherCore.getMinecraftDir();
+  ipcMain.handle('mc-open-instance-folder', async (event, instanceId) => {
+    try {
+      const cfg = launcherCore.loadConfig();
+      const instId = instanceId || cfg.selectedInstanceId;
+      let targetPath;
+      if (instId) {
+        targetPath = launcherCore.getInstanceDir(instId);
+      } else {
+        targetPath = launcherCore.getMinecraftDir();
+      }
+      const err = await shell.openPath(targetPath);
+      if (err) return { success: false, error: err };
+      return true;
+    } catch (e) {
+      return { success: false, error: e.message };
     }
-    shell.openPath(targetPath);
-    return true;
   });
 
   ipcMain.handle('mc-download-single-mod', async (event, data) => {
@@ -296,7 +331,9 @@ function createWindow() {
 
   ipcMain.handle('mc-download-instance-mods', async (event, instanceId) => {
     try {
-      const res = await launcherCore.downloadAllInstanceMods(instanceId);
+      const res = await launcherCore.downloadAllInstanceMods(instanceId, (stat) => {
+        if (!win.isDestroyed()) win.webContents.send('mc-launch-status', stat);
+      });
       return { success: true, ...res };
     } catch (e) {
       console.warn('Instance mods download failed:', e.message);
@@ -377,12 +414,74 @@ function createWindow() {
     }
   });
 
+  ipcMain.handle('mc-select-export-instance-path', async (event, defaultName) => {
+    const safeName = String(defaultName || 'instance').replace(/[<>:"/\\|?*]+/g, '_').trim() || 'instance';
+    const res = await dialog.showSaveDialog(win, {
+      title: 'Экспортировать сборку',
+      defaultPath: `${safeName}.zip`,
+      filters: [
+        { name: 'Архив сборки (*.zip)', extensions: ['zip'] },
+        { name: 'Material Launcher Pack (*.mlpack)', extensions: ['mlpack'] }
+      ]
+    });
+    if (!res.canceled && res.filePath) {
+      return res.filePath;
+    }
+    return null;
+  });
+
+  ipcMain.handle('mc-export-instance', async (event, { instanceId, destPath } = {}) => {
+    try {
+      const res = await launcherCore.exportInstance(instanceId, destPath, (status) => {
+        if (!win.isDestroyed()) win.webContents.send('mc-launch-status', status);
+      });
+      return { success: true, ...res };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('mc-select-import-instance-file', async () => {
+    const res = await dialog.showOpenDialog(win, {
+      title: 'Выберите архив сборки (*.zip, *.mlpack)',
+      filters: [
+        { name: 'Архив сборки (*.zip, *.mlpack)', extensions: ['zip', 'mlpack'] },
+        { name: 'Все файлы', extensions: ['*'] }
+      ],
+      properties: ['openFile']
+    });
+    if (!res.canceled && res.filePaths.length > 0) {
+      return res.filePaths[0];
+    }
+    return null;
+  });
+
+  ipcMain.handle('mc-import-instance', async (event, archivePath) => {
+    try {
+      const res = await launcherCore.importInstance(archivePath, (status) => {
+        if (!win.isDestroyed()) win.webContents.send('mc-launch-status', status);
+      });
+      return { success: true, ...res };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  });
+
   ipcMain.handle('mc-get-instance-jars', (event, instanceId) => {
     try {
       const jars = launcherCore.getInstanceJars(instanceId);
       return { success: true, jars };
     } catch (e) {
-      return { success: false, jars: [] };
+      return { success: false, error: e.message, jars: [] };
+    }
+  });
+
+  ipcMain.handle('mc-get-instance-disk-mods', async (event, instanceId) => {
+    try {
+      const mods = await launcherCore.getInstanceDiskMods(instanceId);
+      return { success: true, mods };
+    } catch (e) {
+      return { success: false, error: e.message, mods: [] };
     }
   });
 
@@ -391,23 +490,33 @@ function createWindow() {
       const query = params.query || '';
       const loader = params.loader || '';
       const gameVersion = params.gameVersion || '';
-      const limit = params.limit || 24;
-      const facets = [];
+      const category = params.category || '';
+      const limit = Math.min(Number(params.limit) || 40, 100);
+      const offset = Math.max(Number(params.offset) || 0, 0);
+      const facets = [['project_type:mod']];
       if (loader && loader !== 'all' && loader !== 'vanilla') {
         facets.push([`categories:${loader}`]);
+      }
+      if (category && category !== 'all') {
+        facets.push([`categories:${category}`]);
       }
       if (gameVersion) {
         facets.push([`versions:${gameVersion}`]);
       }
       const facetsParam = facets.length > 0 ? `&facets=${encodeURIComponent(JSON.stringify(facets))}` : '';
-      const url = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(query)}&limit=${limit}${facetsParam}`;
+      const url = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(query)}&limit=${limit}&offset=${offset}${facetsParam}`;
       const res = await axios.get(url, {
-        headers: { 'User-Agent': 'MaterialLauncher/1.0.0 (admin@materiallauncher.app)' },
+        headers: { 'User-Agent': 'MaterialLauncher/1.3.0 (admin@materiallauncher.app)' },
         timeout: 8000
       });
-      return { success: true, hits: res.data?.hits || [] };
+      return {
+        success: true,
+        hits: res.data?.hits || [],
+        total_hits: res.data?.total_hits || 0,
+        offset
+      };
     } catch (e) {
-      return { success: false, error: e.message, hits: [] };
+      return { success: false, error: e.message, hits: [], total_hits: 0, offset: 0 };
     }
   });
 

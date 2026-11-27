@@ -373,14 +373,22 @@ body.maximized .app-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 6px;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.2;
   color: var(--md-sys-color-on-surface);
 }
+.version-current-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .version-current svg {
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
   fill: currentColor;
   opacity: 0.7;
 }
@@ -1879,8 +1887,9 @@ input:checked + .slider:before {
    ACCOUNT & MOJANG AUTH MODAL
    ========================================================================== */
 .auth-modal-content {
-  width: 480px;
-  max-height: 85vh;
+  width: clamp(480px, 46vw, 760px);
+  max-width: 92vw;
+  max-height: 90vh;
 }
 
 .auth-modal-body {
@@ -1900,7 +1909,7 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 250px;
+  max-height: clamp(250px, 38vh, 460px);
   overflow-y: auto;
   padding-right: 2px;
 }
@@ -3609,9 +3618,9 @@ input:checked + .slider:before {
    3-STEP WIZARD MODAL
    ========================================================================== */
 .create-version-wizard-modal {
-  width: 660px;
+  width: clamp(660px, 78vw, 1200px);
   max-width: 94vw;
-  max-height: 90vh;
+  max-height: 92vh;
   padding: 20px 24px;
   display: flex;
   flex-direction: column;
@@ -3639,7 +3648,7 @@ input:checked + .slider:before {
 .wizard-name-top-input-wrap {
   position: relative;
   flex: 1;
-  max-width: 490px;
+  max-width: 100%;
   display: flex;
   align-items: center;
 }
@@ -3920,12 +3929,90 @@ input:checked + .slider:before {
   display: block;
 }
 
+.wizard-loader-version-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cv-loader-card.disabled {
+  opacity: 0.42;
+  pointer-events: none;
+  filter: grayscale(0.5);
+}
+
+.wizard-loader-version-select {
+  min-width: 240px;
+  max-width: 360px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 140ms ease, background-color 140ms ease;
+}
+.wizard-loader-version-select:hover,
+.wizard-loader-version-select:focus {
+  border-color: var(--md-sys-color-primary);
+  background-color: var(--md-sys-color-surface-container-highest);
+}
+
 /* Step 3: Mods Search & List */
 .wizard-mod-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 10px;
 }
 .wizard-mod-search-box {
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+}
+.mods-layout-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  flex-shrink: 0;
+}
+.mods-layout-btn {
+  width: 30px;
+  height: 28px;
+  border: none;
+  border-radius: calc(var(--md-sys-shape-corner-medium) - 3px);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.mods-layout-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.mods-layout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--md-sys-color-on-surface);
+}
+.mods-layout-btn.active {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
 }
 .wizard-categories-chips {
   margin-bottom: 12px;
@@ -3936,9 +4023,39 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 180px;
+  max-height: clamp(240px, 36vh, 520px);
   overflow-y: auto;
   padding-right: 4px;
+}
+#manageModsList {
+  max-height: clamp(320px, 48vh, 620px);
+}
+.wizard-mods-list.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-content: start;
+}
+.wizard-mods-list.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-content: start;
+}
+.wizard-mods-list.grid-2 .wizard-mod-item,
+.wizard-mods-list.grid-3 .wizard-mod-item {
+  min-width: 0;
+  padding: 10px 12px;
+}
+.wizard-mods-list.grid-3 .wizard-mod-name-row {
+  flex-wrap: wrap;
+}
+.mods-load-more-hint {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 10px;
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .wizard-mod-item {
@@ -4439,6 +4556,141 @@ input:checked + .slider:before {
 /* ==========================================================================
    MATERIAL 3 SNACKBAR / TOAST SYSTEM
    ========================================================================== */
+.ms-login-hover-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.acc-hover-wrap {
+  width: 100%;
+}
+.ms-browser-hover-btn {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: max-content;
+  min-width: 100%;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background-color: var(--md-sys-color-surface-container-highest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+  z-index: 30;
+  box-shadow: var(--md-sys-elevation-3, 0 6px 18px rgba(0, 0, 0, 0.36));
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+.ms-browser-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: var(--md-sys-color-primary);
+}
+.ms-browser-hover-btn::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -8px;
+  height: 8px;
+}
+.ms-browser-hover-btn.ms-browser-hover-up {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform: translateY(4px);
+}
+.ms-browser-hover-btn.ms-browser-hover-up::before {
+  top: auto;
+  bottom: -8px;
+}
+.ms-browser-hover-btn:hover {
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+}
+.ms-login-hover-wrap:hover .ms-browser-hover-btn,
+.ms-login-hover-wrap:focus-within .ms-browser-hover-btn {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.ms-browser-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 200ms cubic-bezier(0.2, 0, 0, 1), opacity 180ms ease;
+}
+.ms-browser-drawer-inner {
+  overflow: hidden;
+  padding-top: 0;
+  transition: padding-top 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+#modalAddOptions.drawer-open .ms-browser-drawer,
+#modalAddOptions:has(.ms-browser-drawer:focus-within) .ms-browser-drawer {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+#modalAddOptions.drawer-open .ms-browser-drawer-inner,
+#modalAddOptions:has(.ms-browser-drawer:focus-within) .ms-browser-drawer-inner {
+  padding-top: 10px;
+}
+.ms-browser-full-btn {
+  width: 100%;
+  height: 42px;
+  padding: 0 16px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background-color: var(--md-sys-color-surface-container-highest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+.ms-browser-full-btn:hover {
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+}
+
+.ms-device-code-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background-color: var(--md-sys-color-surface-container-high);
+  border: 1px solid var(--md-sys-color-outline-variant);
+}
+.ms-device-code-value {
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--md-sys-color-primary);
+  user-select: all;
+}
+
 .m3-snackbar-container {
   position: fixed;
   bottom: 24px;
@@ -4602,6 +4854,8 @@ input:checked + .slider:before {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 140ms ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
@@ -4788,6 +5042,7 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 14px;
   padding: 2px 2px;
 }
@@ -4796,10 +5051,23 @@ input:checked + .slider:before {
   font-size: 15px;
   font-weight: 700;
   color: var(--md-sys-color-on-surface);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.instance-mods-actions {
+  flex-shrink: 0;
+}
+
+.instance-mods-actions .btn-version-folder {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .manage-installed-mods-scroll {
-  max-height: 400px;
+  max-height: clamp(320px, 50vh, 640px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;

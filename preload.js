@@ -10,12 +10,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Minecraft Launcher Core APIs
   getVersions: () => ipcRenderer.invoke('mc-get-versions'),
+  getLoaderVersions: (loader, gameVersion) => ipcRenderer.invoke('mc-get-loader-versions', { loader, gameVersion }),
   getConfig: () => ipcRenderer.invoke('mc-get-config'),
   saveConfig: (cfg) => ipcRenderer.invoke('mc-save-config', cfg),
   getLocale: (code) => ipcRenderer.invoke('get-locale-data', code),
   getInstalledJavas: () => ipcRenderer.invoke('mc-get-installed-javas'),
   selectJavaDialog: () => ipcRenderer.invoke('mc-select-java-file'),
   loginMicrosoft: () => ipcRenderer.invoke('ms-login-start'),
+  loginMicrosoftBrowser: () => ipcRenderer.invoke('ms-login-browser-start'),
+  cancelMicrosoftLogin: () => ipcRenderer.invoke('ms-login-cancel'),
+  onMsLoginCode: (callback) => ipcRenderer.on('ms-login-code', (event, data) => callback(data)),
   loginElyBy: (creds) => ipcRenderer.invoke('ely-login-start', creds),
   launchMinecraft: (opts) => ipcRenderer.invoke('mc-launch', opts),
   openMinecraftFolder: () => ipcRenderer.invoke('mc-open-folder'),
@@ -31,11 +35,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
   toggleMod: (instanceId, modId, enabled) => ipcRenderer.invoke('mc-toggle-mod', { instanceId, modId, enabled }),
   deleteInstanceFolder: (instanceId) => ipcRenderer.invoke('mc-delete-instance-folder', instanceId),
   getInstanceInstalledJarFiles: (instanceId) => ipcRenderer.invoke('mc-get-instance-jars', instanceId),
+  getInstanceDiskMods: (instanceId) => ipcRenderer.invoke('mc-get-instance-disk-mods', instanceId),
   searchMods: (params) => ipcRenderer.invoke('mc-search-mods', params),
   uploadMclogs: (logText) => ipcRenderer.invoke('mc-upload-mclogs', logText),
   analyzeCrash: (logText) => ipcRenderer.invoke('mc-analyze-crash', logText),
   selectMrpackDialog: () => ipcRenderer.invoke('mc-select-mrpack-file'),
   importMrpack: (mrpackPath) => ipcRenderer.invoke('mc-import-mrpack', mrpackPath),
+  selectExportInstanceDialog: (defaultName) => ipcRenderer.invoke('mc-select-export-instance-path', defaultName),
+  exportInstance: (instanceId, destPath) => ipcRenderer.invoke('mc-export-instance', { instanceId, destPath }),
+  selectImportInstanceDialog: () => ipcRenderer.invoke('mc-select-import-instance-file'),
+  importInstance: (archivePath) => ipcRenderer.invoke('mc-import-instance', archivePath),
 
   // Event Listeners
   onLaunchProgress: (callback) => ipcRenderer.on('mc-launch-progress', (event, data) => callback(data)),

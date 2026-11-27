@@ -89,7 +89,10 @@ async function migrateMinecraftDir(oldDir, newDir, action) {
   const resolvedOld = path.resolve(oldDir);
   const resolvedNew = path.resolve(newDir);
 
-  if (resolvedOld.toLowerCase() === resolvedNew.toLowerCase()) {
+  const isSameDir = process.platform === 'win32'
+    ? resolvedOld.toLowerCase() === resolvedNew.toLowerCase()
+    : resolvedOld === resolvedNew;
+  if (isSameDir) {
     return { success: true, action: 'none', message: 'Директории совпадают' };
   }
 
@@ -126,32 +129,38 @@ async function migrateMinecraftDir(oldDir, newDir, action) {
     }
 
     if (fs.existsSync(resolvedOld)) {
-      if (resolvedNew.startsWith(resolvedOld + path.sep)) {
+      const normOld = process.platform === 'win32' ? resolvedOld.toLowerCase() : resolvedOld;
+      const normNew = process.platform === 'win32' ? resolvedNew.toLowerCase() : resolvedNew;
+      if (normNew.startsWith(normOld + path.sep)) {
         throw new Error('Новая папка не может находиться внутри старой папки');
       }
 
       const entries = fs.readdirSync(resolvedOld);
+      let copyErrors = 0;
       for (const entry of entries) {
         const srcPath = path.join(resolvedOld, entry);
         const dstPath = path.join(resolvedNew, entry);
         try {
           fs.cpSync(srcPath, dstPath, { recursive: true, force: true });
         } catch (copyErr) {
+          copyErrors++;
           console.warn(`[Migrate] Warning copying ${srcPath} to ${dstPath}:`, copyErr.message);
         }
       }
 
-      // After copying, clean up the old directory safely
-      try {
-        if (shellModule && shellModule.trashItem) {
-          await shellModule.trashItem(resolvedOld);
-        } else {
-          fs.rmSync(resolvedOld, { recursive: true, force: true });
-        }
-      } catch (e) {
+      // After copying, clean up the old directory safely only if all entries copied without error
+      if (copyErrors === 0) {
         try {
-          fs.rmSync(resolvedOld, { recursive: true, force: true });
-        } catch (err) {}
+          if (shellModule && shellModule.trashItem) {
+            await shellModule.trashItem(resolvedOld);
+          } else {
+            fs.rmSync(resolvedOld, { recursive: true, force: true });
+          }
+        } catch (e) {
+          try {
+            fs.rmSync(resolvedOld, { recursive: true, force: true });
+          } catch (err) {}
+        }
       }
     }
     return { success: true, action: 'move' };
@@ -361,7 +370,7 @@ function resolveJavaForVersion(targetVersion, isAuto = true, manualPath = '', lo
 
   if (ver.startsWith('26.') || ver.startsWith('25.')) {
     neededMajor = 25;
-  } else if (ver.startsWith('1.21') || ver === '1.20.5' || ver === '1.20.6') {
+  } else if (ver.startsWith('1.21') || ver === '1.20.5' || ver === '1.20.6' || /^2[45]w/.test(ver)) {
     neededMajor = 21;
   } else if (ver.startsWith('1.17') || ver.startsWith('1.18') || ver.startsWith('1.19') || ver.startsWith('1.20')) {
     neededMajor = 17;
@@ -414,19 +423,6 @@ function loadConfig() {
   try {
     if (fs.existsSync(CONFIG_FILE)) {
       cfg = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-      // Decrypt any encrypted tokens in memory
-      if (Array.isArray(cfg?.accounts)) {
-        for (const acc of cfg.accounts) {
-          if (acc.access_token && acc.access_token.startsWith('enc:')) {
-            const dec = cryptoHelpers.decryptToken(acc.access_token);
-            acc.access_token = dec || (acc.type === 'offline' ? 'offline-token' : '');
-          }
-          if (acc.refresh_token && acc.refresh_token.startsWith('enc:')) {
-            const dec = cryptoHelpers.decryptToken(acc.refresh_token);
-            acc.refresh_token = dec || '';
-          }
-        }
-      }
     }
   } catch (e) {
     console.error('Failed to read config, attempting backup restore:', e);
@@ -435,6 +431,20 @@ function loadConfig() {
       try {
         cfg = JSON.parse(fs.readFileSync(bakFile, 'utf8'));
       } catch (bakErr) {}
+    }
+  }
+
+  // Decrypt any encrypted tokens in memory (for both primary and backup config)
+  if (Array.isArray(cfg?.accounts)) {
+    for (const acc of cfg.accounts) {
+      if (acc.access_token && acc.access_token.startsWith('enc:')) {
+        const dec = cryptoHelpers.decryptToken(acc.access_token);
+        acc.access_token = dec || (acc.type === 'offline' ? 'offline-token' : '');
+      }
+      if (acc.refresh_token && acc.refresh_token.startsWith('enc:')) {
+        const dec = cryptoHelpers.decryptToken(acc.refresh_token);
+        acc.refresh_token = dec || '';
+      }
     }
   }
 
@@ -472,31 +482,6 @@ function loadConfig() {
       accentColor: 'lavender',
       customAccentHex: '#EADDFF'
     };
-  }
-
-  // Auto-import accounts from PrismLauncher if not already imported
-  try {
-    if (fs.existsSync(PRISM_ACCOUNTS_FILE)) {
-      const prismData = JSON.parse(fs.readFileSync(PRISM_ACCOUNTS_FILE, 'utf8'));
-      if (Array.isArray(prismData.accounts)) {
-        for (const pAcc of prismData.accounts) {
-          const name = pAcc.profile?.name;
-          const isMs = pAcc.type === 'MSA' || pAcc.type === 'Microsoft' || pAcc.msa;
-          if (name && !cfg.accounts.some(a => a.name.toLowerCase() === name.toLowerCase())) {
-            cfg.accounts.push({
-              type: isMs ? 'mojang' : 'offline',
-              name: name,
-              uuid: pAcc.profile?.id || 'offline_' + name,
-              access_token: pAcc.ygg?.token || pAcc.msa?.token || '',
-              skinUrl: pAcc.profile?.skin?.url || '',
-              active: pAcc.active || false
-            });
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.warn('Could not read PrismLauncher accounts:', e.message);
   }
 
   // Ensure at least one account is active
@@ -585,7 +570,9 @@ async function getVersionManifest(forceRefresh = false) {
   } catch (e) {
     console.warn('Network error fetching manifest, falling back to cache:', e.message);
     if (fs.existsSync(MANIFEST_CACHE)) {
-      return JSON.parse(fs.readFileSync(MANIFEST_CACHE, 'utf8'));
+      try {
+        return JSON.parse(fs.readFileSync(MANIFEST_CACHE, 'utf8'));
+      } catch (cacheErr) {}
     }
   }
 
@@ -760,9 +747,10 @@ async function downloadModFile(instanceId, modObj, targetGameVersion, targetLoad
 
   // Check if we already have the jar file on disk
   if (modObj.fileName) {
-    const existingPath = path.join(modsDir, modObj.fileName);
+    const safeModFileName = path.basename(modObj.fileName);
+    const existingPath = path.join(modsDir, safeModFileName);
     if (fs.existsSync(existingPath) && fs.statSync(existingPath).size > 0) {
-      return { success: true, fileName: modObj.fileName, fileSize: fs.statSync(existingPath).size, cached: true };
+      return { success: true, fileName: safeModFileName, fileSize: fs.statSync(existingPath).size, cached: true };
     }
   }
 
@@ -774,12 +762,13 @@ async function downloadModFile(instanceId, modObj, targetGameVersion, targetLoad
   }
 
   const fileInfo = versionData.files.find(f => f.primary) || versionData.files[0];
-  const destPath = path.join(modsDir, fileInfo.filename);
+  const safeFileName = path.basename(fileInfo.filename);
+  const destPath = path.join(modsDir, safeFileName);
 
   // If file already exists with same size, return cached
   if (fs.existsSync(destPath) && fs.statSync(destPath).size === fileInfo.size) {
-    updateModInConfig(instanceId, modObj.id, { fileName: fileInfo.filename, fileSize: fileInfo.size, fileUrl: fileInfo.url });
-    return { success: true, fileName: fileInfo.filename, fileSize: fileInfo.size, cached: true };
+    updateModInConfig(instanceId, modObj.id, { fileName: safeFileName, fileSize: fileInfo.size, fileUrl: fileInfo.url });
+    return { success: true, fileName: safeFileName, fileSize: fileInfo.size, cached: true };
   }
 
   // Stream download into .tmp and atomically rename
@@ -787,7 +776,7 @@ async function downloadModFile(instanceId, modObj, targetGameVersion, targetLoad
 
   // Update mod record in instance config
   updateModInConfig(instanceId, modObj.id, {
-    fileName: fileInfo.filename,
+    fileName: safeFileName,
     fileSize: fileInfo.size || downloadedSize,
     fileUrl: fileInfo.url,
     downloadedAt: Date.now()
@@ -901,7 +890,7 @@ async function toggleModState(instanceId, modId, enabled) {
   const inst = (cfg.instances || []).find(i => i.id === instanceId);
   if (!inst) throw new Error('Инстанс не найден');
 
-  const mod = (inst.mods || []).find(m => m.id === modId);
+  const mod = (inst.mods || []).find(m => m.id === modId || m.slug === modId);
   if (!mod) throw new Error('Мод не найден');
 
   if (!fs.existsSync(modsDir)) {
@@ -909,7 +898,7 @@ async function toggleModState(instanceId, modId, enabled) {
   }
 
   const files = await fs.promises.readdir(modsDir);
-  const cleanId = String(mod.id || mod.slug).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const cleanId = String(mod.id || mod.slug || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 
   let currentFile = null;
   if (mod.fileName) {
@@ -918,7 +907,7 @@ async function toggleModState(instanceId, modId, enabled) {
     else if (files.includes(mod.fileName.replace(/\.disabled$/, ''))) currentFile = mod.fileName.replace(/\.disabled$/, '');
   }
 
-  if (!currentFile) {
+  if (!currentFile && cleanId.length >= 2) {
     currentFile = files.find(f => {
       const cf = f.toLowerCase().replace(/[^a-z0-9]/g, '');
       return cf.includes(cleanId) && (f.endsWith('.jar') || f.endsWith('.jar.disabled'));
@@ -960,12 +949,14 @@ async function deleteModFile(instanceId, modId, fileName) {
     }
   }
   try {
-    const files = await fs.promises.readdir(modsDir);
-    const cleanId = String(modId).toLowerCase().replace(/[^a-z0-9]/g, '');
-    for (const f of files) {
-      const cleanF = f.toLowerCase().replace(/[^a-z0-9]/g, '');
-      if (cleanF.includes(cleanId) && (f.endsWith('.jar') || f.endsWith('.jar.disabled'))) {
-        try { await fs.promises.unlink(path.join(modsDir, f)); } catch (e) {}
+    const cleanId = String(modId || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanId.length >= 2) {
+      const files = await fs.promises.readdir(modsDir);
+      for (const f of files) {
+        const cleanF = f.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (cleanF.includes(cleanId) && (f.endsWith('.jar') || f.endsWith('.jar.disabled'))) {
+          try { await fs.promises.unlink(path.join(modsDir, f)); } catch (e) {}
+        }
       }
     }
   } catch (e) {}
@@ -1003,6 +994,173 @@ function getInstanceJars(instanceId) {
   const modsDir = getInstanceModsDir(instanceId);
   try {
     return fs.readdirSync(modsDir).filter(f => f.endsWith('.jar'));
+  } catch (e) {
+    return [];
+  }
+}
+
+const diskModMetaCache = new Map();
+
+function parseModJarMetadata(filePath) {
+  const meta = { title: '', description: '', author: '', iconDataUrl: '', sha1: '' };
+  try {
+    const buf = fs.readFileSync(filePath);
+    meta.sha1 = crypto.createHash('sha1').update(buf).digest('hex');
+
+    const cached = diskModMetaCache.get(meta.sha1);
+    if (cached) return { ...cached, sha1: meta.sha1 };
+
+    const zip = new AdmZip(buf);
+    let iconPathInJar = '';
+
+    const fabricEntry = zip.getEntry('fabric.mod.json');
+    const quiltEntry = !fabricEntry ? zip.getEntry('quilt.mod.json') : null;
+    if (fabricEntry || quiltEntry) {
+      try {
+        const raw = JSON.parse((fabricEntry || quiltEntry).getData().toString('utf8'));
+        const obj = raw.quilt_loader?.metadata || raw;
+        meta.title = obj.name || '';
+        meta.description = obj.description || '';
+        if (Array.isArray(obj.authors) && obj.authors.length > 0) {
+          const first = obj.authors[0];
+          meta.author = typeof first === 'string' ? first : (first?.name || '');
+        } else if (obj.contributors && typeof obj.contributors === 'object') {
+          meta.author = Object.keys(obj.contributors)[0] || '';
+        }
+        if (typeof obj.icon === 'string') iconPathInJar = obj.icon;
+        else if (obj.icon && typeof obj.icon === 'object') {
+          const sizes = Object.keys(obj.icon).sort((a, b) => Number(b) - Number(a));
+          if (sizes.length > 0) iconPathInJar = obj.icon[sizes[0]];
+        }
+      } catch (e) {}
+    } else {
+      const tomlEntry = zip.getEntry('META-INF/neoforge.mods.toml') || zip.getEntry('META-INF/mods.toml');
+      if (tomlEntry) {
+        try {
+          const toml = tomlEntry.getData().toString('utf8');
+          const mTitle = toml.match(/displayName\s*=\s*["']([^"']+)["']/);
+          const mAuth = toml.match(/authors\s*=\s*["']([^"']+)["']/);
+          const mLogo = toml.match(/logoFile\s*=\s*["']([^"']+)["']/);
+          const mDesc = toml.match(/description\s*=\s*'''([\s\S]*?)'''/) || toml.match(/description\s*=\s*"""([\s\S]*?)"""/) || toml.match(/description\s*=\s*["']([^"'\r\n]+)["']/);
+          if (mTitle) meta.title = mTitle[1].trim();
+          if (mAuth) meta.author = mAuth[1].trim();
+          if (mLogo) iconPathInJar = mLogo[1].trim();
+          if (mDesc) meta.description = mDesc[1].trim().replace(/\s+/g, ' ');
+        } catch (e) {}
+      }
+    }
+
+    if (iconPathInJar) {
+      const cleanIconPath = iconPathInJar.replace(/^\/+/, '');
+      const iconEntry = zip.getEntry(cleanIconPath);
+      if (iconEntry && !iconEntry.isDirectory) {
+        const iconBuf = iconEntry.getData();
+        if (iconBuf.length > 0 && iconBuf.length < 512 * 1024) {
+          const ext = path.extname(cleanIconPath).toLowerCase().replace('.', '') || 'png';
+          const mime = ext === 'jpg' ? 'jpeg' : (['png', 'jpeg', 'webp', 'gif'].includes(ext) ? ext : 'png');
+          meta.iconDataUrl = `data:image/${mime};base64,${iconBuf.toString('base64')}`;
+        }
+      }
+    }
+  } catch (e) {}
+  return meta;
+}
+
+// Get all mod files on disk (.jar and .jar.disabled) with size, state, and metadata/icons
+async function getInstanceDiskMods(instanceId) {
+  const modsDir = getInstanceModsDir(instanceId);
+  try {
+    if (!fs.existsSync(modsDir)) return [];
+    const entries = fs.readdirSync(modsDir, { withFileTypes: true });
+    const result = [];
+    const uncachedHashes = [];
+
+    for (const entry of entries) {
+      if (!entry.isFile()) continue;
+      const name = entry.name;
+      if (!name.endsWith('.jar') && !name.endsWith('.jar.disabled')) continue;
+      const fullPath = path.join(modsDir, name);
+      let size = 0;
+      try {
+        size = fs.statSync(fullPath).size;
+      } catch (e) {}
+
+      const meta = parseModJarMetadata(fullPath);
+      if (meta.sha1 && !diskModMetaCache.has(meta.sha1)) {
+        uncachedHashes.push(meta.sha1);
+      }
+
+      result.push({
+        fileName: name,
+        size,
+        disabled: name.endsWith('.jar.disabled'),
+        sha1: meta.sha1,
+        title: meta.title,
+        description: meta.description,
+        author: meta.author,
+        icon_url: meta.icon_url || meta.iconDataUrl || ''
+      });
+    }
+
+    // Batch lookup Modrinth icons & metadata by SHA-1 for uncached jars
+    if (uncachedHashes.length > 0) {
+      try {
+        const verRes = await axios.post('https://api.modrinth.com/v2/version_files', {
+          hashes: uncachedHashes,
+          algorithm: 'sha1'
+        }, {
+          headers: { 'User-Agent': 'MaterialLauncher/1.3.0' },
+          timeout: 5000
+        });
+
+        const versionMap = verRes.data || {};
+        const hashToProject = new Map();
+        const projectIds = new Set();
+
+        for (const [sha1, verInfo] of Object.entries(versionMap)) {
+          if (verInfo && verInfo.project_id) {
+            hashToProject.set(sha1, verInfo.project_id);
+            projectIds.add(verInfo.project_id);
+          }
+        }
+
+        const projectMap = new Map();
+        if (projectIds.size > 0) {
+          const idsParam = encodeURIComponent(JSON.stringify(Array.from(projectIds)));
+          const projRes = await axios.get(`https://api.modrinth.com/v2/projects?ids=${idsParam}`, {
+            headers: { 'User-Agent': 'MaterialLauncher/1.3.0' },
+            timeout: 5000
+          });
+          if (Array.isArray(projRes.data)) {
+            for (const p of projRes.data) {
+              projectMap.set(p.id, p);
+            }
+          }
+        }
+
+        for (const item of result) {
+          if (!item.sha1) continue;
+          const pid = hashToProject.get(item.sha1);
+          const proj = pid ? projectMap.get(pid) : null;
+          if (proj) {
+            if (proj.icon_url) item.icon_url = proj.icon_url;
+            if (proj.title) item.title = proj.title;
+            if (proj.description) item.description = proj.description;
+          }
+          diskModMetaCache.set(item.sha1, {
+            title: item.title,
+            description: item.description,
+            author: item.author,
+            icon_url: item.icon_url,
+            iconDataUrl: item.icon_url
+          });
+        }
+      } catch (e) {
+        // Offline or timeout: keep local jar metadata/iconDataUrl without poisoning cache
+      }
+    }
+
+    return result;
   } catch (e) {
     return [];
   }
@@ -1048,12 +1206,14 @@ async function ensureForgeInstaller(gameVersion, preferredForgeVer) {
   const forgeDir = path.join(LAUNCHER_DATA_DIR, 'forge_installers');
   if (!fs.existsSync(forgeDir)) fs.mkdirSync(forgeDir, { recursive: true });
 
-  const sortVersions = (arr) => arr.filter(v => v.startsWith(gameVersion)).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+  const sortVersions = (arr) => arr.filter(v => v.startsWith(gameVersion + '-')).sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
 
   // 1. Check Prism libraries
   const prismForgeBase = path.join(PRISM_DIR, 'libraries', 'net', 'minecraftforge', 'forge');
   if (fs.existsSync(prismForgeBase)) {
-    const versions = sortVersions(fs.readdirSync(prismForgeBase));
+    const versions = preferredForgeVer
+      ? [`${gameVersion}-${preferredForgeVer}`]
+      : sortVersions(fs.readdirSync(prismForgeBase));
     for (const v of versions) {
       const p = path.join(prismForgeBase, v, `forge-${v}-installer.jar`);
       if (fs.existsSync(p) && fs.statSync(p).size > 1000000) return p;
@@ -1063,7 +1223,9 @@ async function ensureForgeInstaller(gameVersion, preferredForgeVer) {
   // 2. Check .minecraft libraries
   const mcForgeBase = path.join(getMinecraftDir(), 'libraries', 'net', 'minecraftforge', 'forge');
   if (fs.existsSync(mcForgeBase)) {
-    const versions = sortVersions(fs.readdirSync(mcForgeBase));
+    const versions = preferredForgeVer
+      ? [`${gameVersion}-${preferredForgeVer}`]
+      : sortVersions(fs.readdirSync(mcForgeBase));
     for (const v of versions) {
       const p = path.join(mcForgeBase, v, `forge-${v}-installer.jar`);
       if (fs.existsSync(p) && fs.statSync(p).size > 1000000) return p;
@@ -1071,9 +1233,11 @@ async function ensureForgeInstaller(gameVersion, preferredForgeVer) {
   }
 
   // 3. Check our local cache
-  const localInstallers = fs.readdirSync(forgeDir)
-    .filter(f => f.startsWith(`forge-${gameVersion}`) && f.endsWith('-installer.jar'))
-    .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+  const localInstallers = preferredForgeVer
+    ? [`forge-${gameVersion}-${preferredForgeVer}-installer.jar`].filter(f => fs.existsSync(path.join(forgeDir, f)))
+    : fs.readdirSync(forgeDir)
+      .filter(f => f.startsWith(`forge-${gameVersion}-`) && f.endsWith('-installer.jar'))
+      .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
   if (localInstallers.length > 0) {
     const p = path.join(forgeDir, localInstallers[0]);
     if (fs.statSync(p).size > 1000000) return p;
@@ -1139,14 +1303,17 @@ async function ensureForgeInstaller(gameVersion, preferredForgeVer) {
 }
 
 // Fabric version profile json setup
-async function ensureFabricProfile(gameVersion) {
+async function ensureFabricProfile(gameVersion, preferredLoaderVer) {
   try {
-    const metaRes = await axios.get(`https://meta.fabricmc.net/v2/versions/loader/${gameVersion}`, {
-      headers: { 'User-Agent': 'MaterialLauncher/1.0.0' },
-      timeout: 8000
-    });
-    if (!Array.isArray(metaRes.data) || metaRes.data.length === 0) return null;
-    const loaderVer = metaRes.data[0].loader.version;
+    let loaderVer = (preferredLoaderVer && preferredLoaderVer !== 'latest') ? preferredLoaderVer : '';
+    if (!loaderVer) {
+      const metaRes = await axios.get(`https://meta.fabricmc.net/v2/versions/loader/${gameVersion}`, {
+        headers: { 'User-Agent': 'MaterialLauncher/1.1.0' },
+        timeout: 8000
+      });
+      if (!Array.isArray(metaRes.data) || metaRes.data.length === 0) return null;
+      loaderVer = metaRes.data[0].loader.version;
+    }
     const profileId = `fabric-loader-${loaderVer}-${gameVersion}`;
     const vDir = path.join(getMinecraftDir(), 'versions', profileId);
     const vJsonPath = path.join(vDir, `${profileId}.json`);
@@ -1156,7 +1323,7 @@ async function ensureFabricProfile(gameVersion) {
     }
 
     const profileRes = await axios.get(`https://meta.fabricmc.net/v2/versions/loader/${gameVersion}/${loaderVer}/profile/json`, {
-      headers: { 'User-Agent': 'MaterialLauncher/1.0.0' },
+      headers: { 'User-Agent': 'MaterialLauncher/1.1.0' },
       timeout: 8000
     });
     if (!fs.existsSync(vDir)) fs.mkdirSync(vDir, { recursive: true });
@@ -1169,14 +1336,17 @@ async function ensureFabricProfile(gameVersion) {
 }
 
 // Quilt version profile json setup
-async function ensureQuiltProfile(gameVersion) {
+async function ensureQuiltProfile(gameVersion, preferredLoaderVer) {
   try {
-    const metaRes = await axios.get(`https://meta.quiltmc.org/v3/versions/loader/${gameVersion}`, {
-      headers: { 'User-Agent': 'MaterialLauncher/1.0.0' },
-      timeout: 8000
-    });
-    if (!Array.isArray(metaRes.data) || metaRes.data.length === 0) return null;
-    const loaderVer = metaRes.data[0].loader.version;
+    let loaderVer = (preferredLoaderVer && preferredLoaderVer !== 'latest') ? preferredLoaderVer : '';
+    if (!loaderVer) {
+      const metaRes = await axios.get(`https://meta.quiltmc.org/v3/versions/loader/${gameVersion}`, {
+        headers: { 'User-Agent': 'MaterialLauncher/1.1.0' },
+        timeout: 8000
+      });
+      if (!Array.isArray(metaRes.data) || metaRes.data.length === 0) return null;
+      loaderVer = metaRes.data[0].loader.version;
+    }
     const profileId = `quilt-loader-${loaderVer}-${gameVersion}`;
     const vDir = path.join(getMinecraftDir(), 'versions', profileId);
     const vJsonPath = path.join(vDir, `${profileId}.json`);
@@ -1186,7 +1356,7 @@ async function ensureQuiltProfile(gameVersion) {
     }
 
     const profileRes = await axios.get(`https://meta.quiltmc.org/v3/versions/loader/${gameVersion}/${loaderVer}/profile/json`, {
-      headers: { 'User-Agent': 'MaterialLauncher/1.0.0' },
+      headers: { 'User-Agent': 'MaterialLauncher/1.1.0' },
       timeout: 8000
     });
     if (!fs.existsSync(vDir)) fs.mkdirSync(vDir, { recursive: true });
@@ -1196,6 +1366,97 @@ async function ensureQuiltProfile(gameVersion) {
     console.warn('Quilt profile fetch error:', e.message);
     return null;
   }
+}
+
+// Fetch available mod loader versions for a given Minecraft version
+const loaderVersionsCache = new Map();
+
+async function getLoaderVersions(loader, gameVersion) {
+  const cleanLoader = String(loader || '').toLowerCase().trim();
+  const cleanGame = String(gameVersion || '').trim();
+  if (!cleanLoader || cleanLoader === 'vanilla' || !cleanGame) {
+    return [];
+  }
+
+  const cacheKey = `${cleanLoader}:${cleanGame}`;
+  const cached = loaderVersionsCache.get(cacheKey);
+  if (cached && (Date.now() - cached.ts < 10 * 60 * 1000)) {
+    return cached.data;
+  }
+
+  let results = [];
+  try {
+    if (cleanLoader === 'fabric') {
+      const res = await axios.get(`https://meta.fabricmc.net/v2/versions/loader/${encodeURIComponent(cleanGame)}`, {
+        headers: { 'User-Agent': 'MaterialLauncher/1.1.0' },
+        timeout: 8000
+      });
+      if (Array.isArray(res.data)) {
+        results = res.data.slice(0, 60).map(item => ({
+          version: item.loader.version,
+          stable: !!item.loader.stable
+        }));
+      }
+    } else if (cleanLoader === 'quilt') {
+      const res = await axios.get(`https://meta.quiltmc.org/v3/versions/loader/${encodeURIComponent(cleanGame)}`, {
+        headers: { 'User-Agent': 'MaterialLauncher/1.1.0' },
+        timeout: 8000
+      });
+      if (Array.isArray(res.data)) {
+        results = res.data.slice(0, 60).map(item => ({
+          version: item.loader.version,
+          stable: !String(item.loader.version).includes('beta')
+        }));
+      }
+    } else if (cleanLoader === 'forge') {
+      const [metaRes, promoRes] = await Promise.all([
+        axios.get('https://files.minecraftforge.net/net/minecraftforge/forge/maven-metadata.json', { timeout: 10000 }),
+        axios.get('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json', { timeout: 8000 }).catch(() => ({ data: {} }))
+      ]);
+      const rawList = metaRes.data?.[cleanGame] || [];
+      const promos = promoRes.data?.promos || {};
+      const recVer = promos[`${cleanGame}-recommended`] || '';
+      const latestVer = promos[`${cleanGame}-latest`] || '';
+
+      results = rawList
+        .map(full => full.startsWith(`${cleanGame}-`) ? full.slice(cleanGame.length + 1) : full)
+        .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
+        .slice(0, 60)
+        .map(ver => ({
+          version: ver,
+          stable: ver === recVer || !ver.includes('beta'),
+          recommended: ver === recVer,
+          latest: ver === latestVer
+        }));
+    } else if (cleanLoader === 'neoforge') {
+      const parts = cleanGame.split('.');
+      if (parts.length >= 2 && parts[0] === '1') {
+        const major = parts[1];
+        const minor = parts[2] || '0';
+        const prefix = `${major}.${minor}.`;
+        const res = await axios.get('https://maven.neoforged.net/api/maven/versions/releases/net/neoforged/neoforge', {
+          headers: { 'User-Agent': 'MaterialLauncher/1.1.0' },
+          timeout: 10000
+        });
+        const allVers = res.data?.versions || [];
+        results = allVers
+          .filter(v => v.startsWith(prefix))
+          .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }))
+          .slice(0, 60)
+          .map(ver => ({
+            version: ver,
+            stable: !ver.includes('beta') && !ver.includes('alpha')
+          }));
+      }
+    }
+  } catch (e) {
+    console.warn(`Failed to fetch ${cleanLoader} versions for ${cleanGame}:`, e.message);
+  }
+
+  if (results.length > 0) {
+    loaderVersionsCache.set(cacheKey, { ts: Date.now(), data: results });
+  }
+  return results;
 }
 
 // GPU Offloading: Registry and Environment configuration
@@ -1439,10 +1700,172 @@ async function importModpackMrpack(mrpackPath, onStatus) {
   return { success: true, instanceId, instanceName: packName };
 }
 
+// Export a Material Launcher instance to a .zip / .mlpack archive
+async function exportInstance(instanceId, destPath, onStatus) {
+  if (!instanceId) throw new Error('Не указан ID сборки');
+  if (!destPath) throw new Error('Не указан путь для сохранения');
+
+  const cfg = loadConfig();
+  const inst = (cfg.instances || []).find(i => i.id === instanceId);
+  if (!inst) throw new Error('Сборка не найдена');
+
+  if (onStatus) onStatus({ status: 'preparing', message: `Экспорт сборки "${inst.name}"...` });
+
+  const zip = new AdmZip();
+  const manifest = {
+    format: 'material-launcher-instance',
+    formatVersion: 1,
+    name: inst.name || 'Imported Instance',
+    gameVersion: inst.gameVersion || '1.20.1',
+    loader: inst.loader || 'vanilla',
+    loaderVersion: inst.loaderVersion || 'latest',
+    modProvider: inst.modProvider || 'modrinth',
+    icon: inst.icon || inst.loader || 'fabric',
+    mods: Array.isArray(inst.mods) ? inst.mods : [],
+    exportedAt: new Date().toISOString()
+  };
+
+  zip.addFile('manifest.json', Buffer.from(JSON.stringify(manifest, null, 2), 'utf8'));
+
+  const instanceDir = getInstanceDir(instanceId);
+  const skipDirs = new Set(['logs', 'crash-reports', '.cache']);
+  let fileCount = 0;
+
+  function addDirRecursive(currentDir, relBase) {
+    if (!fs.existsSync(currentDir)) return;
+    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.isDirectory()) {
+        if (!relBase && skipDirs.has(entry.name)) continue;
+        addDirRecursive(path.join(currentDir, entry.name), relBase ? `${relBase}/${entry.name}` : entry.name);
+      } else if (entry.isFile()) {
+        const relPosix = relBase ? `${relBase}/${entry.name}` : entry.name;
+        const buf = fs.readFileSync(path.join(currentDir, entry.name));
+        zip.addFile(`files/${relPosix}`, buf);
+        fileCount++;
+      }
+    }
+  }
+
+  addDirRecursive(instanceDir, '');
+
+  const outDir = path.dirname(destPath);
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+  zip.writeZip(destPath);
+
+  if (onStatus) onStatus({ status: 'done', message: `Сборка "${inst.name}" экспортирована (${fileCount} файлов)` });
+  return { success: true, instanceName: inst.name, fileCount, destPath };
+}
+
+// Import a Material Launcher instance archive (.zip / .mlpack), or fallback to .mrpack
+async function importInstance(archivePath, onStatus) {
+  if (!archivePath || !fs.existsSync(archivePath)) {
+    throw new Error('Файл сборки не найден');
+  }
+
+  if (onStatus) onStatus({ status: 'preparing', message: 'Анализ архива сборки...' });
+
+  const zip = new AdmZip(archivePath);
+  const zipEntries = zip.getEntries();
+
+  const manifestEntry = zipEntries.find(e => e.entryName === 'manifest.json');
+  if (!manifestEntry) {
+    const mrpackEntry = zipEntries.find(e => e.entryName === 'modrinth.index.json');
+    if (mrpackEntry) {
+      return await importModpackMrpack(archivePath, onStatus);
+    }
+    throw new Error('Некорректный архив сборки: отсутствует manifest.json');
+  }
+
+  const manifest = JSON.parse(manifestEntry.getData().toString('utf8'));
+  if (manifest.format !== 'material-launcher-instance') {
+    throw new Error('Неподдерживаемый формат архива сборки');
+  }
+
+  const instanceId = 'inst-imp-' + Date.now();
+  const instanceDir = getInstanceDir(instanceId);
+  const normalizedInstDir = path.resolve(instanceDir);
+  if (!fs.existsSync(normalizedInstDir)) fs.mkdirSync(normalizedInstDir, { recursive: true });
+
+  if (onStatus) onStatus({ status: 'preparing', message: 'Распаковка файлов сборки...' });
+
+  let extractedFiles = 0;
+  for (const entry of zipEntries) {
+    if (entry.isDirectory) continue;
+    const cleanEntryName = entry.entryName.replace(/\\/g, '/');
+    if (!cleanEntryName.startsWith('files/')) continue;
+
+    const targetRelative = cleanEntryName.slice('files/'.length);
+    if (!targetRelative) continue;
+
+    const destPath = path.resolve(normalizedInstDir, targetRelative);
+    if (!destPath.startsWith(normalizedInstDir + path.sep)) {
+      throw new Error(`Обнаружена угроза Zip Slip (Path Traversal): ${entry.entryName}`);
+    }
+
+    const parentDir = path.dirname(destPath);
+    if (!fs.existsSync(parentDir)) fs.mkdirSync(parentDir, { recursive: true });
+    fs.writeFileSync(destPath, entry.getData());
+    extractedFiles++;
+  }
+
+  const packName = manifest.name || path.basename(archivePath, path.extname(archivePath));
+  const loader = manifest.loader || 'vanilla';
+  const cfg = loadConfig();
+  if (!Array.isArray(cfg.instances)) cfg.instances = [];
+
+  const newInst = {
+    id: instanceId,
+    name: packName,
+    gameVersion: manifest.gameVersion || '1.20.1',
+    loader: loader,
+    loaderVersion: manifest.loaderVersion || 'latest',
+    modProvider: manifest.modProvider || 'modrinth',
+    icon: manifest.icon || (loader === 'forge' ? 'forge' : 'fabric'),
+    created: Date.now(),
+    mods: Array.isArray(manifest.mods) ? manifest.mods : []
+  };
+
+  cfg.instances.unshift(newInst);
+  cfg.selectedInstanceId = instanceId;
+  saveConfig(cfg);
+
+  if (onStatus) onStatus({ status: 'done', message: `Сборка "${packName}" успешно импортирована!` });
+  return { success: true, instanceId, instanceName: packName, extractedFiles };
+}
+
 // Minecraft Launcher
 let activeProcess = null;
+const javaMajorCache = new Map();
 
-async function launchMinecraft(opts, callbacks = {}) {
+function getJavaMajorVersion(javaPath) {
+  if (!javaPath) return 0;
+  const cleanPath = String(javaPath).trim().replace(/^"|"$/g, '');
+  if (javaMajorCache.has(cleanPath)) return javaMajorCache.get(cleanPath);
+  let major = 0;
+  try {
+    const javaExe = process.platform === 'win32' ? cleanPath.replace(/javaw\.exe$/i, 'java.exe') : cleanPath;
+    const verOutput = execSync(`"${javaExe}" -version 2>&1`, { encoding: 'utf8', timeout: 3000 });
+    const m = verOutput.match(/version\s+"(\d+)(?:\.(\d+))?/i);
+    if (m) {
+      const num = parseInt(m[1], 10);
+      major = (num === 1 && m[2]) ? parseInt(m[2], 10) : num;
+    }
+  } catch (e) {}
+  if (!major) {
+    const lower = cleanPath.toLowerCase();
+    if (lower.includes('25.') || lower.includes('jdk-25') || lower.includes('java-runtime-epsilon')) major = 25;
+    else if (lower.includes('21.') || lower.includes('jdk-21') || lower.includes('java-runtime-delta')) major = 21;
+    else if (lower.includes('17.') || lower.includes('jdk-17') || lower.includes('java-runtime-gamma')) major = 17;
+    else if (lower.includes('1.8') || lower.includes('jre1.8') || lower.includes('jdk1.8')) major = 8;
+    else if (lower.includes('jre7') || lower.includes('jdk1.7') || lower.includes('jre6') || lower.includes('jdk1.6')) major = 7;
+  }
+  javaMajorCache.set(cleanPath, major);
+  return major;
+}
+
+async function launchMinecraft(opts = {}, callbacks = {}) {
+  opts = opts || {};
   const { onProgress, onStatus, onLog, onClose } = callbacks;
   const launcher = new Client();
 
@@ -1533,12 +1956,8 @@ async function launchMinecraft(opts, callbacks = {}) {
   // PermGen was removed in Java 8 (replaced by Metaspace). Modern JVMs (Java 8, 17, 21, 25)
   // crash with fatal error "Unrecognized VM option 'PermSize'" if passed -XX:PermSize.
   // Only pass PermSize for legacy Java (<= 7).
-  const isLegacyJava = selectedJava && (
-    selectedJava.includes('1.7') || 
-    selectedJava.includes('1.6') || 
-    selectedJava.includes('jre7') || 
-    selectedJava.includes('jre6')
-  );
+  const javaMajor = getJavaMajorVersion(selectedJava);
+  const isLegacyJava = javaMajor > 0 && javaMajor <= 7;
   if (permGenMB && isLegacyJava) {
     customJvmArgs.push(`-XX:PermSize=${permGenMB}M`);
   }
@@ -1551,16 +1970,9 @@ async function launchMinecraft(opts, callbacks = {}) {
 
   // Garbage Collection Presets: Generational ZGC for Java 21+ or Aikar's optimized G1GC
   const gcPreset = (opts.gcPreset || cfg.gcPreset || 'auto').toLowerCase();
-  const isJava21Plus = selectedJava && (
-    selectedJava.includes('21.') || 
-    selectedJava.includes('25.') || 
-    selectedJava.includes('jdk-21') || 
-    selectedJava.includes('jdk-25') ||
-    selectedJava.includes('runtime-delta') ||
-    selectedJava.includes('runtime-epsilon')
-  );
+  const isJava21Plus = javaMajor >= 21;
 
-  if (gcPreset === 'zgc' || (gcPreset === 'auto' && isJava21Plus && maxRamMB >= 6144)) {
+  if (isJava21Plus && (gcPreset === 'zgc' || (gcPreset === 'auto' && maxRamMB >= 6144))) {
     customJvmArgs.push('-XX:+UseZGC', '-XX:+ZGenerational');
     if (onLog) onLog('[MaterialLauncher]: Активирован ультранизколатентный Generational ZGC');
   } else if (!customJvmArgs.some(a => a.includes('UseG1GC') || a.includes('UseZGC') || a.includes('UseParallelGC'))) {
@@ -1612,30 +2024,32 @@ async function launchMinecraft(opts, callbacks = {}) {
   // Mod loader setup (Forge / Fabric / Vanilla)
   let forgeInstallerPath = null;
   let customVersionProfile = null;
+  const rawLoaderVersion = opts.loaderVersion || targetInst?.loaderVersion || 'latest';
+  const preferredLoaderVer = (rawLoaderVersion && rawLoaderVersion !== 'latest') ? rawLoaderVersion : undefined;
 
   if (loaderType === 'forge') {
     if (onStatus) onStatus({ status: 'preparing', message: 'Подготовка загрузчика Forge...' });
-    if (onLog) onLog(`[MaterialLauncher]: Настройка загрузчика Forge для ${versionId}...`);
+    if (onLog) onLog(`[MaterialLauncher]: Настройка загрузчика Forge ${preferredLoaderVer || 'latest'} для ${versionId}...`);
     try {
-      forgeInstallerPath = await ensureForgeInstaller(versionId);
+      forgeInstallerPath = await ensureForgeInstaller(versionId, preferredLoaderVer);
       if (onLog) onLog(`[MaterialLauncher]: Найден установщик Forge: ${forgeInstallerPath}`);
     } catch (e) {
       if (onLog) onLog(`[MaterialLauncher]: Ошибка подготовки Forge: ${e.message}`);
     }
   } else if (loaderType === 'fabric') {
     if (onStatus) onStatus({ status: 'preparing', message: 'Подготовка загрузчика Fabric...' });
-    if (onLog) onLog(`[MaterialLauncher]: Настройка загрузчика Fabric для ${versionId}...`);
+    if (onLog) onLog(`[MaterialLauncher]: Настройка загрузчика Fabric ${preferredLoaderVer || 'latest'} для ${versionId}...`);
     try {
-      customVersionProfile = await ensureFabricProfile(versionId);
+      customVersionProfile = await ensureFabricProfile(versionId, preferredLoaderVer);
       if (onLog) onLog(`[MaterialLauncher]: Установлен профиль Fabric: ${customVersionProfile}`);
     } catch (e) {
       if (onLog) onLog(`[MaterialLauncher]: Ошибка подготовки Fabric: ${e.message}`);
     }
   } else if (loaderType === 'quilt') {
     if (onStatus) onStatus({ status: 'preparing', message: 'Подготовка загрузчика Quilt...' });
-    if (onLog) onLog(`[MaterialLauncher]: Настройка загрузчика Quilt для ${versionId}...`);
+    if (onLog) onLog(`[MaterialLauncher]: Настройка загрузчика Quilt ${preferredLoaderVer || 'latest'} для ${versionId}...`);
     try {
-      customVersionProfile = await ensureQuiltProfile(versionId);
+      customVersionProfile = await ensureQuiltProfile(versionId, preferredLoaderVer);
       if (onLog) onLog(`[MaterialLauncher]: Установлен профиль Quilt: ${customVersionProfile}`);
     } catch (e) {
       if (onLog) onLog(`[MaterialLauncher]: Ошибка подготовки Quilt: ${e.message}`);
@@ -1652,7 +2066,7 @@ async function launchMinecraft(opts, callbacks = {}) {
     javaPath: selectedJava,
     version: {
       number: versionId,
-      type: 'release',
+      type: versionType === 'snapshot' ? 'snapshot' : 'release',
       ...(customVersionProfile ? { custom: customVersionProfile } : {})
     },
     ...(forgeInstallerPath ? { forge: forgeInstallerPath } : {}),
@@ -1766,6 +2180,7 @@ module.exports = {
   findInstalledJavas,
   resolveJavaForVersion,
   getVersionManifest,
+  getLoaderVersions,
   launchMinecraft,
   getInstanceDir,
   getInstanceModsDir,
@@ -1775,8 +2190,11 @@ module.exports = {
   toggleModState,
   deleteInstanceFolder,
   getInstanceJars,
+  getInstanceDiskMods,
   analyzeCrashLog,
   sanitizeLog,
   uploadToMclogs,
-  importModpackMrpack
+  importModpackMrpack,
+  exportInstance,
+  importInstance
 };

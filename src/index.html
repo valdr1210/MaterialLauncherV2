@@ -436,15 +436,21 @@
                   </table>
                 </div>
                 <div class="accounts-actions-column">
-                  <button class="m3-filled-btn acc-action-btn" id="btnAccAddMicrosoft">
-                    <svg viewBox="0 0 24 24" class="ms-icon-small">
-                      <path fill="#f25022" d="M1 1h10v10H1z"/>
-                      <path fill="#00a4ef" d="M1 13h10v10H1z"/>
-                      <path fill="#7fba00" d="M13 1h10v10H13z"/>
-                      <path fill="#ffb900" d="M13 13h10v10H13z"/>
-                    </svg>
-                    <span data-i18n="acc_btn_add_ms">Войти через Microsoft</span>
-                  </button>
+                  <div class="ms-login-hover-wrap acc-hover-wrap">
+                    <button class="m3-filled-btn acc-action-btn" id="btnAccAddMicrosoft">
+                      <svg viewBox="0 0 24 24" class="ms-icon-small">
+                        <path fill="#f25022" d="M1 1h10v10H1z"/>
+                        <path fill="#00a4ef" d="M1 13h10v10H1z"/>
+                        <path fill="#7fba00" d="M13 1h10v10H13z"/>
+                        <path fill="#ffb900" d="M13 13h10v10H13z"/>
+                      </svg>
+                      <span data-i18n="acc_btn_add_ms">Войти через Microsoft</span>
+                    </button>
+                    <button class="m3-action-btn-secondary acc-action-btn ms-browser-hover-btn" id="btnAccAddMicrosoftBrowser">
+                      <svg viewBox="0 0 24 24" class="ms-browser-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                      <span data-i18n="acc_btn_add_ms_browser">Войти через браузер</span>
+                    </button>
+                  </div>
                   <button class="m3-filled-btn acc-action-btn acc-btn-ely" id="btnAccAddElyBy">
                     <img src="./assets/elyby.png" class="ely-icon-small" alt="Ely.by">
                     <span data-i18n="acc_btn_add_ely">Войти через Ely.by</span>
@@ -598,6 +604,14 @@
                 <span data-i18n="acc_type_offline">Автономная</span>
               </button>
             </div>
+            <div class="ms-browser-drawer">
+              <div class="ms-browser-drawer-inner">
+                <button type="button" id="msBrowserLoginBtn" class="ms-browser-full-btn">
+                  <svg viewBox="0 0 24 24" class="ms-browser-icon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+                  <span data-i18n="ms_btn_browser_fallback">Войти через браузер</span>
+                </button>
+              </div>
+            </div>
             <div class="auth-status-msg" id="msAuthStatus" style="display: none;"></div>
           </div>
         </div>
@@ -695,19 +709,52 @@
         </div>
 
         <div class="wizard-steps-container">
-          <!-- ШАГ 1: ЗАГРУЗЧИК МОДОВ -->
+          <!-- ШАГ 1: ВЫБРАТЬ ВЕРСИЮ -->
           <div class="wizard-step-box active" id="wizardStep1" data-step="1">
             <div class="wizard-step-header" id="wizardStep1Header">
               <div class="wizard-step-header-left">
                 <span class="wizard-step-badge">1</span>
-                <span class="wizard-step-title" data-i18n="wizard_step_1_title">Шаг 1: Загрузчик модов</span>
+                <span class="wizard-step-title" data-i18n="wizard_step_1_title">Шаг 1: Выбрать версию</span>
               </div>
               <div class="wizard-step-header-right">
-                <span class="wizard-step-selected-value" id="wizardStep1Value">Fabric</span>
+                <span class="wizard-step-selected-value" id="wizardStep1Value">1.21.1</span>
                 <svg class="wizard-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
               </div>
             </div>
             <div class="wizard-step-content" id="wizardStep1Content">
+              <div class="wizard-version-search-row">
+                <div class="search-input-box wizard-version-search-box">
+                  <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                  <input type="text" id="wizardVersionSearchInput" placeholder="Поиск версии (напр. 1.21.1, 1.20, 1.16)..." data-i18n-placeholder="wizard_version_search_placeholder">
+                </div>
+                <label class="cv-checkbox-label" id="cvShowSnapshotsLabel">
+                  <input type="checkbox" id="cvShowSnapshotsCheckbox">
+                  <span id="cvShowSnapshotsText" data-i18n="cv_show_snapshots">Снапшоты</span>
+                </label>
+              </div>
+              <div class="wizard-versions-grid" id="wizardVersionsGrid">
+                <!-- Dynamically populated or static fallbacks -->
+              </div>
+              <button class="wizard-show-all-versions-btn" id="btnToggleAllWizardVersions" type="button">
+                <span id="txtToggleAllWizardVersions" data-i18n="cv_show_all_versions">Показать все версии</span>
+                <svg viewBox="0 0 24 24" class="toggle-versions-chevron"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- ШАГ 2: ЗАГРУЗЧИК МОДОВ -->
+          <div class="wizard-step-box" id="wizardStep2" data-step="2">
+            <div class="wizard-step-header" id="wizardStep2Header">
+              <div class="wizard-step-header-left">
+                <span class="wizard-step-badge">2</span>
+                <span class="wizard-step-title" data-i18n="wizard_step_2_title">Шаг 2: Загрузчик модов</span>
+              </div>
+              <div class="wizard-step-header-right">
+                <span class="wizard-step-selected-value" id="wizardStep2Value">Fabric</span>
+                <svg class="wizard-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+              </div>
+            </div>
+            <div class="wizard-step-content" id="wizardStep2Content">
               <div class="cv-loader-cards" id="cvLoaderCards">
                 <div class="cv-loader-card active" data-loader="fabric">
                   <div class="cv-loader-icon-box fabric">
@@ -765,6 +812,13 @@
                 </div>
               </div>
 
+              <div class="wizard-loader-version-row" id="wizardLoaderVersionRow">
+                <label class="wizard-provider-label" for="wizardLoaderVersionSelect" data-i18n="wizard_loader_version_label">Версия загрузчика:</label>
+                <select class="wizard-loader-version-select" id="wizardLoaderVersionSelect">
+                  <option value="latest" data-i18n="wizard_loader_version_latest">Последняя (Рекомендуемая)</option>
+                </select>
+              </div>
+
               <!-- Provider selector row -->
               <div class="wizard-provider-row">
                 <span class="wizard-provider-label" data-i18n="cv_label_provider">Сервис для загрузки модов:</span>
@@ -779,39 +833,6 @@
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- ШАГ 2: ВЫБРАТЬ ВЕРСИЮ -->
-          <div class="wizard-step-box" id="wizardStep2" data-step="2">
-            <div class="wizard-step-header" id="wizardStep2Header">
-              <div class="wizard-step-header-left">
-                <span class="wizard-step-badge">2</span>
-                <span class="wizard-step-title" data-i18n="wizard_step_2_title">Шаг 2: Выбрать версию</span>
-              </div>
-              <div class="wizard-step-header-right">
-                <span class="wizard-step-selected-value" id="wizardStep2Value">1.21.1</span>
-                <svg class="wizard-chevron" viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-              </div>
-            </div>
-            <div class="wizard-step-content" id="wizardStep2Content">
-              <div class="wizard-version-search-row">
-                <div class="search-input-box wizard-version-search-box">
-                  <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                  <input type="text" id="wizardVersionSearchInput" placeholder="Поиск версии (напр. 1.21.1, 1.20, 1.16)..." data-i18n-placeholder="wizard_version_search_placeholder">
-                </div>
-                <label class="cv-checkbox-label" id="cvShowSnapshotsLabel">
-                  <input type="checkbox" id="cvShowSnapshotsCheckbox">
-                  <span id="cvShowSnapshotsText" data-i18n="cv_show_snapshots">Снапшоты</span>
-                </label>
-              </div>
-              <div class="wizard-versions-grid" id="wizardVersionsGrid">
-                <!-- Dynamically populated or static fallbacks -->
-              </div>
-              <button class="wizard-show-all-versions-btn" id="btnToggleAllWizardVersions" type="button">
-                <span id="txtToggleAllWizardVersions" data-i18n="cv_show_all_versions">Показать все версии</span>
-                <svg viewBox="0 0 24 24" class="toggle-versions-chevron"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-              </button>
             </div>
           </div>
 
@@ -833,6 +854,17 @@
                   <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>
                   <input type="text" id="wizardModSearchInput" placeholder="Поиск модов (Sodium, Iris, JEI, AppleSkin...)" data-i18n-placeholder="wizard_mod_search_placeholder">
                 </div>
+                <div class="mods-layout-toggle" role="group" aria-label="Сетка отображения">
+                  <button type="button" class="mods-layout-btn active" data-layout="list" title="Список (1 колонка)">
+                    <svg viewBox="0 0 24 24"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>
+                  </button>
+                  <button type="button" class="mods-layout-btn" data-layout="grid-2" title="Сетка (2 колонки)">
+                    <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+                  </button>
+                  <button type="button" class="mods-layout-btn" data-layout="grid-3" title="Сетка (3 колонки)">
+                    <svg viewBox="0 0 24 24"><path d="M3 3h5v5H3V3zm6.5 0h5v5h-5V3zM16 3h5v5h-5V3zM3 9.5h5v5H3v-5zm6.5 0h5v5h-5v-5zm6.5 0h5v5h-5v-5zM3 16h5v5H3v-5zm6.5 0h5v5h-5v-5zm6.5 0h5v5h-5v-5z"/></svg>
+                  </button>
+                </div>
               </div>
               <div class="filter-chips wizard-categories-chips" id="wizardCategoriesChips">
                 <button class="filter-chip active" data-category="all" data-i18n="mods_cat_all">Все</button>
@@ -850,6 +882,20 @@
             </div>
           </div>
         </div>
+
+        <!-- Banner: Import exported instance archive (placed ABOVE .mrpack banner) -->
+        <button class="mrpack-import-banner fullwidth" id="btnImportInstanceInModal" type="button" style="margin-bottom: 10px;">
+          <div class="mrpack-banner-left">
+            <div class="mrpack-banner-icon">
+              <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-5 11v-3H9v-2h6V9l4 4-4 4z"/></svg>
+            </div>
+            <div class="mrpack-banner-text" data-i18n="instance_import_banner_text">Есть готовый архив сборки .zip?</div>
+          </div>
+          <div class="mrpack-banner-btn-label">
+            <span data-i18n="instance_btn_import">Импортировать сборку</span>
+            <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;"><path d="M5 13h11.86l-5.43 5.43 1.42 1.42L21.14 12l-8.29-7.85-1.42 1.42L16.86 11H5v2z"/></svg>
+          </div>
+        </button>
 
         <!-- Banner: Ready-made .mrpack assembly file (Full width, placed at the very bottom above footer) -->
         <button class="mrpack-import-banner fullwidth" id="btnImportMrpackInModal" type="button">
@@ -888,6 +934,10 @@
     <div class="m3-context-item" id="ctxMenuOpenFolder">
       <svg viewBox="0 0 24 24"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm0 12H4V8h16v10z"/></svg>
       <span data-i18n="ctx_open_folder">Открыть папку</span>
+    </div>
+    <div class="m3-context-item" id="ctxMenuExportVersion">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      <span data-i18n="ctx_export_version">Экспортировать сборку</span>
     </div>
     <div class="m3-context-divider"></div>
     <div class="m3-context-item danger" id="ctxMenuDeleteVersion">
@@ -979,6 +1029,17 @@
             <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             <input type="text" id="manageModSearchInput" placeholder="Поиск модов для добавления (Sodium, Iris, JEI, AppleSkin...)" data-i18n-placeholder="manage_mods_search_placeholder">
           </div>
+          <div class="mods-layout-toggle" role="group" aria-label="Сетка отображения">
+            <button type="button" class="mods-layout-btn active" data-layout="list" title="Список (1 колонка)">
+              <svg viewBox="0 0 24 24"><path d="M3 5h18v2H3V5zm0 6h18v2H3v-2zm0 6h18v2H3v-2z"/></svg>
+            </button>
+            <button type="button" class="mods-layout-btn" data-layout="grid-2" title="Сетка (2 колонки)">
+              <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+            </button>
+            <button type="button" class="mods-layout-btn" data-layout="grid-3" title="Сетка (3 колонки)">
+              <svg viewBox="0 0 24 24"><path d="M3 3h5v5H3V3zm6.5 0h5v5h-5V3zM16 3h5v5h-5V3zM3 9.5h5v5H3v-5zm6.5 0h5v5h-5v-5zm6.5 0h5v5h-5v-5zM3 16h5v5H3v-5zm6.5 0h5v5h-5v-5zm6.5 0h5v5h-5v-5z"/></svg>
+            </button>
+          </div>
         </div>
         <div class="filter-chips wizard-categories-chips" id="manageCategoriesChips">
           <button class="filter-chip active" data-category="all" data-i18n="mods_cat_all">Все</button>
@@ -990,7 +1051,7 @@
           <button class="filter-chip" data-category="utility" data-i18n="mods_cat_util">Интерфейс</button>
           <button class="filter-chip" data-category="storage" data-i18n="mods_cat_storage">Хранилище</button>
         </div>
-        <div class="wizard-mods-list" id="manageModsList" style="max-height: 380px;">
+        <div class="wizard-mods-list" id="manageModsList">
           <!-- Dynamically populated mod list with checkboxes/toggles -->
         </div>
       </div>
@@ -998,8 +1059,34 @@
       <div class="wizard-footer" style="justify-content: space-between;">
         <span class="manage-mods-footer-summary" id="manageModsFooterSummary">0 выбрано</span>
         <div class="wizard-footer-actions">
-          <button class="m3-action-btn-primary" id="btnSaveManageMods" data-i18n="btn_done">Готово</button>
+          <button class="btn-wizard-submit" id="btnSaveManageMods" data-i18n="btn_done">Готово</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8c. MICROSOFT DEVICE CODE BROWSER LOGIN MODAL -->
+  <div class="modal-overlay" id="msDeviceLoginModal" role="dialog" aria-modal="true" style="z-index: 1210;">
+    <div class="modal-content m3-dialog-content" style="max-width: 440px;">
+      <div class="m3-dialog-header">
+        <div class="m3-dialog-icon" style="background: rgba(0, 164, 239, 0.14); color: #00a4ef;">
+          <svg viewBox="0 0 24 24"><path d="M11 3H3v8h8V3zm10 0h-8v8h8V3zM11 13H3v8h8v-8zm10 0h-8v8h8v-8z"/></svg>
+        </div>
+        <h3 class="modal-title" data-i18n="ms_device_title">Вход через Microsoft</h3>
+      </div>
+      <p class="m3-dialog-message" data-i18n="ms_device_desc" style="margin-bottom: 12px;">
+        Браузер открыт. Подтвердите вход с этим кодом (он уже скопирован в буфер обмена):
+      </p>
+      <div class="ms-device-code-box">
+        <span class="ms-device-code-value" id="msDeviceCodeDisplay">--------</span>
+        <button type="button" class="btn-version-folder" id="btnCopyMsDeviceCode" data-i18n="btn_copy">Копировать</button>
+      </div>
+      <p style="font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-top: 10px; margin-bottom: 0;" data-i18n="ms_device_waiting">
+        Ожидание подтверждения в браузере...
+      </p>
+      <div class="m3-dialog-actions" style="margin-top: 18px;">
+        <button type="button" class="btn-wizard-cancel" id="btnOpenMsDeviceUrl" data-i18n="ms_device_open_browser">Открыть браузер</button>
+        <button type="button" class="btn-wizard-cancel" id="btnCancelMsDeviceLogin" data-i18n="btn_cancel">Отмена</button>
       </div>
     </div>
   </div>

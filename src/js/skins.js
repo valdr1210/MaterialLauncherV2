@@ -10,10 +10,7 @@ function getHeadHtml(skinUrl, accountName, size = 26) {
   const safeName = (accountName || 'Player').replace(/"/g, '&quot;');
   
   if (skinUrl && (skinUrl.startsWith('http://') || skinUrl.startsWith('https://') || skinUrl.startsWith('data:'))) {
-    let cleanUrl = skinUrl;
-    if (cleanUrl.startsWith('http://skinsystem.ely.by/')) {
-      cleanUrl = cleanUrl.replace('http://', 'https://');
-    }
+    const cleanUrl = skinUrl.startsWith('http://') ? skinUrl.replace(/^http:\/\//i, 'https://') : skinUrl;
     const safeUrl = cleanUrl.replace(/'/g, "\\'");
     return `
       <div class="mc-head-avatar" style="width: ${size}px; height: ${size}px;" title="${safeName}">
@@ -26,7 +23,7 @@ function getHeadHtml(skinUrl, accountName, size = 26) {
   const fallbackUrl = accountName ? `https://mc-heads.net/avatar/${encodeURIComponent(accountName)}/${size}` : DEFAULT_SKIN_SVG;
   return `
     <div class="mc-head-avatar" style="width: ${size}px; height: ${size}px;" title="${safeName}">
-      <img src="${fallbackUrl}" class="mc-head-img-fallback" onerror="this.src='${DEFAULT_SKIN_SVG}'" style="width: 100%; height: 100%; image-rendering: pixelated; display: block;">
+      <img src="${fallbackUrl}" class="mc-head-img-fallback" style="width: 100%; height: 100%; image-rendering: pixelated; display: block;">
     </div>
   `;
 }

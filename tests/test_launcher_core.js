@@ -233,6 +233,10 @@ async function main() {
       assert.strictEqual(foundAcc.access_token, 'secret_plain_access_token', 'access_token in memory must be decrypted');
       assert.strictEqual(foundAcc.refresh_token, 'secret_plain_refresh_token', 'refresh_token in memory must be decrypted');
     } finally {
+      launcherCore.setCryptoHelpers({
+        encryptToken: (t) => t,
+        decryptToken: (t) => t
+      });
       // Restore original config
       if (backupContent) {
         fs.writeFileSync(liveConfigPath, backupContent, 'utf8');
@@ -314,6 +318,73 @@ async function main() {
       fs.rmSync(newDir, { recursive: true, force: true });
       fs.rmSync(keepNew, { recursive: true, force: true });
     } catch (e) {}
+  });
+
+  await runTest('Test 17: getLoaderVersions returns empty array for vanilla/invalid and valid structure for mod loaders', async () => {
+    const vanillaRes = await launcherCore.getLoaderVersions('vanilla', '1.21.1');
+    assert(Array.isArray(vanillaRes) && vanillaRes.length === 0, 'Vanilla must return empty array');
+
+    const emptyRes = await launcherCore.getLoaderVersions('', '');
+    assert(Array.isArray(emptyRes) && emptyRes.length === 0, 'Empty loader/gameVersion must return empty array');
+
+    const fabricRes = await launcherCore.getLoaderVersions('fabric', '1.21.1');
+    assert(Array.isArray(fabricRes), 'Fabric result must be an array');
+    if (fabricRes.length > 0) {
+      assert(typeof fabricRes[0].version === 'string' && fabricRes[0].version.length > 0, 'Fabric version item must have version string');
+    }
+  });
+
+  await runTest('Test 18: exportInstance and importInstance round-trip', async () => {
+    const tmpZip = path.join(os.tmpdir(), `ml_test_export_${Date.now()}.zip`);
+    const tmpId = `inst-test-${Date.now()}`;
+    const cfgBackup = launcherCore.loadConfig();
+    const origInstances = Array.isArray(cfgBackup.instances) ? [...cfgBackup.instances] : [];
+    const origSelected = cfgBackup.selectedInstanceId;
+    let importedId = null;
+
+    try {
+      const instDir = launcherCore.getInstanceDir(tmpId);
+      const modsDir = path.join(instDir, 'mods');
+      fs.mkdirSync(modsDir, { recursive: true });
+      fs.writeFileSync(path.join(modsDir, 'sample-mod.jar'), 'dummy-jar-bytes');
+
+      cfgBackup.instances = [
+        ...origInstances,
+        {
+          id: tmpId,
+          name: 'Test Export Pack',
+          gameVersion: '1.20.1',
+          loader: 'forge',
+          loaderVersion: '47.4.10',
+          modProvider: 'modrinth',
+          mods: [{ id: 'sample-mod', title: 'Sample Mod' }]
+        }
+      ];
+      launcherCore.saveConfig(cfgBackup);
+
+      const expRes = await launcherCore.exportInstance(tmpId, tmpZip);
+      assert(expRes.success && fs.existsSync(tmpZip), 'Exported zip must exist');
+
+      const impRes = await launcherCore.importInstance(tmpZip);
+      assert(impRes.success && impRes.instanceId, 'Import must succeed');
+      importedId = impRes.instanceId;
+
+      const afterCfg = launcherCore.loadConfig();
+      const importedInst = (afterCfg.instances || []).find(i => i.id === importedId);
+      assert(importedInst && importedInst.name === 'Test Export Pack', 'Imported instance metadata must match');
+      assert(importedInst.loaderVersion === '47.4.10', 'Imported loaderVersion must match');
+
+      const importedModPath = path.join(launcherCore.getInstanceDir(importedId), 'mods', 'sample-mod.jar');
+      assert(fs.existsSync(importedModPath), 'Imported mod file must exist on disk');
+    } finally {
+      const restoreCfg = launcherCore.loadConfig();
+      restoreCfg.instances = origInstances;
+      restoreCfg.selectedInstanceId = origSelected;
+      launcherCore.saveConfig(restoreCfg);
+      if (fs.existsSync(tmpZip)) fs.rmSync(tmpZip, { force: true });
+      await launcherCore.deleteInstanceFolder(tmpId);
+      if (importedId) await launcherCore.deleteInstanceFolder(importedId);
+    }
   });
 
   console.log('\n=== SUMMARY ===');

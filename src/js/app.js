@@ -693,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Restore saved accent color (default to lavender with #1D1B20 / #79747E / #EADDFF)
   let savedAccent = localStorage.getItem('launcher_accent');
-  if (!savedAccent || savedAccent === 'emerald' || savedAccent === 'purple') {
+  if (!savedAccent || savedAccent === 'purple') {
     savedAccent = 'lavender';
     localStorage.setItem('launcher_accent', 'lavender');
   }
@@ -1027,8 +1027,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const t = (k, fb) => (window.I18N ? window.I18N.t(k, fb) : fb);
     const inst = appConfig.selectedInstanceId ? getActiveInstance() : null;
 
+    const displayTitle = inst ? (inst.name || ver) : ver;
     if (currentVersionText) {
-      currentVersionText.innerHTML = `${escapeHtml(ver)} <svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>`;
+      currentVersionText.innerHTML = `<span class="version-current-label" title="${escapeHtml(displayTitle)}">${escapeHtml(displayTitle)}</span><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>`;
     }
     if (launchVersionTitle && isLaunching) {
       // Keep download progress or leave clear
@@ -1037,7 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (versionSelectorLabel) {
       if (inst) {
-        versionSelectorLabel.textContent = (inst.loader || 'Fabric').toUpperCase();
+        versionSelectorLabel.textContent = `${(inst.loader || 'Fabric').toUpperCase()} • ${inst.gameVersion}`;
       } else {
         const isLatest = manifestData?.latest?.release === ver;
         if (isLatest) {
@@ -1439,6 +1440,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     updateSidebarProfile();
+    if (typeof renderModalAccountsList === 'function') {
+      renderModalAccountsList();
+    }
   }
 
   async function loadInstalledJavas() {
@@ -1861,22 +1865,67 @@ document.addEventListener('DOMContentLoaded', () => {
   btnRefreshJava?.addEventListener('click', loadInstalledJavas);
 
   // Accounts Toolbar & Actions
-  btnAccAddMicrosoft?.addEventListener('click', async () => {
-    if (!window.electronAPI?.loginMicrosoft) {
+  const msDeviceLoginModal = document.getElementById('msDeviceLoginModal');
+  const msDeviceCodeDisplay = document.getElementById('msDeviceCodeDisplay');
+  const btnCopyMsDeviceCode = document.getElementById('btnCopyMsDeviceCode');
+  const btnOpenMsDeviceUrl = document.getElementById('btnOpenMsDeviceUrl');
+  const btnCancelMsDeviceLogin = document.getElementById('btnCancelMsDeviceLogin');
+  let activeMsDeviceUrl = 'https://www.microsoft.com/link';
+
+  if (window.electronAPI?.onMsLoginCode) {
+    window.electronAPI.onMsLoginCode((data) => {
+      if (!data) return;
+      activeMsDeviceUrl = data.browserUrl || data.verificationUri || 'https://www.microsoft.com/link';
+      if (msDeviceCodeDisplay) msDeviceCodeDisplay.textContent = data.userCode || '--------';
+      msDeviceLoginModal?.classList.add('open');
+    });
+  }
+
+  btnCopyMsDeviceCode?.addEventListener('click', async () => {
+    const code = msDeviceCodeDisplay?.textContent?.trim();
+    if (!code) return;
+    try {
+      await navigator.clipboard.writeText(code);
+      showSnackbar((window.I18N ? window.I18N.t('toast_code_copied', 'Код скопирован') : 'Код скопирован'), 'success');
+    } catch (e) {}
+  });
+
+  btnOpenMsDeviceUrl?.addEventListener('click', () => {
+    if (window.electronAPI?.openExternal && activeMsDeviceUrl) {
+      window.electronAPI.openExternal(activeMsDeviceUrl);
+    }
+  });
+
+  btnCancelMsDeviceLogin?.addEventListener('click', () => {
+    msDeviceLoginModal?.classList.remove('open');
+    window.electronAPI?.cancelMicrosoftLogin?.();
+  });
+
+  const btnAccAddMicrosoftBrowser = document.getElementById('btnAccAddMicrosoftBrowser');
+  const msBrowserLoginBtn = document.getElementById('msBrowserLoginBtn');
+
+  async function runMicrosoftLogin(viaBrowser = false) {
+    const loginFn = viaBrowser ? window.electronAPI?.loginMicrosoftBrowser : window.electronAPI?.loginMicrosoft;
+    if (!loginFn) {
       showSnackbar((window.I18N ? window.I18N.t('toast_ms_login_desktop_only', 'Microsoft Login доступен в десктопном приложении Electron.') : 'Microsoft Login доступен в десктопном приложении Electron.'), 'warning');
       return;
     }
-    btnAccAddMicrosoft.disabled = true;
-    appendConsoleLog('[Auth]: Открытие окна авторизации Microsoft...');
+    if (btnAccAddMicrosoft) btnAccAddMicrosoft.disabled = true;
+    if (btnAccAddMicrosoftBrowser) btnAccAddMicrosoftBrowser.disabled = true;
+    if (msBrowserLoginBtn) msBrowserLoginBtn.disabled = true;
+    appendConsoleLog(viaBrowser ? '[Auth]: Запуск входа Microsoft через браузер...' : '[Auth]: Открытие окна авторизации Microsoft...');
 
     try {
-      const res = await window.electronAPI.loginMicrosoft();
+      const res = await loginFn();
+      msDeviceLoginModal?.classList.remove('open');
       if (res.success && res.account) {
         const newAcc = {
           type: 'mojang',
           name: res.account.name,
           uuid: res.account.uuid,
           access_token: res.account.access_token,
+          refresh_token: res.account.refresh_token,
+          hasLicense: res.account.hasLicense,
           skinUrl: res.account.skinUrl,
           active: true
         };
@@ -1902,9 +1951,37 @@ document.addEventListener('DOMContentLoaded', () => {
       const connText = window.I18N ? window.I18N.t('error_connect_failed', 'Ошибка подключения: ') : 'Ошибка подключения: ';
       showSnackbar(connText + err.message, 'error');
     } finally {
-      btnAccAddMicrosoft.disabled = false;
+      msDeviceLoginModal?.classList.remove('open');
+      if (btnAccAddMicrosoft) btnAccAddMicrosoft.disabled = false;
+      if (btnAccAddMicrosoftBrowser) btnAccAddMicrosoftBrowser.disabled = false;
+      if (msBrowserLoginBtn) msBrowserLoginBtn.disabled = false;
     }
-  });
+  }
+
+  btnAccAddMicrosoft?.addEventListener('click', () => runMicrosoftLogin(false));
+  btnAccAddMicrosoftBrowser?.addEventListener('click', () => runMicrosoftLogin(true));
+  msBrowserLoginBtn?.addEventListener('click', () => runMicrosoftLogin(true));
+
+  const msBrowserDrawerEl = document.querySelector('#modalAddOptions .ms-browser-drawer');
+  let msDrawerCloseTimer = null;
+  function openMsBrowserDrawer() {
+    if (msDrawerCloseTimer) {
+      clearTimeout(msDrawerCloseTimer);
+      msDrawerCloseTimer = null;
+    }
+    modalAddOptions?.classList.add('drawer-open');
+  }
+  function scheduleCloseMsBrowserDrawer() {
+    if (msDrawerCloseTimer) clearTimeout(msDrawerCloseTimer);
+    msDrawerCloseTimer = setTimeout(() => {
+      modalAddOptions?.classList.remove('drawer-open');
+    }, 180);
+  }
+  msLoginBtn?.addEventListener('mouseenter', openMsBrowserDrawer);
+  modalElyLoginBtn?.addEventListener('mouseenter', scheduleCloseMsBrowserDrawer);
+  modalBtnAddOfflineChoice?.addEventListener('mouseenter', scheduleCloseMsBrowserDrawer);
+  msBrowserDrawerEl?.addEventListener('mouseenter', openMsBrowserDrawer);
+  modalAddOptions?.addEventListener('mouseleave', scheduleCloseMsBrowserDrawer);
 
   btnAccAddOffline?.addEventListener('click', () => {
     if (addOfflineModal) {
@@ -2337,6 +2414,42 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Instance Archive Import Button Handler (above .mrpack)
+  const btnImportInstanceInModal = document.getElementById('btnImportInstanceInModal');
+  btnImportInstanceInModal?.addEventListener('click', async () => {
+    if (!window.electronAPI?.selectImportInstanceDialog || !window.electronAPI?.importInstance) return;
+    try {
+      const filePath = await window.electronAPI.selectImportInstanceDialog();
+      if (!filePath) return;
+
+      showSnackbar((window.I18N ? window.I18N.t('toast_import_instance_started', 'Импорт сборки начат...') : 'Импорт сборки начат...'), 'info');
+      btnImportInstanceInModal.disabled = true;
+      const labelSpan = btnImportInstanceInModal.querySelector('.mrpack-banner-btn-label span') || btnImportInstanceInModal;
+      labelSpan.textContent = (window.I18N ? window.I18N.t('btn_importing_status', 'Импортирование...') : 'Импортирование...');
+
+      const res = await window.electronAPI.importInstance(filePath);
+      if (res?.success) {
+        appConfig = await window.electronAPI.getConfig();
+        createVersionModal?.classList.remove('open');
+        renderVersionsGrid();
+        renderActiveInstanceOnLaunchTab();
+        showSnackbar((window.I18N ? window.I18N.t('toast_import_instance_success', 'Сборка "{name}" успешно импортирована!') : 'Сборка "{name}" успешно импортирована!').replace('{name}', res.instanceName), 'success');
+      } else {
+        showSnackbar((window.I18N ? window.I18N.t('toast_mrpack_error', 'Ошибка импорта: {error}') : 'Ошибка импорта: {error}').replace('{error}', res?.error || 'Неизвестная ошибка'), 'error');
+      }
+    } catch (e) {
+      showSnackbar((window.I18N ? window.I18N.t('toast_mrpack_error', 'Ошибка импорта: {error}') : 'Ошибка импорта: {error}').replace('{error}', e.message), 'error');
+    } finally {
+      if (btnImportInstanceInModal) {
+        btnImportInstanceInModal.disabled = false;
+        const labelSpan = btnImportInstanceInModal.querySelector('.mrpack-banner-btn-label span');
+        if (labelSpan) {
+          labelSpan.textContent = (window.I18N ? window.I18N.t('instance_btn_import', 'Импортировать сборку') : 'Импортировать сборку');
+        }
+      }
+    }
+  });
+
   // Mrpack Import Button Handler
   const btnImportMrpackInModal = document.getElementById('btnImportMrpackInModal');
   btnImportMrpackInModal?.addEventListener('click', async () => {
@@ -2679,8 +2792,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 8. Mods View & 3-Step Create Version Wizard
   const btnOpenCreateVersionModal = document.getElementById('btnOpenCreateVersionModal');
-  const btnOpenModsFolder = document.getElementById('btnOpenModsFolder');
-  const minimalInstancesList = document.getElementById('minimalInstancesList');
   const installedVersionsContainer = document.getElementById('installedVersionsContainer');
 
   // Create Version Wizard Modal elements
@@ -2711,10 +2822,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const wizardStep3Value = document.getElementById('wizardStep3Value');
   const wizardModSearchInput = document.getElementById('wizardModSearchInput');
   const wizardModsList = document.getElementById('wizardModsList');
+  const wizardLoaderVersionRow = document.getElementById('wizardLoaderVersionRow');
+  const wizardLoaderVersionSelect = document.getElementById('wizardLoaderVersionSelect');
 
   let selectedCvVersion = '1.21.1';
   let selectedCvLoader = 'fabric';
+  let selectedCvLoaderVersion = 'latest';
+  let defaultCvLoaderVersion = '';
   let selectedCvProvider = 'modrinth';
+  let loaderVersionsReqSeq = 0;
   const selectedCvMods = new Set();
 
   // Curated popular versions list per mod loader
@@ -2780,6 +2896,55 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: '1.7.10', tag: '', type: 'release' }
     ]
   };
+
+  // Global CSP-safe image error fallback (replaces broken mod icons with puzzle placeholder)
+  document.addEventListener('error', (e) => {
+    const img = e.target;
+    if (!img || img.tagName !== 'IMG') return;
+    if (img.classList.contains('wizard-mod-icon') || img.classList.contains('installed-mod-icon')) {
+      const placeholder = document.createElement('div');
+      placeholder.className = img.classList.contains('installed-mod-icon') ? 'installed-mod-icon-placeholder' : 'wizard-mod-icon';
+      placeholder.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg>';
+      img.replaceWith(placeholder);
+    } else if (img.classList.contains('news-thumb-img')) {
+      img.style.display = 'none';
+    } else if (img.classList.contains('mc-head-img-fallback') && window.LauncherSkin?.DEFAULT_SKIN_SVG && img.src !== window.LauncherSkin.DEFAULT_SKIN_SVG) {
+      img.src = window.LauncherSkin.DEFAULT_SKIN_SVG;
+    }
+  }, true);
+
+  let popularModIconsHydrated = false;
+  async function hydratePopularModIcons() {
+    if (popularModIconsHydrated) return;
+    popularModIconsHydrated = true;
+    try {
+      const slugs = POPULAR_MODS.map(m => m.slug).filter(Boolean);
+      if (slugs.length === 0) return;
+      const res = await fetch(`https://api.modrinth.com/v2/projects?ids=${encodeURIComponent(JSON.stringify(slugs))}`);
+      if (!res.ok) return;
+      const projects = await res.json();
+      if (!Array.isArray(projects)) return;
+
+      const bySlug = new Map();
+      for (const p of projects) {
+        if (p.slug) bySlug.set(p.slug, p);
+      }
+
+      let updated = false;
+      for (const m of POPULAR_MODS) {
+        const proj = bySlug.get(m.slug);
+        if (proj?.icon_url && m.icon_url !== proj.icon_url) {
+          m.icon_url = proj.icon_url;
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        if (createVersionModal?.classList.contains('open')) renderWizardMods();
+        if (manageInstanceModsModal?.classList.contains('open') && subpaneCatalogMods?.style.display !== 'none') renderManageCatalogMods();
+      }
+    } catch (e) {}
+  }
 
   // Legacy fallback reference
   const POPULAR_VERSIONS = LOADER_POPULAR_VERSIONS.fabric;
@@ -3140,7 +3305,7 @@ document.addEventListener('DOMContentLoaded', () => {
       wizardCategoriesChips.forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       activeWizardCategory = chip.getAttribute('data-category') || 'all';
-      renderWizardMods();
+      fetchOrFilterWizardMods(false);
     });
   });
 
@@ -3150,6 +3315,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const ctxMenuDeleteVersion = document.getElementById('ctxMenuDeleteVersion');
   const ctxMenuAddMods = document.getElementById('ctxMenuAddMods');
   const ctxMenuOpenFolder = document.getElementById('ctxMenuOpenFolder');
+  const ctxMenuExportVersion = document.getElementById('ctxMenuExportVersion');
   let contextMenuTargetInstanceId = null;
 
   function showContextMenu(x, y) {
@@ -3186,6 +3352,31 @@ document.addEventListener('DOMContentLoaded', () => {
       await window.electronAPI.openModsFolder(targetId);
     } else if (window.electronAPI?.openMinecraftFolder) {
       await window.electronAPI.openMinecraftFolder();
+    }
+  });
+
+  ctxMenuExportVersion?.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!contextMenuTargetInstanceId) return;
+    const targetId = contextMenuTargetInstanceId;
+    hideContextMenu();
+
+    if (!window.electronAPI?.selectExportInstanceDialog || !window.electronAPI?.exportInstance) return;
+    const inst = (appConfig.instances || []).find(i => i.id === targetId);
+    const defaultName = inst ? inst.name : 'instance';
+    const t = (k, fb) => (window.I18N ? window.I18N.t(k, fb) : fb);
+
+    try {
+      const destPath = await window.electronAPI.selectExportInstanceDialog(defaultName);
+      if (!destPath) return;
+      const res = await window.electronAPI.exportInstance(targetId, destPath);
+      if (res?.success) {
+        showSnackbar(t('toast_export_success', 'Сборка "{name}" успешно экспортирована!').replace('{name}', res.instanceName || defaultName), 'success');
+      } else {
+        showSnackbar(t('toast_export_error', 'Ошибка экспорта: {error}').replace('{error}', res?.error || 'Неизвестная ошибка'), 'error');
+      }
+    } catch (err) {
+      showSnackbar(t('toast_export_error', 'Ошибка экспорта: {error}').replace('{error}', err.message), 'error');
     }
   });
 
@@ -3342,6 +3533,10 @@ document.addEventListener('DOMContentLoaded', () => {
           ? descModsTpl.replace('{count}', modsCount) 
           : descNoModsTpl.replace('{version}', item.gameVersion).replace('{loader}', (item.loader || 'fabric').toUpperCase());
 
+        const loaderMetaText = (item.loaderVersion && item.loaderVersion !== 'latest')
+          ? `${(item.loader || 'fabric').toUpperCase()} ${item.loaderVersion} (${item.gameVersion})`
+          : `${(item.loader || 'fabric').toUpperCase()} ${item.gameVersion}`;
+
         card.innerHTML = `
           <div>
             <div class="mod-card-header">
@@ -3352,7 +3547,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="version-card-header-top">
                   <span class="mod-title">${escapeHtml(item.name)}</span>
                 </div>
-                <span class="mod-author">${escapeHtml((item.loader || 'fabric').toUpperCase())} ${escapeHtml(item.gameVersion)} • ${escapeHtml(providerName)}</span>
+                <span class="mod-author">${escapeHtml(loaderMetaText)} • ${escapeHtml(providerName)}</span>
               </div>
             </div>
 
@@ -3413,26 +3608,23 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    // Keep minimalInstancesList compatibility if exists
-    if (minimalInstancesList) {
-      minimalInstancesList.innerHTML = '';
-    }
-
     // Sync with bottom release selector & launch banner
     if (inst) {
+      const displayTitle = inst.name || inst.gameVersion;
       if (currentVersionText) {
-        currentVersionText.textContent = inst.gameVersion;
+        currentVersionText.innerHTML = `<span class="version-current-label" title="${escapeHtml(displayTitle)}">${escapeHtml(displayTitle)}</span><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>`;
       }
       if (launchVersionTitle && !isLaunching) {
         launchVersionTitle.textContent = '';
       }
       const versionLabel = document.querySelector('.version-selector-widget .version-label');
       if (versionLabel) {
-        versionLabel.textContent = (inst.loader || 'Fabric').toUpperCase();
+        versionLabel.textContent = `${(inst.loader || 'Fabric').toUpperCase()} • ${inst.gameVersion}`;
       }
     } else {
       if (currentVersionText) {
-        currentVersionText.textContent = selectedVersion || '1.21.1';
+        const verTxt = selectedVersion || '1.21.1';
+        currentVersionText.innerHTML = `<span class="version-current-label">${escapeHtml(verTxt)}</span><svg viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>`;
       }
       if (launchVersionTitle && !isLaunching) {
         launchVersionTitle.textContent = '';
@@ -3475,8 +3667,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentManagingInstanceId = null;
   let manageApiHits = [];
+  let manageApiOffset = 0;
+  let manageApiTotal = Infinity;
+  let manageApiLoading = false;
+  let manageApiSeq = 0;
   let manageSearchDebounceTimer = null;
   let activeManageCategory = 'all';
+
+  let modCatalogLayout = localStorage.getItem('ml_mod_catalog_layout') || 'list';
+  function applyModCatalogLayout(layout) {
+    modCatalogLayout = ['list', 'grid-2', 'grid-3'].includes(layout) ? layout : 'list';
+    localStorage.setItem('ml_mod_catalog_layout', modCatalogLayout);
+    [wizardModsList, manageModsList].forEach(listEl => {
+      if (!listEl) return;
+      listEl.classList.remove('grid-2', 'grid-3');
+      if (modCatalogLayout !== 'list') listEl.classList.add(modCatalogLayout);
+    });
+    document.querySelectorAll('.mods-layout-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-layout') === modCatalogLayout);
+    });
+  }
+  document.querySelectorAll('.mods-layout-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      applyModCatalogLayout(btn.getAttribute('data-layout'));
+    });
+  });
+  applyModCatalogLayout(modCatalogLayout);
 
   function formatBytes(bytes) {
     if (!bytes || bytes === 0) return '';
@@ -3503,7 +3719,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  tabBtnInstalledMods?.addEventListener('click', () => switchManageModalTab('installed'));
+  tabBtnInstalledMods?.addEventListener('click', async () => {
+    const inst = (appConfig.instances || []).find(i => i.id === currentManagingInstanceId);
+    if (inst) await syncManualModsForInstance(inst);
+    switchManageModalTab('installed');
+  });
   tabBtnAddCatalogMods?.addEventListener('click', () => switchManageModalTab('catalog'));
   btnSwitchToAddMods?.addEventListener('click', () => switchManageModalTab('catalog'));
 
@@ -3545,7 +3765,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const count = mods.length;
 
     if (manageInstalledHeading) {
-      manageInstalledHeading.textContent = `${t('mods_instance_title', 'Установленные моды')}: ${inst.name}`;
+      manageInstalledHeading.textContent = t('mods_instance_title', 'Установленные моды');
     }
     if (tabInstalledModsBadge) {
       tabInstalledModsBadge.textContent = count;
@@ -3568,10 +3788,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <svg class="mods-empty-icon" viewBox="0 0 24 24" style="width: 40px; height: 40px; fill: var(--md-sys-color-on-surface-variant);"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg>
           <div style="font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); margin-top: 10px;">${escapeHtml(t('mods_instance_empty', 'В этой версии ещё нет модов'))}</div>
           <p style="font-size: 12.5px; color: var(--md-sys-color-on-surface-variant); margin-top: 4px; max-width: 480px; margin-left: auto; margin-right: auto; line-height: 1.5;">${escapeHtml(t('mods_instance_empty_desc', 'Нажмите «Добавить моды», чтобы выбрать совместимые моды из каталога Modrinth.'))}</p>
-          <button class="btn-add-mods-primary btn-modal-switch-add" style="margin-top: 16px;">
-            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            <span>${escapeHtml(t('btn_add_mods_full', 'Добавить моды'))}</span>
-          </button>
         </div>
       `;
       manageInstalledModsContainer.querySelector('.btn-modal-switch-add')?.addEventListener('click', () => switchManageModalTab('catalog'));
@@ -3581,10 +3797,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const safeTitle = escapeHtml(mod.title || mod.id);
         const safeAuthor = escapeHtml(mod.author || 'Author');
         const safeDesc = escapeHtml((mod.descKey && window.I18N ? window.I18N.t(mod.descKey, mod.description) : mod.description) || (window.I18N ? window.I18N.t('mod_no_desc', 'Описание отсутствует') : 'Описание отсутствует'));
-        const safeIcon = (mod.icon_url && /^https?:\/\//i.test(mod.icon_url)) ? escapeHtml(mod.icon_url) : '';
+        const safeIcon = (mod.icon_url && /^(https?:\/\/|data:image\/)/i.test(mod.icon_url)) ? escapeHtml(mod.icon_url) : '';
 
         const iconMarkup = safeIcon
-          ? `<img src="${safeIcon}" class="installed-mod-icon" alt="${safeTitle}" onerror="this.style.display='none';" />`
+          ? `<img src="${safeIcon}" class="installed-mod-icon" alt="${safeTitle}" />`
           : `<div class="installed-mod-icon-placeholder"><svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg></div>`;
 
         const fileBadge = mod.downloading
@@ -3600,7 +3816,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="installed-mod-meta">
                 <div class="installed-mod-name-row">
                   <span class="installed-mod-name" title="${safeTitle}">${safeTitle}</span>
-                  ${mod.disabled ? '<span class="minimal-instance-badge" style="background: rgba(255,255,255,0.06); color: var(--md-sys-color-outline); font-size: 10px;">Отключён</span>' : ''}
+                  ${mod.disabled ? `<span class="minimal-instance-badge" style="background: rgba(255,255,255,0.06); color: var(--md-sys-color-outline); font-size: 10px;">${escapeHtml(t('mod_status_disabled_badge', 'Отключён'))}</span>` : ''}
                 </div>
                 <span class="installed-mod-author">by ${safeAuthor}</span>
                 <p class="installed-mod-desc">${safeDesc}</p>
@@ -3612,8 +3828,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${fileBadge}
               </div>
               <div class="installed-mod-actions-right">
-                <label class="m3-switch-label" title="${mod.disabled ? 'Включить мод' : 'Отключить мод (мягкое отключение без удаления)'}">
-                  <span>${mod.disabled ? 'Выкл' : 'Вкл'}</span>
+                <label class="m3-switch-label" title="${escapeHtml(mod.disabled ? t('mod_toggle_enable_title', 'Включить мод') : t('mod_toggle_disable_title', 'Отключить мод (мягкое отключение без удаления)'))}">
+                  <span>${escapeHtml(mod.disabled ? t('mod_status_off', 'Выкл') : t('mod_status_on', 'Вкл'))}</span>
                   <input type="checkbox" class="mod-soft-toggle" data-mod-id="${escapeHtml(mod.id)}" ${mod.disabled ? '' : 'checked'}>
                 </label>
                 <button class="btn-remove-mod" data-mod-id="${escapeHtml(mod.id)}" title="Удалить мод из версии">
@@ -3761,7 +3977,89 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function openManageModsModal(instanceId) {
+  async function syncManualModsForInstance(inst) {
+    if (!inst || inst.loader === 'vanilla' || !window.electronAPI?.getInstanceDiskMods) return;
+    try {
+      const res = await window.electronAPI.getInstanceDiskMods(inst.id);
+      if (!res?.success || !Array.isArray(res.mods)) return;
+
+      if (!Array.isArray(inst.mods)) inst.mods = [];
+      const t = (k, fb) => (window.I18N ? window.I18N.t(k, fb) : fb);
+      const norm = (f) => String(f || '').replace(/\.disabled$/i, '').toLowerCase();
+
+      const diskMap = new Map();
+      for (const d of res.mods) {
+        diskMap.set(norm(d.fileName), d);
+      }
+
+      let changed = false;
+
+      // Remove manual entries whose files were deleted from disk, and update state/size for existing ones
+      const filtered = [];
+      for (const m of inst.mods) {
+        const key = m.fileName ? norm(m.fileName) : '';
+        const onDisk = key ? diskMap.get(key) : null;
+        if (m.isManual && !onDisk) {
+          changed = true;
+          continue;
+        }
+        if (onDisk) {
+          if (m.fileName !== onDisk.fileName || m.disabled !== onDisk.disabled || (!m.fileSize && onDisk.size)) {
+            m.fileName = onDisk.fileName;
+            m.disabled = onDisk.disabled;
+            if (!m.fileSize && onDisk.size) m.fileSize = onDisk.size;
+            changed = true;
+          }
+          if (m.isManual) {
+            if (onDisk.icon_url && m.icon_url !== onDisk.icon_url) {
+              m.icon_url = onDisk.icon_url;
+              changed = true;
+            }
+            if (onDisk.title && m.title !== onDisk.title) {
+              m.title = onDisk.title;
+              changed = true;
+            }
+            if (onDisk.description && m.description !== onDisk.description) {
+              m.description = onDisk.description;
+              changed = true;
+            }
+            if (onDisk.author && m.author !== onDisk.author) {
+              m.author = onDisk.author;
+              changed = true;
+            }
+          }
+          diskMap.delete(key);
+        }
+        filtered.push(m);
+      }
+
+      // Add any remaining .jar / .jar.disabled files found on disk as manual mods
+      for (const d of diskMap.values()) {
+        const baseName = d.fileName.replace(/\.jar(\.disabled)?$/i, '');
+        filtered.push({
+          id: 'local-' + baseName,
+          title: d.title || baseName,
+          author: d.author || 'Local',
+          description: d.description || t('mod_manual_desc', 'Добавлен вручную в папку mods'),
+          icon_url: d.icon_url || '',
+          fileName: d.fileName,
+          fileSize: d.size,
+          disabled: d.disabled,
+          isManual: true
+        });
+        changed = true;
+      }
+
+      if (changed) {
+        inst.mods = filtered;
+        saveConfig();
+        updateManageModalSummary(inst);
+        updateInstancesUI();
+      }
+    } catch (e) {}
+  }
+
+  async function openManageModsModal(instanceId) {
     const inst = (appConfig.instances || []).find(i => i.id === instanceId);
     if (!inst) return;
 
@@ -3791,6 +4089,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default to the Installed mods tab
     switchManageModalTab('installed');
     manageInstanceModsModal?.classList.add('open');
+
+    await syncManualModsForInstance(inst);
+    if (currentManagingInstanceId === inst.id && subpaneInstalledMods?.style.display !== 'none') {
+      renderInstalledModsInModal(inst);
+    }
   }
 
   function saveCurrentInstanceName() {
@@ -3863,7 +4166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       manageCategoriesChips.forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       activeManageCategory = chip.getAttribute('data-category') || 'all';
-      renderManageMods();
+      fetchOrFilterManageMods(false);
     });
   });
 
@@ -3875,22 +4178,44 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 350);
   });
 
-  async function fetchOrFilterManageMods() {
+  async function fetchOrFilterManageMods(loadMore = false) {
+    hydratePopularModIcons();
     const inst = (appConfig.instances || []).find(i => i.id === currentManagingInstanceId);
     if (!inst || inst.loader === 'vanilla') {
       renderManageMods();
       return;
     }
 
+    if (loadMore) {
+      if (manageApiLoading || manageApiHits.length >= manageApiTotal) return;
+    } else {
+      manageApiOffset = 0;
+      manageApiTotal = Infinity;
+      manageApiHits = [];
+    }
+
+    const reqSeq = ++manageApiSeq;
+    manageApiLoading = true;
     const query = (manageModSearchInput?.value || '').trim();
     const loader = inst.loader;
     const gv = inst.gameVersion;
+    const cat = activeManageCategory || 'all';
+    const pageLimit = 40;
 
     try {
       if (window.electronAPI?.searchMods) {
-        const res = await window.electronAPI.searchMods({ query, loader, gameVersion: gv, limit: 50 });
+        const res = await window.electronAPI.searchMods({
+          query,
+          loader,
+          gameVersion: gv,
+          category: cat,
+          limit: pageLimit,
+          offset: manageApiOffset
+        });
+        if (reqSeq !== manageApiSeq) return;
         if (res?.success && Array.isArray(res.hits)) {
-          manageApiHits = res.hits.map(h => ({
+          manageApiTotal = typeof res.total_hits === 'number' ? res.total_hits : res.hits.length;
+          const mapped = res.hits.map(h => ({
             id: h.project_id || h.slug,
             slug: h.slug,
             title: h.title,
@@ -3901,17 +4226,38 @@ document.addEventListener('DOMContentLoaded', () => {
             categories: h.categories || [],
             loaders: h.categories ? h.categories.filter(c => ['fabric', 'forge', 'neoforge', 'quilt'].includes(c)) : [loader]
           }));
+          if (loadMore) {
+            const existing = new Set(manageApiHits.map(x => x.id));
+            mapped.forEach(x => { if (!existing.has(x.id)) manageApiHits.push(x); });
+          } else {
+            manageApiHits = mapped;
+          }
+          manageApiOffset += res.hits.length;
         }
       }
     } catch (e) {
       console.warn('Live manage mod search error:', e);
+    } finally {
+      if (reqSeq === manageApiSeq) {
+        manageApiLoading = false;
+      }
     }
 
-    renderManageMods();
+    renderManageMods(loadMore);
   }
 
-  function renderManageMods() {
+  manageModsList?.addEventListener('scroll', () => {
+    if (!manageModsList || manageApiLoading) return;
+    if (manageModsList.scrollTop + manageModsList.clientHeight >= manageModsList.scrollHeight - 140) {
+      if (manageApiHits.length < manageApiTotal) {
+        fetchOrFilterManageMods(true);
+      }
+    }
+  });
+
+  function renderManageMods(preserveScroll = false) {
     if (!manageModsList) return;
+    const prevScroll = preserveScroll ? manageModsList.scrollTop : 0;
     const inst = (appConfig.instances || []).find(i => i.id === currentManagingInstanceId);
     if (!inst) return;
 
@@ -3988,7 +4334,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const safeIcon = (mod.icon_url && /^https?:\/\//i.test(mod.icon_url)) ? escapeHtml(mod.icon_url) : '';
 
       const iconMarkup = safeIcon
-        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}" onerror="this.style.display='none';">`
+        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}">`
         : `<div class="wizard-mod-icon"><svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg></div>`;
 
       const loaderBadges = (mod.loaders || [])
@@ -4023,16 +4369,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       manageModsList.appendChild(item);
     });
-  }
 
-  // Open Mods Folder
-  btnOpenModsFolder?.addEventListener('click', async () => {
-    if (window.electronAPI?.openModsFolder) {
-      await window.electronAPI.openModsFolder(appConfig.selectedInstanceId);
-    } else if (window.electronAPI?.openMinecraftFolder) {
-      await window.electronAPI.openMinecraftFolder();
+    if (manageApiHits.length < manageApiTotal && manageApiHits.length > 0) {
+      const moreEl = document.createElement('div');
+      moreEl.className = 'mods-load-more-hint';
+      moreEl.textContent = window.I18N ? window.I18N.t('mods_scroll_more', 'Прокрутите вниз для загрузки ещё...') : 'Прокрутите вниз для загрузки ещё...';
+      manageModsList.appendChild(moreEl);
     }
-  });
+    if (preserveScroll) manageModsList.scrollTop = prevScroll;
+  }
 
   // Wizard Accordion Navigation
   function setWizardStep(stepNum) {
@@ -4122,44 +4467,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateLoaderCompatibility() {
-    const supportsSnapshots = (selectedCvLoader !== 'forge' && selectedCvLoader !== 'neoforge');
-    const loaderName = selectedCvLoader.charAt(0).toUpperCase() + selectedCvLoader.slice(1);
-
-    if (!supportsSnapshots) {
-      if (cvShowSnapshotsCheckbox) {
-        cvShowSnapshotsCheckbox.checked = false;
-        cvShowSnapshotsCheckbox.disabled = true;
-      }
-      if (cvShowSnapshotsLabel) {
-        cvShowSnapshotsLabel.classList.add('disabled');
-        const notSupportedTpl = window.I18N ? window.I18N.t('cv_snapshots_not_supported', 'Снапшоты недоступны для {loader}') : `Снапшоты недоступны для {loader}`;
-        cvShowSnapshotsLabel.title = notSupportedTpl.replace('{loader}', loaderName);
-      }
-      if (cvShowSnapshotsText) {
-        const notSupportedWord = window.I18N ? window.I18N.t('cv_unavailable', 'недоступно') : 'недоступно';
-        const baseTxt = window.I18N ? window.I18N.t('cv_show_snapshots', 'Снапшоты') : 'Снапшоты';
-        cvShowSnapshotsText.textContent = `${baseTxt} (${notSupportedWord})`;
-      }
-    } else {
-      if (cvShowSnapshotsCheckbox) {
-        cvShowSnapshotsCheckbox.disabled = false;
-      }
-      if (cvShowSnapshotsLabel) {
-        cvShowSnapshotsLabel.classList.remove('disabled');
-        cvShowSnapshotsLabel.removeAttribute('title');
-      }
-      if (cvShowSnapshotsText) {
-        cvShowSnapshotsText.textContent = window.I18N ? window.I18N.t('cv_show_snapshots', 'Снапшоты') : 'Снапшоты';
-      }
+    if (cvShowSnapshotsCheckbox) {
+      cvShowSnapshotsCheckbox.disabled = false;
+    }
+    if (cvShowSnapshotsLabel) {
+      cvShowSnapshotsLabel.classList.remove('disabled');
+      cvShowSnapshotsLabel.removeAttribute('title');
+    }
+    if (cvShowSnapshotsText) {
+      cvShowSnapshotsText.textContent = window.I18N ? window.I18N.t('cv_show_snapshots', 'Снапшоты') : 'Снапшоты';
     }
 
-    // Check if current version is compatible with selected loader
-    if (!isVersionSupportedByLoader(selectedCvVersion, selectedCvLoader)) {
-      const popular = LOADER_POPULAR_VERSIONS[selectedCvLoader] || LOADER_POPULAR_VERSIONS.fabric;
-      selectedCvVersion = popular[0]?.id || '1.21.1';
-      if (wizardStep2Value) {
-        wizardStep2Value.textContent = selectedCvVersion;
-      }
+    const versionObj = (manifestData?.versions || []).find(v => v.id === selectedCvVersion) || selectedCvVersion;
+    cvLoaderCards.forEach(card => {
+      const loader = card.getAttribute('data-loader') || 'vanilla';
+      const supported = isVersionSupportedByLoader(versionObj, loader);
+      card.classList.toggle('disabled', !supported);
+    });
+
+    if (!isVersionSupportedByLoader(versionObj, selectedCvLoader)) {
+      const fallbackOrder = ['fabric', 'forge', 'quilt', 'neoforge', 'vanilla'];
+      const nextLoader = fallbackOrder.find(l => isVersionSupportedByLoader(versionObj, l)) || 'vanilla';
+      selectedCvLoader = nextLoader;
+      cvLoaderCards.forEach(c => c.classList.toggle('active', c.getAttribute('data-loader') === selectedCvLoader));
     }
   }
 
@@ -4176,28 +4506,107 @@ document.addEventListener('DOMContentLoaded', () => {
     return baseList;
   }
 
-  // Step 2: Render Version Tiles
+  function updateWizardLoaderBadge() {
+    if (!wizardStep2Value) return;
+    const loaderDisplay = selectedCvLoader.charAt(0).toUpperCase() + selectedCvLoader.slice(1);
+    if (selectedCvLoader === 'vanilla') {
+      wizardStep2Value.textContent = loaderDisplay;
+      return;
+    }
+    const effectiveVer = (selectedCvLoaderVersion && selectedCvLoaderVersion !== 'latest')
+      ? selectedCvLoaderVersion
+      : defaultCvLoaderVersion;
+    wizardStep2Value.textContent = effectiveVer ? `${loaderDisplay} (${effectiveVer})` : loaderDisplay;
+  }
+
+  async function loadWizardLoaderVersions() {
+    if (!wizardLoaderVersionRow || !wizardLoaderVersionSelect) return;
+    const loader = selectedCvLoader || 'fabric';
+    if (loader === 'vanilla') {
+      wizardLoaderVersionRow.style.display = 'none';
+      selectedCvLoaderVersion = 'latest';
+      defaultCvLoaderVersion = '';
+      wizardLoaderVersionSelect.innerHTML = '';
+      updateWizardLoaderBadge();
+      return;
+    }
+
+    wizardLoaderVersionRow.style.display = 'flex';
+    const reqId = ++loaderVersionsReqSeq;
+    const t = (k, fb) => (window.I18N ? window.I18N.t(k, fb) : fb);
+    const latestTxt = t('wizard_loader_version_latest', 'Последняя (Рекомендуемая)');
+    const loadingTxt = t('wizard_loader_version_loading', 'Загрузка версий...');
+    const recTxt = t('wizard_loader_version_recommended', 'Рекомендуемая');
+
+    selectedCvLoaderVersion = 'latest';
+    defaultCvLoaderVersion = '';
+    wizardLoaderVersionSelect.disabled = true;
+    wizardLoaderVersionSelect.innerHTML = `<option value="latest">${escapeHtml(latestTxt)} (${escapeHtml(loadingTxt)})</option>`;
+    updateWizardLoaderBadge();
+
+    try {
+      const list = window.electronAPI?.getLoaderVersions
+        ? await window.electronAPI.getLoaderVersions(loader, selectedCvVersion)
+        : [];
+      if (reqId !== loaderVersionsReqSeq) return;
+
+      const defaultItem = Array.isArray(list) && list.length > 0
+        ? (list.find(i => i.recommended) || list.find(i => i.latest) || list.find(i => i.stable) || list[0])
+        : null;
+      defaultCvLoaderVersion = defaultItem ? defaultItem.version : '';
+
+      wizardLoaderVersionSelect.innerHTML = '';
+      const defOpt = document.createElement('option');
+      defOpt.value = 'latest';
+      defOpt.textContent = defaultCvLoaderVersion ? `${latestTxt} — ${defaultCvLoaderVersion}` : latestTxt;
+      wizardLoaderVersionSelect.appendChild(defOpt);
+
+      if (Array.isArray(list)) {
+        list.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.version;
+          let label = item.version;
+          if (item.recommended) label += ` (${recTxt})`;
+          else if (item.stable === false) label += ' (Beta)';
+          opt.textContent = label;
+          wizardLoaderVersionSelect.appendChild(opt);
+        });
+      }
+      updateWizardLoaderBadge();
+    } catch (e) {
+      if (reqId !== loaderVersionsReqSeq) return;
+      defaultCvLoaderVersion = '';
+      wizardLoaderVersionSelect.innerHTML = `<option value="latest">${escapeHtml(latestTxt)}</option>`;
+      updateWizardLoaderBadge();
+    } finally {
+      if (reqId === loaderVersionsReqSeq) {
+        wizardLoaderVersionSelect.disabled = false;
+        wizardLoaderVersionSelect.value = 'latest';
+      }
+    }
+  }
+
+  wizardLoaderVersionSelect?.addEventListener('change', () => {
+    selectedCvLoaderVersion = wizardLoaderVersionSelect.value || 'latest';
+    updateWizardLoaderBadge();
+  });
+
+  // Step 1: Render Version Tiles
   function renderWizardVersions() {
     if (!wizardVersionsGrid) return;
     const query = (wizardVersionSearchInput?.value || '').toLowerCase().trim();
-    const loader = selectedCvLoader || 'fabric';
-    const supportsSnapshots = (loader !== 'forge' && loader !== 'neoforge');
-    const showSnapshots = supportsSnapshots && cvShowSnapshotsCheckbox?.checked;
+    const showSnapshots = !!cvShowSnapshotsCheckbox?.checked;
 
-    let versions = getDynamicPopularVersions(loader);
-
-    if (query || wizardVersionsExpanded || showSnapshots) {
-      if (manifestData?.versions && manifestData.versions.length > 0) {
-        const allVers = manifestData.versions
-          .filter(v => isVersionSupportedByLoader(v, loader))
-          .map(v => ({
-            id: v.id,
-            tag: isSnapshotVersion(v) ? 'Snapshot' : '',
-            type: v.type
-          }));
-
-        versions = allVers.filter(v => showSnapshots || !isSnapshotVersion(v));
-      }
+    let versions;
+    if (manifestData?.versions && manifestData.versions.length > 0) {
+      versions = manifestData.versions
+        .filter(v => showSnapshots || !isSnapshotVersion(v))
+        .map(v => ({
+          id: v.id,
+          type: v.type
+        }));
+    } else {
+      versions = getDynamicPopularVersions('vanilla');
     }
 
     if (query) {
@@ -4217,14 +4626,15 @@ document.addEventListener('DOMContentLoaded', () => {
     sliceToShow.forEach(v => {
       const tile = document.createElement('div');
       tile.className = 'wizard-version-tile ' + (v.id === selectedCvVersion ? 'active' : '');
-      tile.innerHTML = `<span>${escapeHtml(v.id)}</span>${v.tag ? `<span class="version-tag">${escapeHtml(v.tag)}</span>` : ''}`;
+      tile.innerHTML = `<span>${escapeHtml(v.id)}</span>`;
       tile.addEventListener('click', () => {
         selectedCvVersion = v.id;
-        if (wizardStep2Value) wizardStep2Value.textContent = v.id;
+        if (wizardStep1Value) wizardStep1Value.textContent = selectedCvVersion;
+        updateLoaderCompatibility();
         updateWizardDefaultName();
         renderWizardVersions();
-        // Advance to Step 3 (Choose mods)
-        setWizardStep(3);
+        loadWizardLoaderVersions();
+        setWizardStep(2);
       });
       wizardVersionsGrid.appendChild(tile);
     });
@@ -4245,26 +4655,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Step 1: Loader & Provider selection
+  // Step 2: Loader & Provider selection
   cvLoaderCards.forEach(card => {
     card.addEventListener('click', () => {
+      if (card.classList.contains('disabled')) return;
       cvLoaderCards.forEach(c => c.classList.remove('active'));
       card.classList.add('active');
       selectedCvLoader = card.getAttribute('data-loader') || 'fabric';
 
-      const loaderDisplay = selectedCvLoader.charAt(0).toUpperCase() + selectedCvLoader.slice(1);
-      if (wizardStep1Value) wizardStep1Value.textContent = loaderDisplay;
-
-      updateLoaderCompatibility();
+      updateWizardLoaderBadge();
       updateWizardDefaultName();
-      renderWizardVersions();
+      loadWizardLoaderVersions();
 
       // Clear previous selected mods when switching loader to prevent incompatible cross-installation!
       selectedCvMods.clear();
       updateWizardModsSummary();
-
-      // Auto-advance to Step 2 (Select version)
-      setWizardStep(2);
     });
   });
 
@@ -4277,22 +4682,49 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Step 3: Fetch mods from API with Loader and Category filters
-  async function fetchOrFilterWizardMods() {
+  // Step 3: Fetch mods from API with Loader, Category & Infinite Scroll Pagination
+  let wizardApiOffset = 0;
+  let wizardApiTotal = Infinity;
+  let wizardApiLoading = false;
+  let wizardApiSeq = 0;
+
+  async function fetchOrFilterWizardMods(loadMore = false) {
+    hydratePopularModIcons();
     if (selectedCvLoader === 'vanilla') {
       renderWizardMods();
       return;
     }
 
+    if (loadMore) {
+      if (wizardApiLoading || wizardApiHits.length >= wizardApiTotal) return;
+    } else {
+      wizardApiOffset = 0;
+      wizardApiTotal = Infinity;
+      wizardApiHits = [];
+    }
+
+    const reqSeq = ++wizardApiSeq;
+    wizardApiLoading = true;
     const query = (wizardModSearchInput?.value || '').trim();
     const loader = selectedCvLoader; // 'fabric', 'forge', 'neoforge', 'quilt'
     const gv = selectedCvVersion;
+    const cat = activeWizardCategory || 'all';
+    const pageLimit = 40;
 
     try {
       if (window.electronAPI?.searchMods) {
-        const res = await window.electronAPI.searchMods({ query, loader, gameVersion: gv, limit: 50 });
+        const res = await window.electronAPI.searchMods({
+          query,
+          loader,
+          gameVersion: gv,
+          category: cat,
+          limit: pageLimit,
+          offset: wizardApiOffset
+        });
+        if (reqSeq !== wizardApiSeq) return;
         if (res?.success && Array.isArray(res.hits)) {
-          wizardApiHits = res.hits.map(h => ({
+          wizardApiTotal = typeof res.total_hits === 'number' ? res.total_hits : res.hits.length;
+          const mapped = res.hits.map(h => ({
             id: h.project_id || h.slug,
             slug: h.slug,
             title: h.title,
@@ -4303,14 +4735,34 @@ document.addEventListener('DOMContentLoaded', () => {
             categories: h.categories || [],
             loaders: h.categories ? h.categories.filter(c => ['fabric', 'forge', 'neoforge', 'quilt'].includes(c)) : [loader]
           }));
+          if (loadMore) {
+            const existing = new Set(wizardApiHits.map(x => x.id));
+            mapped.forEach(x => { if (!existing.has(x.id)) wizardApiHits.push(x); });
+          } else {
+            wizardApiHits = mapped;
+          }
+          wizardApiOffset += res.hits.length;
         }
       }
     } catch (e) {
       console.warn('Live mod search error:', e);
+    } finally {
+      if (reqSeq === wizardApiSeq) {
+        wizardApiLoading = false;
+      }
     }
 
-    renderWizardMods();
+    renderWizardMods(loadMore);
   }
+
+  wizardModsList?.addEventListener('scroll', () => {
+    if (!wizardModsList || wizardApiLoading) return;
+    if (wizardModsList.scrollTop + wizardModsList.clientHeight >= wizardModsList.scrollHeight - 140) {
+      if (wizardApiHits.length < wizardApiTotal) {
+        fetchOrFilterWizardMods(true);
+      }
+    }
+  });
 
   // Helper to check loader compatibility
   function isModCompatibleWithLoader(modLoaders, targetLoader) {
@@ -4325,8 +4777,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Step 3: Render list with strict loader and category filtering
-  function renderWizardMods() {
+  function renderWizardMods(preserveScroll = false) {
     if (!wizardModsList) return;
+    const prevScroll = preserveScroll ? wizardModsList.scrollTop : 0;
 
     if (selectedCvLoader === 'vanilla') {
       const step1Text = window.I18N ? window.I18N.t('wizard_step_1_title', 'Шаг 1: Загрузчик модов') : 'Шаг 1: Загрузчик модов';
@@ -4411,7 +4864,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const safeIcon = (mod.icon_url && /^https?:\/\//i.test(mod.icon_url)) ? escapeHtml(mod.icon_url) : '';
 
       const iconMarkup = safeIcon
-        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}" onerror="this.style.display='none';">`
+        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}">`
         : `<div class="wizard-mod-icon"><svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg></div>`;
 
       const loaderBadges = (mod.loaders || [])
@@ -4446,6 +4899,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
       wizardModsList.appendChild(item);
     });
+
+    if (wizardApiHits.length < wizardApiTotal && wizardApiHits.length > 0) {
+      const moreEl = document.createElement('div');
+      moreEl.className = 'mods-load-more-hint';
+      moreEl.textContent = window.I18N ? window.I18N.t('mods_scroll_more', 'Прокрутите вниз для загрузки ещё...') : 'Прокрутите вниз для загрузки ещё...';
+      wizardModsList.appendChild(moreEl);
+    }
+    if (preserveScroll) wizardModsList.scrollTop = prevScroll;
   }
 
   function updateWizardModsSummary() {
@@ -4468,11 +4929,11 @@ document.addEventListener('DOMContentLoaded', () => {
     setWizardStep(1);
     selectedCvMods.clear();
     updateWizardModsSummary();
-    const loaderDisplay = selectedCvLoader.charAt(0).toUpperCase() + selectedCvLoader.slice(1);
-    if (wizardStep1Value) wizardStep1Value.textContent = loaderDisplay;
+    if (wizardStep1Value) wizardStep1Value.textContent = selectedCvVersion;
     updateLoaderCompatibility();
+    updateWizardLoaderBadge();
     renderWizardVersions();
-    if (wizardStep2Value) wizardStep2Value.textContent = selectedCvVersion;
+    loadWizardLoaderVersions();
     updateWizardDefaultName();
   });
 
@@ -4513,6 +4974,7 @@ document.addEventListener('DOMContentLoaded', () => {
       name: name,
       gameVersion: selectedCvVersion,
       loader: selectedCvLoader,
+      loaderVersion: selectedCvLoader === 'vanilla' ? 'latest' : (selectedCvLoaderVersion || 'latest'),
       modProvider: selectedCvProvider,
       created: Date.now(),
       mods: chosenMods
@@ -4595,7 +5057,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const heroBannerImg = document.getElementById('heroBannerImg');
     if (heroBanner) {
       if (heroBannerImg) {
-        if (imgPath) {
+        if (imgPath && /^https?:\/\//i.test(imgPath)) {
           heroBannerImg.style.display = 'block';
           heroBannerImg.onerror = () => { heroBannerImg.style.display = 'none'; };
           heroBannerImg.src = imgPath;
@@ -4686,7 +5148,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       card.innerHTML = `
         <div class="news-thumbnail">
-          ${safeImg ? `<img src="${safeImg}" class="news-thumb-img" alt="${safeTitle}" onerror="this.style.display='none'" />` : ''}
+          ${safeImg ? `<img src="${safeImg}" class="news-thumb-img" alt="${safeTitle}" />` : ''}
           <span class="news-tag">${safeTag}</span>
         </div>
         <div class="news-info">
