@@ -23,6 +23,12 @@
 <br>
 
 <div align="center">
+  <img src="assets/rust_migration_banner_en.png" alt="Material Launcher — Now on Rust" width="85%">
+</div>
+
+<br>
+
+<div align="center">
   <a href="https://imgur.com/a/lW37YVm">
     <img src="https://i.imgur.com/gNiSOCZ.png" alt="Material Launcher Demo" width="85%">
   </a>
