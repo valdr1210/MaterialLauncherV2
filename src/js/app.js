@@ -2999,6 +2999,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'fabric-api',
       descKey: 'mod_desc_fabric_api',
       slug: 'fabric-api',
+      cfId: 306612,
       title: 'Fabric API',
       author: 'modmuss50',
       description: 'Базовая библиотека хуков и API, обязательная для большинства Fabric модов.',
@@ -3011,6 +3012,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'sodium',
       descKey: 'mod_desc_sodium',
       slug: 'sodium',
+      cfId: 394468,
       title: 'Sodium',
       author: 'jellysquid3',
       description: 'Революционный движок рендеринга для Fabric. Максимальный FPS и плавность.',
@@ -3035,6 +3037,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'lithium',
       descKey: 'mod_desc_lithium',
       slug: 'lithium',
+      cfId: 360438,
       title: 'Lithium',
       author: 'jellysquid3',
       description: 'Глобальная оптимизация серверной части: физика, ИИ мобов и генерация мира.',
@@ -3047,10 +3050,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'modmenu',
       descKey: 'mod_desc_modmenu',
       slug: 'modmenu',
+      cfId: 308702,
       title: 'Mod Menu',
       author: 'Prospector',
       description: 'Добавляет экран списка модов и меню настроек прямо в главном меню игры.',
-      icon_url: 'https://cdn.modrinth.com/data/mOgUt4GM/icon.png',
+      icon_url: 'https://cdn.modrinth.com/data/mOgUt4GM/5a20ed1450a0e1e79a1fe04e61bb4e5878bf1d20.png',
       downloads: 31000000,
       categories: ['utility'],
       loaders: ['fabric', 'quilt']
@@ -3071,10 +3075,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'trinkets',
       descKey: 'mod_desc_trinkets',
       slug: 'trinkets',
+      cfId: 341284,
       title: 'Trinkets',
       author: 'emilyploszaj',
       description: 'Система дополнительных слотов для колец, поясов и амулетов для Fabric.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/5aaWibi9/icon.png',
       downloads: 18000000,
       categories: ['utility', 'adventure'],
       loaders: ['fabric', 'quilt']
@@ -3085,10 +3090,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'embeddium',
       descKey: 'mod_desc_embeddium',
       slug: 'embeddium',
+      cfId: 908741,
       title: 'Embeddium',
       author: 'embeddedt',
       description: 'Быстрый и стабильный официальный порт Sodium для Forge и NeoForge. Максимальный FPS.',
-      icon_url: 'https://cdn.modrinth.com/data/sk9uT7Te/icon.png',
+      icon_url: 'https://cdn.modrinth.com/data/sk9rgfiA/55f9c50284f8abbbe2a485abfd6a16209201e451_96.webp',
       downloads: 16500000,
       categories: ['optimization'],
       loaders: ['forge', 'neoforge']
@@ -3097,6 +3103,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'oculus',
       descKey: 'mod_desc_oculus',
       slug: 'oculus',
+      cfId: 581495,
       title: 'Oculus',
       author: 'Asek3',
       description: 'Порт Iris Shaders для Forge и NeoForge. Поддержка всех современных шейдеров без OptiFine.',
@@ -3109,10 +3116,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'create',
       descKey: 'mod_desc_create',
       slug: 'create',
+      cfId: 328085,
       title: 'Create',
       author: 'simibubi',
       description: 'Кинематические механизмы, шестерни, ветряки, поезда и автоматизация производства.',
-      icon_url: 'https://cdn.modrinth.com/data/LNytGWDc/icon.png',
+      icon_url: 'https://cdn.modrinth.com/data/LNytGWDc/61d716699bcf1ec42ed4926a9e1c7311be6087e2_96.webp',
       downloads: 36000000,
       categories: ['technology', 'adventure'],
       loaders: ['forge', 'neoforge', 'fabric']
@@ -3121,10 +3129,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'ironchests',
       descKey: 'mod_desc_ironchests',
       slug: 'ironchests',
+      cfId: 228756,
       title: 'Iron Chests',
       author: 'ProgWML6',
       description: 'Вместительные сундуки из меди, железа, золота, алмазов, кристаллов и обсидиана.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/n2de3t2z/6a17c192e399211a9a0b5c31ec75f5fc073ca7b6.png',
       downloads: 28000000,
       categories: ['storage'],
       loaders: ['forge', 'neoforge', 'fabric']
@@ -3133,10 +3142,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'sophisticatedbackpacks',
       descKey: 'mod_desc_sophisticatedbackpacks',
       slug: 'sophisticatedbackpacks',
+      cfId: 422301,
       title: 'Sophisticated Backpacks',
       author: 'P3pp3rF1y',
       description: 'Улучшаемые рюкзаки с авто-сортировкой, магнитом, плавкой и удобным ношением на спине.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/TyCTlI4b/e31c7e2f8769d317339e25b2a8d1b40fbf312729_96.webp',
       downloads: 25000000,
       categories: ['storage', 'adventure'],
       loaders: ['forge', 'neoforge', 'fabric']
@@ -3145,10 +3155,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'biomesoplenty',
       descKey: 'mod_desc_biomesoplenty',
       slug: 'biomesoplenty',
+      cfId: 220318,
       title: "Biomes O' Plenty",
       author: 'Forstride',
       description: 'Более 50 великолепных новых биомов в обычном мире, Незере и Энде с уникальными растениями.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/HXF82T3G/ffb870e12c325b795d54833f8f899126553ef06f.png',
       downloads: 33000000,
       categories: ['adventure'],
       loaders: ['forge', 'neoforge', 'fabric']
@@ -3157,10 +3168,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'alexsmobs',
       descKey: 'mod_desc_alexsmobs',
       slug: 'alexsmobs',
+      cfId: 426558,
       title: "Alex's Mobs",
       author: 'sbom_xela',
       description: 'Более 85 невероятных существ и животных со своими способностями, анимациями и механикой.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/2cMuAZAp/fbe04602fb0fb336be05e7c40378156b49d50156_96.webp',
       downloads: 24000000,
       categories: ['adventure'],
       loaders: ['forge', 'neoforge']
@@ -3169,10 +3181,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'curios',
       descKey: 'mod_desc_curios',
       slug: 'curios',
+      cfId: 309927,
       title: 'Curios API',
       author: 'TheIllusiveC4',
       description: 'Гибкая система слотов экипировки для аксессуаров, колец и магических артефактов.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/vvuO3ImH/2a7323ca80849de0bcb50299e18acdf8bf394682.png',
       downloads: 39000000,
       categories: ['utility'],
       loaders: ['forge', 'neoforge']
@@ -3181,10 +3194,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'mekanism',
       descKey: 'mod_desc_mekanism',
       slug: 'mekanism',
+      cfId: 268560,
       title: 'Mekanism',
       author: 'aidancbrady',
       description: 'Высокотехнологичный мод: 5-кратная очистка руды, ядерный синтез, реактивные ранцы и лазеры.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/Ce6I4WUE/ea185eb1300a64867f89101d4798e71a54ef6bed_96.webp',
       downloads: 27000000,
       categories: ['technology'],
       loaders: ['forge', 'neoforge']
@@ -3193,10 +3207,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'botania',
       descKey: 'mod_desc_botania',
       slug: 'botania',
+      cfId: 225643,
       title: 'Botania',
       author: 'Vazkii',
       description: 'Увлекательная магия на основе цветов, генерации маны и мистических реликвий.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/pfjLUfGv/e40d77bf0245907048fb71b5a64ec3de10099ef1_96.webp',
       downloads: 23000000,
       categories: ['magic'],
       loaders: ['forge', 'neoforge', 'fabric']
@@ -3205,10 +3220,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'twilightforest',
       descKey: 'mod_desc_twilightforest',
       slug: 'twilightforest',
+      cfId: 227639,
       title: 'The Twilight Forest',
       author: 'Benimatic',
       description: 'Легендарное сумеречное измерение с замками, лабиринтами, уникальными боссами и сокровищами.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/1XoXkBdT/88152516ff458ceeaf45a5b9868a0eefd4832e4d_96.webp',
       downloads: 31000000,
       categories: ['adventure'],
       loaders: ['forge', 'neoforge', 'fabric']
@@ -3219,10 +3235,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'jei',
       descKey: 'mod_desc_jei',
       slug: 'jei',
+      cfId: 238222,
       title: 'Just Enough Items (JEI)',
       author: 'mezz',
       description: 'Просмотр всех рецептов крафта, плавки и использования предметов прямо в инвентаре.',
-      icon_url: 'https://cdn.modrinth.com/data/u6dRKJwZ/icon.png',
+      icon_url: 'https://cdn.modrinth.com/data/u6dRKJwZ/4a3f18ac0d096c9f8e9176984c44be4e58f94c89_96.webp',
       downloads: 38000000,
       categories: ['utility'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3231,6 +3248,7 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'appleskin',
       descKey: 'mod_desc_appleskin',
       slug: 'appleskin',
+      cfId: 248787,
       title: 'AppleSkin',
       author: 'squeek502',
       description: 'Отображает уровень насыщения и точное количество здоровья от еды на панели HUD.',
@@ -3243,10 +3261,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'journeymap',
       descKey: 'mod_desc_journeymap',
       slug: 'journeymap',
+      cfId: 32274,
       title: 'JourneyMap',
       author: 'techbrew',
       description: 'Карта мира в реальном времени с метками, пещерами, радаром мобов и просмотром в браузере.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/lfHFW1mp/a1c571a21a88f6fa59eab67829f216f65ab393ee_96.webp',
       downloads: 22000000,
       categories: ['utility', 'adventure'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3255,10 +3274,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'xaeros-minimap',
       descKey: 'mod_desc_xaeros_minimap',
       slug: 'xaeros-minimap',
+      cfId: 263420,
       title: "Xaero's Minimap",
       author: 'xaero96',
       description: 'Легковесная и плавная миникарта с путевыми точками и настройкой интерфейса.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/1bokaNcj/354080f65407e49f486fcf9c4580e82c45ae63b8_96.webp',
       downloads: 26000000,
       categories: ['utility', 'adventure'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3267,10 +3287,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'waystones',
       descKey: 'mod_desc_waystones',
       slug: 'waystones',
+      cfId: 245755,
       title: 'Waystones',
       author: 'BlayTheNinth',
       description: 'Путевые камни телепортации между базами и локациями с помощью свитков.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/LOpKHB2A/d56c030a875582aff5bab477ddcfec317a1610f0_96.webp',
       downloads: 29000000,
       categories: ['adventure', 'magic'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3279,10 +3300,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'mousetweaks',
       descKey: 'mod_desc_mousetweaks',
       slug: 'mousetweaks',
+      cfId: 60089,
       title: 'Mouse Tweaks',
       author: 'YaLTeR',
       description: 'Удобное перемещение и быстрая сортировка предметов в сундуках колесиком мыши.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/aC3cM3Vq/6c0eaa4e60a9c87f4766f222ff63286f09da32c0_96.webp',
       downloads: 34000000,
       categories: ['utility'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3291,10 +3313,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'clumps',
       descKey: 'mod_desc_clumps',
       slug: 'clumps',
+      cfId: 256717,
       title: 'Clumps',
       author: 'jaredlll08',
       description: 'Объединяет разрозненные сферы опыта в одну большую сферу, ликвидируя лаги.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/Wnxd13zP/6a965bb7974c3e759a53a1c89c35de4acd4cf86a_96.webp',
       downloads: 30000000,
       categories: ['optimization'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3303,10 +3326,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'farmersdelight',
       descKey: 'mod_desc_farmersdelight',
       slug: 'farmersdelight',
+      cfId: 398521,
       title: "Farmer's Delight",
       author: 'vectorwing',
       description: 'Уютная кулинария и фермерство: сковороды, кастрюли, ножи и десятки вкусных блюд.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/R2OftAxM/8e7aa38ab94d94bb0a2894a218b69beb49002b34.png',
       downloads: 27000000,
       categories: ['adventure', 'decoration'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3315,10 +3339,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'jade',
       descKey: 'mod_desc_jade',
       slug: 'jade',
+      cfId: 324717,
       title: 'Jade (HWYLA / WAILA)',
       author: 'Snownee',
       description: 'Информативная всплывающая подсказка при наведении на любой блок или существо.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/nvQzSEkH/b04217bc2b7dc524c4d12f81ff42cc1cefb9b0fc_96.webp',
       downloads: 25000000,
       categories: ['utility'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3327,10 +3352,11 @@ document.addEventListener('DOMContentLoaded', () => {
       id: 'controlling',
       descKey: 'mod_desc_controlling',
       slug: 'controlling',
+      cfId: 250398,
       title: 'Controlling',
       author: 'jaredlll08',
       description: 'Удобный поиск и фильтрация занятых и конфликтующих клавиш управления в настройках.',
-      icon_url: '',
+      icon_url: 'https://cdn.modrinth.com/data/xv94TkTM/bdb6feb3d04ca37da4ed5aa73fef062a39d8b3e5_96.webp',
       downloads: 22000000,
       categories: ['utility'],
       loaders: ['forge', 'fabric', 'neoforge', 'quilt']
@@ -3840,7 +3866,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const safeTitle = escapeHtml(mod.title || mod.id);
         const safeAuthor = escapeHtml(mod.author || 'Author');
         const safeDesc = escapeHtml((mod.descKey && window.I18N ? window.I18N.t(mod.descKey, mod.description) : mod.description) || (window.I18N ? window.I18N.t('mod_no_desc', 'Описание отсутствует') : 'Описание отсутствует'));
-        const safeIcon = (mod.icon_url && /^(https?:\/\/|data:image\/)/i.test(mod.icon_url)) ? escapeHtml(mod.icon_url) : '';
+        const safeIcon = (mod.icon_url && /^(https?:\/\/|data:image\/)/i.test(mod.icon_url)) ? escapeHtml(mod.icon_url.replace(/^http:\/\//i, 'https://')) : '';
 
         const iconMarkup = safeIcon
           ? `<img src="${safeIcon}" class="installed-mod-icon" alt="${safeTitle}" />`
@@ -3975,6 +4001,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const newMod = {
       id: modObj.id,
+      cfId: modObj.cfId || null,
+      provider: modObj.provider || inst.modProvider || 'modrinth',
       slug: modObj.slug || modObj.id,
       title: modObj.title,
       author: modObj.author || 'Author',
@@ -4248,6 +4276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       if (window.electronAPI?.searchMods) {
         const res = await window.electronAPI.searchMods({
+          provider: inst.modProvider || 'modrinth',
           query,
           loader,
           gameVersion: gv,
@@ -4260,6 +4289,8 @@ document.addEventListener('DOMContentLoaded', () => {
           manageApiTotal = typeof res.total_hits === 'number' ? res.total_hits : res.hits.length;
           const mapped = res.hits.map(h => ({
             id: h.project_id || h.slug,
+            cfId: h.cfId || null,
+            provider: h.provider || inst.modProvider || 'modrinth',
             slug: h.slug,
             title: h.title,
             author: h.author,
@@ -4374,10 +4405,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const safeTitle = escapeHtml(mod.title || '');
       const safeAuthor = escapeHtml(mod.author || 'Author');
       const safeDesc = escapeHtml((mod.descKey && window.I18N ? window.I18N.t(mod.descKey, mod.description) : mod.description) || (window.I18N ? window.I18N.t('mod_no_desc', 'Описание отсутствует') : 'Описание отсутствует'));
-      const safeIcon = (mod.icon_url && /^https?:\/\//i.test(mod.icon_url)) ? escapeHtml(mod.icon_url) : '';
+      const safeIcon = (mod.icon_url && /^https?:\/\//i.test(mod.icon_url)) ? escapeHtml(mod.icon_url.replace(/^http:\/\//i, 'https://')) : '';
 
       const iconMarkup = safeIcon
-        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}">`
+        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}" referrerpolicy="no-referrer">`
         : `<div class="wizard-mod-icon"><svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg></div>`;
 
       const loaderBadges = (mod.loaders || [])
@@ -4399,6 +4430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="wizard-mod-checkbox">${isSelected ? '✓' : ''}</div>
       `;
+      attachModIconFallback(item);
 
       item.addEventListener('click', () => {
         if (installedModIds.has(mod.id)) {
@@ -4721,7 +4753,9 @@ document.addEventListener('DOMContentLoaded', () => {
       cvProviderCards.forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       selectedCvProvider = chip.getAttribute('data-provider') || 'modrinth';
-      fetchOrFilterWizardMods();
+      wizardApiHits = [];
+      wizardApiOffset = 0;
+      fetchOrFilterWizardMods(false);
     });
   });
 
@@ -4757,6 +4791,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       if (window.electronAPI?.searchMods) {
         const res = await window.electronAPI.searchMods({
+          provider: selectedCvProvider || 'modrinth',
           query,
           loader,
           gameVersion: gv,
@@ -4769,6 +4804,8 @@ document.addEventListener('DOMContentLoaded', () => {
           wizardApiTotal = typeof res.total_hits === 'number' ? res.total_hits : res.hits.length;
           const mapped = res.hits.map(h => ({
             id: h.project_id || h.slug,
+            cfId: h.cfId || null,
+            provider: h.provider || selectedCvProvider || 'modrinth',
             slug: h.slug,
             title: h.title,
             author: h.author,
@@ -4806,6 +4843,18 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
+
+
+  function attachModIconFallback(containerEl) {
+    const img = containerEl.querySelector('img.wizard-mod-icon');
+    if (!img) return;
+    img.addEventListener('error', () => {
+      const fallback = document.createElement('div');
+      fallback.className = 'wizard-mod-icon';
+      fallback.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg>';
+      img.replaceWith(fallback);
+    }, { once: true });
+  }
 
   // Helper to check loader compatibility
   function isModCompatibleWithLoader(modLoaders, targetLoader) {
@@ -4904,10 +4953,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const safeTitle = escapeHtml(mod.title || '');
       const safeAuthor = escapeHtml(mod.author || 'Author');
       const safeDesc = escapeHtml((mod.descKey && window.I18N ? window.I18N.t(mod.descKey, mod.description) : mod.description) || (window.I18N ? window.I18N.t('mod_no_desc', 'Описание отсутствует') : 'Описание отсутствует'));
-      const safeIcon = (mod.icon_url && /^https?:\/\//i.test(mod.icon_url)) ? escapeHtml(mod.icon_url) : '';
+      const safeIcon = (mod.icon_url && /^https?:\/\//i.test(mod.icon_url)) ? escapeHtml(mod.icon_url.replace(/^http:\/\//i, 'https://')) : '';
 
       const iconMarkup = safeIcon
-        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}">`
+        ? `<img src="${safeIcon}" class="wizard-mod-icon" alt="${safeTitle}" referrerpolicy="no-referrer">`
         : `<div class="wizard-mod-icon"><svg viewBox="0 0 24 24"><path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z"/></svg></div>`;
 
       const loaderBadges = (mod.loaders || [])
@@ -4929,6 +4978,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="wizard-mod-checkbox">${isSelected ? '✓' : ''}</div>
       `;
+      attachModIconFallback(item);
 
       item.addEventListener('click', () => {
         if (selectedCvMods.has(mod.id)) {
@@ -5002,6 +5052,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const m = POPULAR_MODS.find(p => p.id === id) || wizardApiHits.find(h => h.id === id) || { id, title: id };
       return {
         id: m.id,
+        cfId: m.cfId || null,
+        provider: m.provider || selectedCvProvider || 'modrinth',
+        slug: m.slug || m.id,
         title: m.title,
         author: m.author || 'Author',
         description: m.description || '',

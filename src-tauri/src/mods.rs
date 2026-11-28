@@ -93,13 +93,166 @@ pub async fn stream_download_to_file(
     Ok(total_bytes)
 }
 
+const CURSEFORGE_API_KEY: &str = "$2a$10$C6qgNzG0E9IuDmwb1MrZIOUSOO5lx7aj5hc8kiv.Ofu12Rcr/r2iy";
+
+fn curseforge_loader_type(loader: &str) -> Option<u32> {
+    match loader.to_lowercase().as_str() {
+        "forge" => Some(1),
+        "fabric" => Some(4),
+        "quilt" => Some(5),
+        "neoforge" => Some(6),
+        _ => None,
+    }
+}
+
+pub async fn resolve_curseforge_file(cf_mod_id: u64, game_version: &str, loader: &str) -> Option<Value> {
+    let client = http_client(12);
+    let mut urls = Vec::new();
+    if let Some(lt) = curseforge_loader_type(loader) {
+        if !game_version.is_empty() {
+            urls.push(format!(
+                "https://api.curseforge.com/v1/mods/{}/files?gameVersion={}&modLoaderType={}&pageSize=10",
+                cf_mod_id,
+                urlencoding::encode(game_version),
+                lt
+            ));
+        }
+    }
+    if !game_version.is_empty() {
+        urls.push(format!(
+            "https://api.curseforge.com/v1/mods/{}/files?gameVersion={}&pageSize=10",
+            cf_mod_id,
+            urlencoding::encode(game_version)
+        ));
+    }
+
+    for url in urls {
+        if let Ok(resp) = client
+            .get(&url)
+            .header("x-api-key", CURSEFORGE_API_KEY)
+            .header("Accept", "application/json")
+            .send()
+            .await
+        {
+            if resp.status().is_success() {
+                if let Ok(data) = resp.json::<Value>().await {
+                    if let Some(arr) = data.get("data").and_then(|v| v.as_array()) {
+                        if let Some(first) = arr.first() {
+                            return Some(first.clone());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 pub async fn search_mods(params: Value) -> Value {
+    let provider = params.get("provider").and_then(|v| v.as_str()).unwrap_or("modrinth");
     let query = params.get("query").and_then(|v| v.as_str()).unwrap_or("");
     let loader = params.get("loader").and_then(|v| v.as_str()).unwrap_or("");
     let game_version = params.get("gameVersion").and_then(|v| v.as_str()).unwrap_or("");
     let category = params.get("category").and_then(|v| v.as_str()).unwrap_or("");
     let limit = params.get("limit").and_then(|v| v.as_u64()).unwrap_or(40).min(100);
     let offset = params.get("offset").and_then(|v| v.as_u64()).unwrap_or(0);
+
+    if provider == "curseforge" {
+        let mut url = format!(
+            "https://api.curseforge.com/v1/mods/search?gameId=432&classId=6&searchFilter={}&pageSize={}&index={}&sortField=2&sortOrder=desc",
+            urlencoding::encode(query),
+            limit.min(50),
+            offset
+        );
+        if !game_version.is_empty() {
+            url.push_str(&format!("&gameVersion={}", urlencoding::encode(game_version)));
+        }
+        if let Some(lt) = curseforge_loader_type(loader) {
+            url.push_str(&format!("&modLoaderType={}", lt));
+        }
+
+        return match http_client(10)
+            .get(&url)
+            .header("x-api-key", CURSEFORGE_API_KEY)
+            .header("Accept", "application/json")
+            .send()
+            .await
+        {
+            Ok(resp) => {
+                let status = resp.status();
+                if status == reqwest::StatusCode::FORBIDDEN {
+                    return json!({
+                        "success": false,
+                        "provider": "curseforge",
+                        "error": "curseforge_search_forbidden",
+                        "hits": [],
+                        "total_hits": 0,
+                        "offset": offset
+                    });
+                }
+                match resp.json::<Value>().await {
+                    Ok(data) => {
+                        let raw_hits = data.get("data").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+                        let mapped: Vec<Value> = raw_hits
+                            .into_iter()
+                            .map(|m| {
+                                let cf_id = m.get("id").and_then(|v| v.as_u64()).unwrap_or(0);
+                                let author = m
+                                    .get("authors")
+                                    .and_then(|a| a.as_array())
+                                    .and_then(|a| a.first())
+                                    .and_then(|a| a.get("name"))
+                                    .and_then(|v| v.as_str())
+                                    .unwrap_or("Author");
+                                let icon_url = m
+                                    .pointer("/logo/thumbnailUrl")
+                                    .or_else(|| m.pointer("/logo/url"))
+                                    .and_then(|v| v.as_str())
+                                    .unwrap_or("");
+                                let mut cats: Vec<String> = m
+                                    .get("categories")
+                                    .and_then(|c| c.as_array())
+                                    .map(|arr| {
+                                        arr.iter()
+                                            .filter_map(|c| c.get("slug").and_then(|s| s.as_str()).map(|s| s.to_string()))
+                                            .collect()
+                                    })
+                                    .unwrap_or_default();
+                                if !loader.is_empty() && loader != "all" && loader != "vanilla" {
+                                    cats.push(loader.to_lowercase());
+                                }
+                                json!({
+                                    "project_id": format!("cf-{}", cf_id),
+                                    "cfId": cf_id,
+                                    "slug": m.get("slug").and_then(|v| v.as_str()).unwrap_or(""),
+                                    "title": m.get("name").and_then(|v| v.as_str()).unwrap_or(""),
+                                    "author": author,
+                                    "description": m.get("summary").and_then(|v| v.as_str()).unwrap_or(""),
+                                    "icon_url": icon_url,
+                                    "downloads": m.get("downloadCount").and_then(|v| v.as_u64()).unwrap_or(0),
+                                    "categories": cats,
+                                    "provider": "curseforge"
+                                })
+                            })
+                            .collect();
+                        let total = data
+                            .pointer("/pagination/totalCount")
+                            .and_then(|v| v.as_u64())
+                            .unwrap_or(mapped.len() as u64);
+                        json!({
+                            "success": true,
+                            "provider": "curseforge",
+                            "hits": mapped,
+                            "total_hits": total,
+                            "offset": offset
+                        })
+                    }
+                    Err(e) => json!({ "success": false, "provider": "curseforge", "error": e.to_string(), "hits": [], "total_hits": 0, "offset": 0 }),
+                }
+            }
+            Err(e) => json!({ "success": false, "provider": "curseforge", "error": e.to_string(), "hits": [], "total_hits": 0, "offset": 0 }),
+        };
+    }
 
     let mut facets: Vec<Vec<String>> = vec![vec!["project_type:mod".to_string()]];
     if !loader.is_empty() && loader != "all" && loader != "vanilla" {
@@ -125,13 +278,14 @@ pub async fn search_mods(params: Value) -> Value {
         Ok(resp) => match resp.json::<Value>().await {
             Ok(data) => json!({
                 "success": true,
+                "provider": "modrinth",
                 "hits": data.get("hits").cloned().unwrap_or(json!([])),
                 "total_hits": data.get("total_hits").and_then(|v| v.as_u64()).unwrap_or(0),
                 "offset": offset
             }),
-            Err(e) => json!({ "success": false, "error": e.to_string(), "hits": [], "total_hits": 0, "offset": 0 }),
+            Err(e) => json!({ "success": false, "provider": "modrinth", "error": e.to_string(), "hits": [], "total_hits": 0, "offset": 0 }),
         },
-        Err(e) => json!({ "success": false, "error": e.to_string(), "hits": [], "total_hits": 0, "offset": 0 }),
+        Err(e) => json!({ "success": false, "provider": "modrinth", "error": e.to_string(), "hits": [], "total_hits": 0, "offset": 0 }),
     }
 }
 
@@ -266,6 +420,93 @@ pub async fn download_mod_file(
         .filter(|s| !s.is_empty())
         .unwrap_or(mod_id);
     let title = mod_obj.get("title").and_then(|v| v.as_str()).unwrap_or(project_id);
+
+    let provider = mod_obj
+        .get("provider")
+        .and_then(|v| v.as_str())
+        .or_else(|| inst.and_then(|i| i.get("modProvider")).and_then(|v| v.as_str()))
+        .unwrap_or("modrinth");
+
+    let cf_id_opt = mod_obj
+        .get("cfId")
+        .and_then(|v| v.as_u64())
+        .or_else(|| mod_id.strip_prefix("cf-").and_then(|s| s.parse::<u64>().ok()));
+
+    if provider == "curseforge" {
+        if let Some(cf_id) = cf_id_opt {
+            if let Some(cf_file) = resolve_curseforge_file(cf_id, &gv, &loader).await {
+                let raw_filename = cf_file.get("fileName").and_then(|v| v.as_str()).unwrap_or("mod.jar");
+                let safe_filename = Path::new(raw_filename)
+                    .file_name()
+                    .and_then(|n| n.to_str())
+                    .unwrap_or("mod.jar")
+                    .to_string();
+                let dest_path = mods_dir.join(&safe_filename);
+                let file_id = cf_file.get("id").and_then(|v| v.as_u64()).unwrap_or(0);
+                let fallback_url = if file_id > 0 {
+                    format!(
+                        "https://edge.forgecdn.net/files/{}/{}/{}",
+                        file_id / 1000,
+                        file_id % 1000,
+                        urlencoding::encode(&safe_filename)
+                    )
+                } else {
+                    String::new()
+                };
+                let file_url = cf_file
+                    .get("downloadUrl")
+                    .and_then(|v| v.as_str())
+                    .filter(|s| !s.is_empty())
+                    .map(|s| s.to_string())
+                    .unwrap_or(fallback_url);
+                if !file_url.is_empty() {
+                    let file_size = cf_file.get("fileLength").and_then(|v| v.as_u64()).unwrap_or(0);
+                    let sha1 = cf_file
+                        .get("hashes")
+                        .and_then(|h| h.as_array())
+                        .and_then(|arr| arr.iter().find(|x| x.get("algo").and_then(|a| a.as_u64()) == Some(1)))
+                        .and_then(|x| x.get("value").and_then(|v| v.as_str()));
+
+                    if dest_path.exists() && fs::metadata(&dest_path).map(|m| m.len() == file_size && file_size > 0).unwrap_or(false) {
+                        update_mod_in_config(
+                            instance_id,
+                            mod_id,
+                            &[
+                                ("fileName", json!(safe_filename)),
+                                ("fileSize", json!(file_size)),
+                                ("fileUrl", json!(file_url)),
+                            ],
+                        );
+                        return Ok(json!({
+                            "success": true,
+                            "fileName": safe_filename,
+                            "fileSize": file_size,
+                            "cached": true
+                        }));
+                    }
+
+                    let downloaded_size = stream_download_to_file(&file_url, &dest_path, sha1).await?;
+                    let final_size = if file_size > 0 { file_size } else { downloaded_size };
+                    update_mod_in_config(
+                        instance_id,
+                        mod_id,
+                        &[
+                            ("fileName", json!(safe_filename)),
+                            ("fileSize", json!(final_size)),
+                            ("fileUrl", json!(file_url)),
+                            ("downloadedAt", json!(now_ms())),
+                        ],
+                    );
+
+                    return Ok(json!({
+                        "success": true,
+                        "fileName": safe_filename,
+                        "fileSize": final_size
+                    }));
+                }
+            }
+        }
+    }
 
     let version_data = resolve_modrinth_version(project_id, &gv, &loader)
         .await
