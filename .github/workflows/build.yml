@@ -54,19 +54,19 @@ jobs:
       - name: Package release assets
         run: |
           mkdir -p dist-linux
-          cp src-tauri/target/release/bundle/deb/*.deb dist-linux/Material.Launcher-1.3.0-amd64.deb
-          cp src-tauri/target/release/bundle/rpm/*.rpm dist-linux/Material.Launcher-1.3.0-x86_64.rpm
-          cp src-tauri/target/release/bundle/appimage/*.AppImage dist-linux/Material.Launcher-1.3.0-x86_64.AppImage
+          cp src-tauri/target/release/bundle/deb/*.deb dist-linux/Material.Launcher-1.4.0-amd64.deb
+          cp src-tauri/target/release/bundle/rpm/*.rpm dist-linux/Material.Launcher-1.4.0-x86_64.rpm
+          cp src-tauri/target/release/bundle/appimage/*.AppImage dist-linux/Material.Launcher-1.4.0-x86_64.AppImage
 
-          mkdir -p dist-tar/Material-Launcher-1.3.0
-          cp src-tauri/target/release/material-launcher dist-tar/Material-Launcher-1.3.0/material-launcher
-          cp src-tauri/icons/icon.png dist-tar/Material-Launcher-1.3.0/icon.png
-          chmod +x dist-tar/Material-Launcher-1.3.0/material-launcher
-          tar -czf dist-linux/Material.Launcher-1.3.0-linux-x64.tar.gz -C dist-tar Material-Launcher-1.3.0
+          mkdir -p dist-tar/Material-Launcher-1.4.0
+          cp src-tauri/target/release/material-launcher dist-tar/Material-Launcher-1.4.0/material-launcher
+          cp src-tauri/icons/icon.png dist-tar/Material-Launcher-1.4.0/icon.png
+          chmod +x dist-tar/Material-Launcher-1.4.0/material-launcher
+          tar -czf dist-linux/Material.Launcher-1.4.0-linux-x64.tar.gz -C dist-tar Material-Launcher-1.4.0
           ls -lh dist-linux/
 
-      - name: Upload Linux assets to GitHub Release v1.3.0
+      - name: Upload Linux assets to GitHub Release v1.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload v1.3.0 dist-linux/* --clobber || true
+          gh release upload v1.4.0 dist-linux/* --clobber || true
