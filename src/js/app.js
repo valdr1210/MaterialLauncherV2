@@ -779,6 +779,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 3.1. Typography / Font Customization
+  const FONT_PRESETS = {
+    default: "'Google Sans', 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    system: "'Segoe UI Variable Text', 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+    roboto: "'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    inter: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    jetbrains: "'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace",
+    montserrat: "'Montserrat', 'Rubik', -apple-system, sans-serif",
+    comfortaa: "'Comfortaa', 'Quicksand', cursive, sans-serif",
+    minecraft: "'VT323', 'Minecraft', 'Minecraft Ten', 'Mojangles', 'Press Start 2P', monospace"
+  };
+
+  const fontSelect = document.getElementById('fontSelect');
+
+  function applyFont(fontKey) {
+    const fontCss = FONT_PRESETS[fontKey] || FONT_PRESETS.default;
+    root.style.setProperty('--md-sys-typescale-font', fontCss);
+    localStorage.setItem('launcher_font', fontKey);
+    if (fontSelect && fontSelect.value !== fontKey) {
+      fontSelect.value = fontKey;
+    }
+  }
+
+  // Restore saved font immediately
+  const savedFont = localStorage.getItem('launcher_font') || 'default';
+  applyFont(savedFont);
+
+  fontSelect?.addEventListener('change', (e) => {
+    const val = e.target.value;
+    applyFont(val);
+    appConfig.font = val;
+    saveConfig();
+  });
+
   // 4. Real Version Selector & Manifest Loader
   const versionSelectorWidget = document.getElementById('versionSelectorWidget');
   const versionModal = document.getElementById('versionModal');
@@ -1161,6 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
     language: 'ru_RU',
     theme: 'dark',
     accentColor: 'lavender',
+    font: 'default',
     customAccentHex: '#EADDFF'
   };
 
@@ -1295,6 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectedVersionType) appConfig.selectedVersionType = selectedVersionType;
 
     if (window.I18N?.currentLanguage) appConfig.language = window.I18N.currentLanguage;
+    if (fontSelect) appConfig.font = fontSelect.value;
     const currentAccent = localStorage.getItem('launcher_accent') || 'lavender';
     appConfig.accentColor = currentAccent;
     if (currentAccent === 'custom') {
@@ -1509,6 +1545,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function applyConfigToUI() {
+    if (fontSelect) {
+      const activeFont = appConfig.font || localStorage.getItem('launcher_font') || 'default';
+      fontSelect.value = activeFont;
+      applyFont(activeFont);
+    }
     if (mcCustomPathInput) {
       mcCustomPathInput.value = appConfig.minecraftPath || '';
     }
@@ -2531,6 +2572,8 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         applyAccentPalette(accentToApply);
       }
+      const fontToApply = appConfig.font || localStorage.getItem('launcher_font') || 'default';
+      applyFont(fontToApply);
       applyConfigToUI();
       if (window.I18N) {
         const langToUse = cfg?.language || appConfig.language || localStorage.getItem('launcher_language') || 'ru_RU';

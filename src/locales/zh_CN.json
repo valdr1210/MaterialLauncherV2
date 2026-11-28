@@ -379,5 +379,15 @@
   "toast_code_copied": "代码已复制",
   "acc_btn_add_ms_browser": "通过浏览器登录",
   "ms_btn_browser_fallback": "通过浏览器登录",
-  "mods_scroll_more": "向下滚动加载更多..."
+  "mods_scroll_more": "向下滚动加载更多...",
+  "app_font_label": "界面字体",
+  "app_font_desc": "选择启动器界面的字体样式",
+  "font_default": "Google Sans (Material 3)",
+  "font_system": "Segoe UI (系统默认)",
+  "font_roboto": "Roboto (经典风格)",
+  "font_inter": "Inter (现代无衬线)",
+  "font_jetbrains": "JetBrains Mono (等宽代码)",
+  "font_montserrat": "Montserrat (几何无衬线)",
+  "font_comfortaa": "Comfortaa (圆角柔和)",
+  "font_minecraft": "Minecraft (像素风格)"
 }
