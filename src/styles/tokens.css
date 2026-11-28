@@ -13,11 +13,17 @@
   --md-sys-shape-corner-2xl: 24px;
   --md-sys-shape-corner-full: 9999px;
 
-  /* Transitions */
+  /* Material Design 3 Expressive Motion Tokens */
   --md-sys-motion-standard: cubic-bezier(0.2, 0, 0, 1);
-  --md-sys-motion-duration-short: 150ms;
-  --md-sys-motion-duration-medium: 250ms;
-  --md-sys-motion-duration-long: 400ms;
+  --md-sys-motion-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --md-sys-motion-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --md-sys-motion-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --md-sys-motion-spring-subtle: cubic-bezier(0.25, 1, 0.5, 1);
+
+  --md-sys-motion-duration-short: 200ms;
+  --md-sys-motion-duration-medium: 300ms;
+  --md-sys-motion-duration-long: 450ms;
 
   /* Dynamic Components */
   --wave-percent: 0%;
