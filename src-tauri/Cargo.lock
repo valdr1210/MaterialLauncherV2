@@ -2220,7 +2220,7 @@ dependencies = [
 
 [[package]]
 name = "material-launcher"
-version = "1.4.0"
+version = "1.4.1"
 dependencies = [
  "base64 0.22.1",
  "dirs 5.0.1",
