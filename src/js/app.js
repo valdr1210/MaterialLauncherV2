@@ -795,7 +795,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function applyFont(fontKey) {
     const fontCss = FONT_PRESETS[fontKey] || FONT_PRESETS.default;
-    root.style.setProperty('--md-sys-typescale-font', fontCss);
+    document.documentElement.style.setProperty('--md-sys-typescale-font', fontCss);
     localStorage.setItem('launcher_font', fontKey);
     if (fontSelect && fontSelect.value !== fontKey) {
       fontSelect.value = fontKey;

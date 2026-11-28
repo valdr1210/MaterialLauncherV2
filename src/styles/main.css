@@ -151,10 +151,7 @@ body.maximized .app-container {
   cursor: pointer;
   color: var(--md-sys-color-on-surface-variant);
   border-radius: var(--md-sys-shape-corner-xs);
-  transition: background-color 220ms ease,
-              color 220ms ease,
-              transform 220ms var(--md-sys-motion-emphasized),
-              box-shadow 220ms ease;
+  transition: background-color 160ms ease, color 160ms ease;
 }
 .window-btn:hover {
   background-color: rgba(255, 255, 255, 0.08);
@@ -289,17 +286,8 @@ body.maximized .app-container {
 }
 
 .nav-item:hover {
-  background-color: rgba(255, 255, 255, 0.07);
+  background-color: rgba(255, 255, 255, 0.06);
   color: var(--md-sys-color-on-surface);
-  transform: translateX(3px);
-}
-.nav-item:active {
-  transform: scale(0.97);
-}
-
-.nav-item.active .nav-icon svg {
-  transform: scale(1.12);
-  transition: transform 260ms var(--md-sys-motion-spring);
 }
 
 .nav-item.active {
@@ -490,11 +478,9 @@ body.maximized .app-container {
 @keyframes m3TabEnter {
   from {
     opacity: 0;
-    transform: translateY(12px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -1690,11 +1676,11 @@ input:checked + .slider:before {
 @keyframes m3ModalPopIn {
   from {
     opacity: 0;
-    transform: scale(0.93) translateY(14px);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: scale(1);
   }
 }
 
@@ -2361,11 +2347,9 @@ input:checked + .slider:before {
 @keyframes m3SubpaneEnter {
   from {
     opacity: 0;
-    transform: translateY(10px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
