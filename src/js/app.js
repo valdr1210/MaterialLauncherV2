@@ -4157,6 +4157,12 @@ document.addEventListener('DOMContentLoaded', () => {
       else c.classList.remove('active');
     });
 
+    const activeProv = inst.modProvider || 'modrinth';
+    document.querySelectorAll('#manageProviderCards .wizard-provider-chip').forEach(c => {
+      if (c.getAttribute('data-provider') === activeProv) c.classList.add('active');
+      else c.classList.remove('active');
+    });
+
     // Default to the Installed mods tab
     switchManageModalTab('installed');
     manageInstanceModsModal?.classList.add('open');
@@ -4327,6 +4333,23 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchOrFilterManageMods(true);
       }
     }
+  });
+
+  document.querySelectorAll('#manageProviderCards .wizard-provider-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#manageProviderCards .wizard-provider-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const newProv = chip.getAttribute('data-provider') || 'modrinth';
+      const inst = (appConfig.instances || []).find(i => i.id === currentManagingInstanceId);
+      if (inst) {
+        inst.modProvider = newProv;
+        saveConfig();
+        updateInstancesUI();
+      }
+      manageApiHits = [];
+      manageApiOffset = 0;
+      fetchOrFilterManageMods(false);
+    });
   });
 
   function renderManageMods(preserveScroll = false) {
