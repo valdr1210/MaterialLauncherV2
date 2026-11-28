@@ -844,21 +844,6 @@
                   <option value="latest" data-i18n="wizard_loader_version_latest">Последняя (Рекомендуемая)</option>
                 </select>
               </div>
-
-              <!-- Provider selector row -->
-              <div class="wizard-provider-row">
-                <span class="wizard-provider-label" data-i18n="cv_label_provider">Сервис для загрузки модов:</span>
-                <div class="wizard-provider-chips" id="cvProviderCards">
-                  <button class="wizard-provider-chip active" data-provider="modrinth" type="button">
-                    <img src="./assets/provider_modrinth.svg" alt="Modrinth" class="provider-chip-icon">
-                    <span>Modrinth</span>
-                  </button>
-                  <button class="wizard-provider-chip" data-provider="curseforge" type="button">
-                    <img src="./assets/provider_curseforge.svg" alt="CurseForge" class="provider-chip-icon">
-                    <span>CurseForge</span>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -875,6 +860,20 @@
               </div>
             </div>
             <div class="wizard-step-content" id="wizardStep3Content">
+              <!-- Provider selector row -->
+              <div class="wizard-provider-row" style="margin-top: 0; margin-bottom: 10px;">
+                <span class="wizard-provider-label" data-i18n="cv_label_provider">Сервис для загрузки модов:</span>
+                <div class="wizard-provider-chips" id="cvProviderCards">
+                  <button class="wizard-provider-chip active" data-provider="modrinth" type="button">
+                    <img src="./assets/provider_modrinth.svg" alt="Modrinth" class="provider-chip-icon">
+                    <span>Modrinth</span>
+                  </button>
+                  <button class="wizard-provider-chip" data-provider="curseforge" type="button">
+                    <img src="./assets/provider_curseforge.svg" alt="CurseForge" class="provider-chip-icon">
+                    <span>CurseForge</span>
+                  </button>
+                </div>
+              </div>
               <div class="wizard-mod-search-row">
                 <div class="search-input-box wizard-mod-search-box">
                   <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 14z"/></svg>
