@@ -323,27 +323,8 @@ pub fn load_config() -> Value {
         }
     }
 
-    let needs_default_inst = cfg
-        .get("instances")
-        .and_then(|v| v.as_array())
-        .map(|a| a.is_empty())
-        .unwrap_or(true);
-    if needs_default_inst {
-        cfg["instances"] = json!([{
-            "id": "inst-fabric-1-21-1",
-            "name": "Fabric 1.21.1",
-            "gameVersion": "1.21.1",
-            "loader": "fabric",
-            "loaderVersion": "latest",
-            "modProvider": "modrinth",
-            "icon": "fabric",
-            "created": now_ms(),
-            "mods": []
-        }]);
-    }
-    if cfg.get("selectedInstanceId").is_none() {
-        let first_id = cfg["instances"][0]["id"].clone();
-        cfg["selectedInstanceId"] = first_id;
+    if cfg.get("instances").and_then(|v| v.as_array()).is_none() {
+        cfg["instances"] = json!([]);
     }
     if cfg.get("accentColor").is_none() {
         cfg["accentColor"] = json!("lavender");
